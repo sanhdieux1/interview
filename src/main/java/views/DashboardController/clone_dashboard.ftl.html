@@ -1,0 +1,70 @@
+<#import "../layout/defaultLayout.ftl.html" as layout> <@layout.myLayout "Dashboard | Clone">
+
+    <h1>Clone Dashboard</h1>
+
+<#if !dashboard.id??>
+<h3>Dashboard ${id} is not exist!</h3>
+<#else>
+
+    <form action="/dashboard/${id}/clone" method="post" class="form-horizontal" role="form">
+
+        <div class="md-padding" ng-cloak>
+            <md-input-container>
+                <label>Dashboard Name</label>
+                <input required value="${dashboard.name} copy" name="name">
+            </md-input-container>
+
+            <label>Share</label>
+            <div class="form-group">
+                <input type="radio" name="share" value="public" <#if dashboard.share=="public">checked</#if>> Public<br>
+  				<input type="radio" name="share" value="private" <#if dashboard.share=="private">checked</#if>> Private<br>
+            </div>
+
+            <h1 class="md-title">Sonar Statistic</h1>
+            <div>
+                <label>Sonar IAs *</label>
+                <p><small>Choose at least one of them</small></p>
+                <md-input-container>
+                    <select multiple name="s_ia" required>
+                    	<#list s_ia as ia>
+						  <option value="${ia}" <#if dashboard.s_ia?contains("${ia}")>selected</#if>>${ia}</option>
+						</#list>
+					</select>
+                </md-input-container>
+            </div>
+
+            <div>
+                <label>Sonar Metrics *</label>
+                <p><small>Choose at least one of them</small></p>
+                <md-input-container>
+                    <select multiple name="metric">
+                    	<#list metrics as metric>
+						  <option value="${metric.code}" <#if dashboard.metric?contains("${metric.code}")>selected</#if>>${metric.name}</option>
+						</#list>
+					</select>
+                </md-input-container>
+            </div>
+
+            <h1 class="md-title">Overdue Review</h1>
+            <div>
+                <label>Implementation Authority</label>
+                <p><small>This input is optional, empty is choose all IAs</small></p>
+            	<md-input-container>
+                    <select name="r_ia">
+                    	<option value="">Choose OD review IA...</option>
+                    	<#list r_ia as ia>
+						  <option value="${ia}" <#if dashboard.r_ia?contains("${ia}")>selected</#if>>${ia}</option>
+						</#list>
+					</select>
+                </md-input-container>
+
+                <md-input-container>
+                    <label>Project name</label>
+                    <input value="${dashboard.project}" name="project">
+                </md-input-container>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-success pull-right">Clone</button>
+    </form>
+    </#if>
+</@layout.myLayout>
