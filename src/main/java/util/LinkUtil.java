@@ -100,8 +100,14 @@ public class LinkUtil {
         return false;
     }
 
-    public String getLegacyDataWithProxy(String host, String scheme, String path, String proxyIP, int proxyPort, String proxyType,
-            Map<String, String> parameters) {
+    public String getLegacyDataWithProxy(Map<String, String> parameters) {
+        String host = PropertiesUtil.getString(Constant.RESOURCE_BUNLE_HOST);
+        String scheme = PropertiesUtil.getString(Constant.RESOURCE_BUNLE_HOST_TYPE); 
+        String path = PropertiesUtil.getString(Constant.RESOURCE_BUNLE_PATH);
+        String proxyIP=PropertiesUtil.getString(Constant.RESOURCE_BUNLE_PROXY_IP);
+        int proxyPort=Integer.parseInt(PropertiesUtil.getString(Constant.RESOURCE_BUNLE_PROXY_PORT));
+        String proxyType=PropertiesUtil.getString(Constant.RESOURCE_BUNLE_PROXY_TYPE);
+        
         URIBuilder builder = new URIBuilder();
         builder.setCharset(StandardCharsets.UTF_8);
         builder.setScheme(scheme).setHost(host).setPath(path);

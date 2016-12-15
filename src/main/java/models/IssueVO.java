@@ -16,7 +16,7 @@ public class IssueVO {
     private String project;
     private int projectAvatarId;
     private String priority;
-    private List<String> components;
+    private List<ComponentVO> components;
     private int versionId;
     private String versionName;
     private StatusVO status;
@@ -113,10 +113,11 @@ public class IssueVO {
     public void setPriority(String priority) {
         this.priority = priority;
     }
-    public List<String> getComponents() {
+
+    public List<ComponentVO> getComponents() {
         return components;
     }
-    public void setComponents(List<String> components) {
+    public void setComponents(List<ComponentVO> components) {
         this.components = components;
     }
     public int getVersionId() {
