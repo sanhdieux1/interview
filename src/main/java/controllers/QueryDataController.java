@@ -18,60 +18,79 @@ import com.google.inject.Singleton;
 
 import models.ExecutionsVO;
 import models.IssueVO;
+import models.ProjectVO;
 import ninja.Context;
 import ninja.Result;
 import ninja.Results;
 import ninja.params.Param;
 import util.Constant;
 import util.LinkUtil;
+import util.PropertiesUtil;
 
 @Singleton
 public class QueryDataController {
     final static Logger logger = Logger.getLogger(QueryDataController.class);
     private static final String QUERY = "project in ('%s') and assignee='%s' and executionStatus in (PASS) and cycleName in ('%s')";
-    private static Set<String> executionCache;
-
+    private static Set<String> cycleNameCache;
+    private static Set<String> projectsCache;
     public Result getAssigneeTable(@Param("username") String username, @Param("cyclename") String cyclename, @Param("project") String project,
             Context context) {
         logger.info("getAssigneeTable(" + username + "," + cyclename + "," + project + ")");
 
         Map<String, String> parameters = new HashMap<String, String>();
         parameters.put(Constant.PARAMERTER_QUERY, String.format(QUERY, project, username, cyclename));
-        String result = LinkUtil.getInstance().getLegacyDataWithProxy(parameters);
-        ExecutionsVO executions = convertJSONtoObject(result);
+        String data = LinkUtil.getInstance().getLegacyDataWithProxy(PropertiesUtil.getString(Constant.RESOURCE_BUNLE_PATH), parameters);
+        ExecutionsVO executions = convertJSONtoObject(data, ExecutionsVO.class);
         return Results.json().render(executions);
     }
 
     public Result getListCycleName(@Param("project") String projectName) {
-        if(executionCache == null){
+        if(cycleNameCache == null){
             String query = "project in ('%s')";
             Map<String, String> parameters = new HashMap<String, String>();
             parameters.put(Constant.PARAMERTER_QUERY, String.format(query, projectName));
-            String result = LinkUtil.getInstance().getLegacyDataWithProxy(parameters);
-            ExecutionsVO executions = convertJSONtoObject(result);
+            String result = LinkUtil.getInstance().getLegacyDataWithProxy(PropertiesUtil.getString(Constant.RESOURCE_BUNLE_PATH), parameters);
+            
+            ExecutionsVO executions = convertJSONtoObject(result, ExecutionsVO.class);
             if(executions != null){
                 List<IssueVO> excutions = executions.getExecutions();
                 Stream<IssueVO> excutionsStream = excutions.stream();
-                executionCache = excutionsStream.map(i -> i.getCycleName()).collect(Collectors.toSet());
+                cycleNameCache = excutionsStream.map(i -> i.getCycleName()).collect(Collectors.toSet());
             }
         }
-        return Results.json().render(executionCache);
+        return Results.json().render(cycleNameCache);
     }
     
-    private ExecutionsVO convertJSONtoObject(String json) {
-        ExecutionsVO executions = null;
+    public Result getProjectList(){
+        if(projectsCache == null){
+            ObjectMapper mapper = new ObjectMapper();
+            String data = LinkUtil.getInstance().getLegacyDataWithProxy(PropertiesUtil.getString(Constant.RESOURCE_BUNLE_PROJECT_PATH), new HashMap<String, String>());
+            logger.info(data);
+            try{
+                List<ProjectVO> projects = mapper.readValue(data, mapper.getTypeFactory().constructCollectionType(List.class, ProjectVO.class));
+                projectsCache = projects.stream().map(p -> p.getName()).collect(Collectors.toSet());
+            } catch (IOException e){
+                // ignore exeption
+                logger.error("cannot parse result", e);
+            }
+        }
+        return Results.json().render(projectsCache);
+    }
+    
+    private <T> T convertJSONtoObject(String json, Class<T> type) {
+        T result = null;
         try{
             ObjectMapper mapper = new ObjectMapper();
-            executions = mapper.readValue(json, ExecutionsVO.class);
+            result = mapper.readValue(json, type);
         } catch (IOException e){
             // ignore exeption
             logger.error("cannot parse result", e);
         }
-        return executions;
+        return result;
     }
     
     public void clearSession(){
-        executionCache = null;
+        cycleNameCache = null;
     }
     
     
