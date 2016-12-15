@@ -1,0 +1,47 @@
+<#import "../layout/defaultLayout.ftl.html" as layout> 
+<@layout.myLayout "Homepage">
+
+<#if id gt dashboards?chunk(10)?size>
+	<div class="centerDiv">
+		<h3>Page ${id} is not exist!</h3>
+		Back to page 
+	  	<ul class="pagination pagination-sm" style="margin-bottom: auto;zoom: 80%;">
+	  		<#list dashboards?chunk(10) as dashboard>
+	    		<li <#if dashboard?counter == id>class="active"</#if>><a href="page=${dashboard?counter}">${dashboard?counter}</a></li>
+	    	</#list>
+	  	</ul>
+	</div>
+<#else>
+	<div style="text-align: right">
+			<em>Displaying dashboards ${10*(id-1)+1} - <#if 10*id lt dashboards?size>${10*id}<#else>${dashboards?size}</#if> of ${dashboards?size}</em>
+	  	<ul class="pagination pagination-sm" style="margin-bottom: auto;zoom: 80%;">
+	  		<#list dashboards?chunk(10) as dashboard>
+	    		<li <#if dashboard?counter == id>class="active"</#if>><a href="page=${dashboard?counter}">${dashboard?counter}</a></li>
+	    	</#list>
+	  	</ul>
+	</div>
+	<#list dashboards as dashboard>
+	<#if 10*(id-1) lte dashboard?index && dashboard?index lt 10*id>
+	<div id="lobipanel-custom-control" class="panel panel-primary lobipanel-sortable mypanel">
+		<div class="panel-heading">
+			<div class="panel-title">
+				<h4><a href="/dashboard/${dashboard.id}" style="color:white">${dashboard.name}</a></h4>
+			</div>
+		</div>
+		<div class="panel-body">
+			<p>Owner: ${dashboard.owner}</p>
+		</div>
+	</div>
+	</#if>
+	</#list>
+	<div style="text-align: right">
+			<em>Displaying dashboards ${10*(id-1)+1} - <#if 10*id lt dashboards?size>${10*id}<#else>${dashboards?size}</#if> of ${dashboards?size}</em>
+	  	<ul class="pagination pagination-sm" style="margin-bottom: auto;zoom: 80%;">
+	  		<#list dashboards?chunk(10) as dashboard>
+	    		<li <#if dashboard?counter == id>class="active"</#if>><a href="page=${dashboard?counter}">${dashboard?counter}</a></li>
+	    	</#list>
+	  	</ul>
+	</div>
+</#if>
+
+</@layout.myLayout>
