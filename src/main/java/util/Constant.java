@@ -32,6 +32,10 @@ public class Constant {
 	public static final String RESOURCE_BUNLE_PROXY_IP = "resourcebundle.proxy.ip";
 	public static final String RESOURCE_BUNLE_PROXY_PORT = "resourcebundle.proxy.port";
 	public static final String RESOURCE_BUNLE_PROXY_TYPE = "resourcebundle.proxy.type";
-	public static final String PARAMERTER_QUERY = "zqlQuery";
+	
     public static final String RESOURCE_BUNLE_PROJECT_PATH = "resourcebundle.project.path";
+    //constant query
+    public static final String PARAMERTER_QUERY = "zqlQuery";
+    public static final String PARAMERTER_MAXRECORDS = "maxRecords";
+    public static final String PARAMERTER_OFFSET = "offset";
 }

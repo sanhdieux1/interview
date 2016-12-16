@@ -1,19 +1,17 @@
 package controllers;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Consumer;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.log4j.Logger;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Singleton;
 
 import models.ExecutionsVO;
@@ -31,8 +29,8 @@ import util.PropertiesUtil;
 public class QueryDataController {
     final static Logger logger = Logger.getLogger(QueryDataController.class);
     private static final String QUERY = "project in ('%s') and assignee='%s' and executionStatus in (PASS) and cycleName in ('%s')";
-    private static Set<String> cycleNameCache;
-    private static Set<String> projectsCache;
+    private static Set<String> cycleNameCache = new HashSet<>();
+    private static Set<String> projectsCache = new HashSet<>();;
     public Result getAssigneeTable(@Param("username") String username, @Param("cyclename") String cyclename, @Param("project") String project,
             Context context) {
         logger.info("getAssigneeTable(" + username + "," + cyclename + "," + project + ")");
@@ -49,8 +47,10 @@ public class QueryDataController {
             String query = "project in ('%s')";
             Map<String, String> parameters = new HashMap<String, String>();
             parameters.put(Constant.PARAMERTER_QUERY, String.format(query, projectName));
+            parameters.put(Constant.PARAMERTER_MAXRECORDS, "10000");
+            parameters.put(Constant.PARAMERTER_OFFSET, "0");
             String result = LinkUtil.getInstance().getLegacyDataWithProxy(PropertiesUtil.getString(Constant.RESOURCE_BUNLE_PATH), parameters);
-            
+            logger.info(result);
             ExecutionsVO executions = convertJSONtoObject(result, ExecutionsVO.class);
             if(executions != null){
                 List<IssueVO> excutions = executions.getExecutions();

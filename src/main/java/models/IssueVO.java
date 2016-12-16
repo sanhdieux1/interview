@@ -2,6 +2,9 @@ package models;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class IssueVO {
     private int id;
     private int orderId;
@@ -26,7 +29,7 @@ public class IssueVO {
     private String htmlComment;
     private String executedBy;
     private String executedByUserName;
-    private List<String> executionDefects;
+    private List<ExecutionDefectVO> executionDefects;
     private List<String> stepDefects;
     private int executionDefectCount;
     private int stepDefectCount;
@@ -174,10 +177,11 @@ public class IssueVO {
     public void setExecutedByUserName(String executedByUserName) {
         this.executedByUserName = executedByUserName;
     }
-    public List<String> getExecutionDefects() {
+
+    public List<ExecutionDefectVO> getExecutionDefects() {
         return executionDefects;
     }
-    public void setExecutionDefects(List<String> executionDefects) {
+    public void setExecutionDefects(List<ExecutionDefectVO> executionDefects) {
         this.executionDefects = executionDefects;
     }
     public List<String> getStepDefects() {
