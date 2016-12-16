@@ -9,8 +9,10 @@ import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -352,19 +354,155 @@ public class DashboardController {
 		Map<String, Object> periods = service.getPeriods();
 		logger.info("PERIODS " + periods);
 		
-        return Results.html()
-        		.render("id", id)
-        		.render("dashboard", dashboard)
-        		.render("username", username)
-        		.render("alias", alias)
-        		.render("role", role)
-        		.render("s_data", s_data2)
-        		.render("s_datas", s_datas)
-        		.render("r_datas", r_datas)
-        		.render("s_ia", s_ia)
-        		.render("metrics", metrics)
-        		.render("releases", releases)
-        		.render("periods", periods);
+		// dummy epic link
+				Map<String,List<String>> epicProjectMap = new HashMap<>();
+				List<String> listForEpicProjectMap = new ArrayList<>();
+				List<String> epicTestMetric = new ArrayList<>();
+				List<String> epicRelease = new ArrayList<>();
+				listForEpicProjectMap.add("FNMS-11");
+				listForEpicProjectMap.add("FNMS-39");
+				Map<String, Map<String, Object>> epicTable = new HashMap<>();
+				
+				
+				epicProjectMap.put("FNMS 577x",listForEpicProjectMap);
+				listForEpicProjectMap = new ArrayList<>();
+				listForEpicProjectMap.add("FNMS-35");
+				listForEpicProjectMap.add("FNMS-89");
+				epicProjectMap.put("FNMS 578x",listForEpicProjectMap);
+				epicTestMetric.add("UNEXECUTED");
+				epicTestMetric.add("FAILED");
+				epicTestMetric.add("WIP");
+				epicTestMetric.add("BLOCKED");
+				epicTestMetric.add("PASSED");
+				epicTestMetric.add("PLANNED");
+				epicTestMetric.add("UNPLANNED");
+				
+				epicRelease.add("R1.2.01");
+				epicRelease.add("R1.2.1");
+				epicRelease.add("R1.3.0");
+				
+				for (int i = 0; i < 5; i++) {
+					Map<String, Object> m_statisBasket = new LinkedHashMap<>();
+					Random ran = new Random();
+					
+					int unexecuted = ran.nextInt(50);
+					int passed = ran.nextInt(50);
+					int failed = ran.nextInt(50);
+					int wip = ran.nextInt(50);
+					int blocked = ran.nextInt(50);
+					int planned = 0;
+					int unplanned = unexecuted + failed + passed + wip + blocked;
+					m_statisBasket.put("UNEXECUTED", unexecuted);
+					m_statisBasket.put("FAILED", failed);
+					m_statisBasket.put("WIP", wip);
+					m_statisBasket.put("BLOCKED", blocked);
+					m_statisBasket.put("PASSED", passed);
+					m_statisBasket.put("PLANNED", 0);
+					m_statisBasket.put("UNPLANNED", unplanned);
+					epicTable.put("FNMS-" + ran.nextInt(99), m_statisBasket);
+				}
+				
+				
+				
+				// dummy user story
+				Map<String, Map<String, Integer>> storyTable = new HashMap<>();
+				for (int i = 0; i < 5; i++) {
+					Map<String, Integer> m_statisBasket = new LinkedHashMap<>();
+					Random ran = new Random();
+					int unexecuted = ran.nextInt(50);
+					int passed = ran.nextInt(20);
+					int failed = ran.nextInt(50);
+					int wip = ran.nextInt(50);
+					int blocked = ran.nextInt(50);
+					int planned = 0;
+					int unplanned = unexecuted + failed + passed + wip + blocked;
+					
+					m_statisBasket.put("UNEXECUTED", unexecuted);
+					m_statisBasket.put("FAILED", failed);
+					m_statisBasket.put("WIP", wip);
+					m_statisBasket.put("BLOCKED", blocked);
+					m_statisBasket.put("PASSED", passed);
+					m_statisBasket.put("PLANNED", 0);
+					m_statisBasket.put("UNPLANNED", unplanned);
+					storyTable.put("FNMS-" + ran.nextInt(999), m_statisBasket);
+				}
+				
+				// dummy assignee
+				List<String> assigneeList = new ArrayList<>();
+				assigneeList.add("Hoa VAN TRAN");
+				Map<String, Map<String, Integer>> assigneeTable = new HashMap<>();
+				for(int i = 0; i < assigneeList.size(); i++){
+					Map<String, Integer> m_statisBasket = new LinkedHashMap<>();
+					Random ran = new Random();
+					int unexecuted = ran.nextInt(50);
+					int passed = ran.nextInt(20);
+					int failed = ran.nextInt(50);
+					int wip = ran.nextInt(50);
+					int blocked = ran.nextInt(50);
+					int planned = 0;
+					
+					int unplanned = unexecuted + failed + passed + wip + blocked;
+					
+					m_statisBasket.put("UNEXECUTED", unexecuted);
+					m_statisBasket.put("FAILED", failed);
+					m_statisBasket.put("WIP", wip);
+					m_statisBasket.put("BLOCKED", blocked);
+					m_statisBasket.put("PASSED", passed);
+					m_statisBasket.put("PLANNED", 0);
+					m_statisBasket.put("UNPLANNED", unplanned);
+					assigneeTable.put(assigneeList.get(i), m_statisBasket);
+				}
+				
+				//dummy test cycle
+				List<String> cycleList = new ArrayList<>();
+				cycleList.add("SD-OLT E2E Testing");
+				cycleList.add("HBDC Regression");
+				cycleList.add("Ad hoc");
+				cycleList.add("TS 1.2.01 Spring Iteration 9");
+				Map<String, Map<String, Integer>> cycleTable = new HashMap<>();
+				for(int i = 0; i < cycleList.size(); i++){
+					Map<String, Integer> m_statisBasket = new LinkedHashMap<>();
+					Random ran = new Random();
+					int unexecuted = ran.nextInt(50);
+					int passed = ran.nextInt(20);
+					int failed = ran.nextInt(50);
+					int wip = ran.nextInt(50);
+					int blocked = ran.nextInt(50);
+					int planned = 0;
+					int unplanned = unexecuted + failed + passed + wip + blocked;
+					
+					m_statisBasket.put("UNEXECUTED", unexecuted);
+					m_statisBasket.put("FAILED", failed);
+					m_statisBasket.put("WIP", wip);
+					m_statisBasket.put("BLOCKED", blocked);
+					m_statisBasket.put("PASSED", passed);
+					m_statisBasket.put("PLANNED", 0);
+					m_statisBasket.put("UNPLANNED", unplanned);
+					cycleTable.put(cycleList.get(i), m_statisBasket);
+				}
+				
+		        return Results.html()
+		        		.render("id", id)
+		        		.render("dashboard", dashboard)
+		        		.render("username", username)
+		        		.render("alias", alias)
+		        		.render("role", role)
+		        		.render("s_data", s_data2)
+		        		.render("s_datas", s_datas)
+		        		.render("r_datas", r_datas)
+		        		.render("s_ia", s_ia)
+		        		.render("metrics", metrics)
+		        		.render("releases", releases)
+		        		.render("periods", periods)
+		        		.render("epicProjectMap",epicProjectMap)
+		        		.render("epicTable",epicTable)
+		        		.render("epicTestMetric", epicTestMetric)
+		        		.render("epicRelease", epicRelease)
+		        		.render("storyTable",storyTable)
+		        		.render("assigneeList", assigneeList)
+		        		.render("assigneeTable", assigneeTable)
+		        		.render("cycleList",cycleList)
+		        		.render("cycleTable", cycleTable);
     }
 
 	@FilterWith(SecureFilter.class)

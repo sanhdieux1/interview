@@ -219,6 +219,54 @@
 					$this.text("Show Configuration");
 				}
 			});
+			
+			$("#epic-config").hide();
+			$("#epic-config-toggle").click(function() {
+				$("#epic-config").toggle();
+				var $this = $(this);
+				$this.toggleClass("epic-config-toggle");
+				if ($this.hasClass("epic-config-toggle")) {
+					$this.text("Hide Configuration");
+				} else {
+					$this.text("Show Configuration");
+				}
+			});
+			
+			$("#us-config").hide();
+			$("#us-config-toggle").click(function() {
+				$("#us-config").toggle();
+				var $this = $(this);
+				$this.toggleClass("us-config-toggle");
+				if ($this.hasClass("us-config-toggle")) {
+					$this.text("Hide Configuration");
+				} else {
+					$this.text("Show Configuration");
+				}
+			});
+			
+			$("#cycle-config").hide();
+			$("#cycle-config-toggle").click(function() {
+				$("#cycle-config").toggle();
+				var $this = $(this);
+				$this.toggleClass("cycle-config-toggle");
+				if ($this.hasClass("cycle-config-toggle")) {
+					$this.text("Hide Configuration");
+				} else {
+					$this.text("Show Configuration");
+				}
+			});
+			
+			$("#assignee-config").hide();
+			$("#assignee-config-toggle").click(function() {
+				$("#assignee-config").toggle();
+				var $this = $(this);
+				$this.toggleClass("assignee-config-toggle");
+				if ($this.hasClass("assignee-config-toggle")) {
+					$this.text("Hide Configuration");
+				} else {
+					$this.text("Show Configuration");
+				}
+			});
 		});
     </script>
     <script>
