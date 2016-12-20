@@ -22,6 +22,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import models.AssigneeVO;
 import models.ExecutionsVO;
 import models.IssueVO;
+import models.JQLReferIssuesVO;
 import models.JQLSearchResult;
 import models.MException;
 import models.ProjectVO;
@@ -177,7 +178,7 @@ public class QueryDataHandler implements MHandler {
 	@Override
 	public Result getEpicLinks(String project) {
 		Set<String> result = null;
-		String query = "project = %s and type = epic";
+		String query = "project = \"%s\" and type = epic";
 		Map<String, String> parameters = new HashMap<String, String>();
 		parameters.put(Constant.PARAMERTER_JQL_QUERY, String.format(query, project));
 		 parameters.put(Constant.PARAMERTER_MAXRESULTS, "10000");
@@ -192,8 +193,8 @@ public class QueryDataHandler implements MHandler {
 	}
 
 	public Result findAllIssues(String epic){
-		Set<String> result = null;
-		String query = "\"Epic Link\"=\"%s\"";
+		List<JQLReferIssuesVO> result = null;
+		String query = "\"Epic Link\"=%s";
 		Map<String, String> parameters = new HashMap<String, String>();
 		parameters.put(Constant.PARAMERTER_JQL_QUERY, String.format(query, epic));
 		 parameters.put(Constant.PARAMERTER_MAXRESULTS, "10000");
@@ -201,10 +202,7 @@ public class QueryDataHandler implements MHandler {
 		String data = LinkUtil.getInstance()
 				.getLegacyDataWithProxy(PropertiesUtil.getString(Constant.RESOURCE_BUNLE_SEARCH_PATH), parameters);
 		JQLSearchResult searchResult = convertJSONtoObject(data, JQLSearchResult.class);
-		if (searchResult != null) {
-			result = searchResult.getIssues().stream().map(t -> t.getKey()).collect(Collectors.toSet());
-		}
-		return Results.json().render(result);
+		return Results.json().render(searchResult);
 	}
 	
 }

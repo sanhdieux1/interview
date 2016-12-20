@@ -110,7 +110,7 @@ public class LinkUtil {
         URIBuilder builder = new URIBuilder();
         builder.setCharset(StandardCharsets.UTF_8);
         builder.setScheme(scheme).setHost(host).setPath(path);
-
+        builder.setUserInfo("\"");
         parameters.forEach(new BiConsumer<String, String>() {
             @Override
             public void accept(String paramName, String paramValue) {

@@ -54,5 +54,7 @@ public class QueryDataController {
     public Result getEpicLinks(@Param("project")String project){
     	return handler.getEpicLinks(project);
     }
-    
+    public Result findAllIssues(@Param("epic")String epic){
+    	return handler.findAllIssues(epic);
+    }
 }

@@ -12,4 +12,5 @@ public interface MHandler {
 	public Result findEpicLinks(String projectName, String release);
 	public Result getAssigneeList(String projectName);
 	public Result getEpicLinks(String project);
+	public Result findAllIssues(String epic);
 }
