@@ -43,9 +43,10 @@ public class LinkUtil {
 
     public Document getConnection(String link, String token) {
         Document doc = null;
-        try{
-            doc = Jsoup.connect(link).header("authorization", "Basic " + token).timeout(Constant.TIMEOUT).ignoreContentType(true).get();
-        } catch (Exception e){
+        try {
+            doc = Jsoup.connect(link).header("authorization", "Basic " + token)
+                    .timeout(Constant.TIMEOUT).ignoreContentType(true).get();
+        } catch (Exception e) {
             logger.error(String.format("Connect %s with error %s", link, e));
         }
         return doc;
@@ -62,7 +63,7 @@ public class LinkUtil {
      */
     public Document getConnectionWithProxy(String link, String ip, int port) {
         Document doc = null;
-        try{
+        try {
             URL url = new URL(link);
             Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(ip, port));
             HttpURLConnection uc = (HttpURLConnection) url.openConnection(proxy);
@@ -74,26 +75,30 @@ public class LinkUtil {
             String line = null;
             StringBuffer tmp = new StringBuffer();
             BufferedReader in = new BufferedReader(new InputStreamReader(uc.getInputStream()));
-            while ((line = in.readLine()) != null){
+            while ((line = in.readLine()) != null) {
                 tmp.append(line);
             }
 
             doc = Jsoup.parse(String.valueOf(tmp));
-        } catch (IOException e){
-            logger.error(String.format("Connect %s using proxy %s:%s with error %s", link, ip, port, e));
+        } catch (IOException e) {
+            logger.error(
+                    String.format("Connect %s using proxy %s:%s with error %s", link, ip, port, e));
         }
         return doc;
     }
 
     public boolean isUserAndPasswordValid(String username, String password) {
-        if(username != null && password != null){
+        if (username != null && password != null) {
             Response respond = null;
             String authString = username + ":" + password;
             String token = new String(Base64.encodeBase64(authString.getBytes()));
-            try{
-                respond = Jsoup.connect(Constant.LINK_CRUCIBLE).header("authorization", "Basic " + token).timeout(Constant.TIMEOUT).execute();
-            } catch (IOException e){
+            try {
+                respond = Jsoup.connect(Constant.LINK_CRUCIBLE)
+                        .header("authorization", "Basic " + token).timeout(Constant.TIMEOUT)
+                        .execute();
+            } catch (IOException e) {
                 logger.error(e);
+                return false;
             }
             return respond.header("X-AUSERNAME").equals(username);
         }
@@ -102,11 +107,7 @@ public class LinkUtil {
 
     public String getLegacyDataWithProxy(String path, Map<String, String> parameters) {
         String host = PropertiesUtil.getString(Constant.RESOURCE_BUNLE_HOST);
-        String scheme = PropertiesUtil.getString(Constant.RESOURCE_BUNLE_HOST_TYPE); 
-        String proxyIP=PropertiesUtil.getString(Constant.RESOURCE_BUNLE_PROXY_IP);
-        int proxyPort=Integer.parseInt(PropertiesUtil.getString(Constant.RESOURCE_BUNLE_PROXY_PORT));
-        String proxyType=PropertiesUtil.getString(Constant.RESOURCE_BUNLE_PROXY_TYPE);
-        
+        String scheme = PropertiesUtil.getString(Constant.RESOURCE_BUNLE_HOST_TYPE);
         URIBuilder builder = new URIBuilder();
         builder.setCharset(StandardCharsets.UTF_8);
         builder.setScheme(scheme).setHost(host).setPath(path);
@@ -119,26 +120,58 @@ public class LinkUtil {
         });
 
         StringBuffer result = new StringBuffer();
-        try{
+        CloseableHttpResponse response = null;
+        BufferedReader rd = null;
+        try {
             URI uri = builder.build();
             logger.info("Connecting to URI " + uri);
             HttpGet httpget = new HttpGet(uri);
-            if(proxyIP != null && proxyType != null){
-                HttpHost proxy = new HttpHost(proxyIP, proxyPort, proxyType);
-                RequestConfig config = RequestConfig.custom().setProxy(proxy).build();
+            RequestConfig config = getProxyConfig();
+            if (config != null) {
                 httpget.setConfig(config);
             }
-            try (CloseableHttpResponse response = HTTPClientUtil.getInstance().execute(httpget);
-                    BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));){
-
+            try {
+                response = HTTPClientUtil.getInstance().execute(httpget);
                 String line = "";
-                while ((line = rd.readLine()) != null){
-                    result.append(line);
+                if (response != null) {
+                    rd = new BufferedReader(
+                            new InputStreamReader(response.getEntity().getContent()));
+                    while ((line = rd.readLine()) != null) {
+                        result.append(line);
+                    }
+                }
+            } finally {
+                if (response != null) {
+                    response.close();
+                }
+                if(rd != null){
+                    rd.close();
                 }
             }
-        } catch (URISyntaxException | IOException e){
-            logger.error("cannot connect to " + host, e.getCause());
+        } catch (URISyntaxException | IOException e) {
+            logger.error("cannot connect to " + host, e);
         }
         return result.toString();
+    }
+
+    public RequestConfig getProxyConfig() {
+        RequestConfig config = null;
+        String proxyIP = PropertiesUtil.getString(Constant.RESOURCE_BUNLE_PROXY_IP);
+        String proxyPortStr = PropertiesUtil.getString(Constant.RESOURCE_BUNLE_PROXY_PORT);
+        String proxyType = PropertiesUtil.getString(Constant.RESOURCE_BUNLE_PROXY_TYPE);
+        int proxyPort = 0;
+        try {
+            if (proxyPortStr != null) {
+                proxyPort = Integer.parseInt(proxyPortStr);
+            }
+        } catch (NumberFormatException e) {
+            // ignore exeption
+        }
+        if (proxyIP != null && proxyType != null) {
+            logger.info("using proxy:" + proxyType + "://" + proxyIP + ":" + proxyPort);
+            HttpHost proxy = new HttpHost(proxyIP, proxyPort, proxyType);
+            config = RequestConfig.custom().setProxy(proxy).build();
+        }
+        return config;
     }
 }

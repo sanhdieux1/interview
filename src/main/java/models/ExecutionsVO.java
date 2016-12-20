@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ExecutionsVO {
-    private List<IssueVO> executions;
+    private List<ExecutionIssueVO> executions;
     private int currentIndex;
     private int maxResultAllowed;
     private List<Integer> linksNew;
@@ -42,10 +42,10 @@ public class ExecutionsVO {
     public void setLinksNew(List<Integer> linksNew) {
         this.linksNew = linksNew;
     }
-    public List<IssueVO> getExecutions() {
+    public List<ExecutionIssueVO> getExecutions() {
         return executions;
     }
-    public void setExecutions(List<IssueVO> executions) {
+    public void setExecutions(List<ExecutionIssueVO> executions) {
         this.executions = executions;
     }
     public int getTotalCount() {

@@ -5,7 +5,7 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class IssueVO {
+public class ExecutionIssueVO {
     private int id;
     private int orderId;
     private int cycleId;

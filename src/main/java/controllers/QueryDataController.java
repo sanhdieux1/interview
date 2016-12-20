@@ -4,14 +4,12 @@ import java.lang.reflect.Proxy;
 
 import org.apache.log4j.Logger;
 
-import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import filter.CrossOriginAccessControlFilter;
 import handle.ExceptionHandler;
-import handle.MHandler;
-import handle.QueryDataHandler;
-import models.ExecutionsVO;
+import handle.QueryHandler;
+import handle.QueryHandlerImpl;
 import ninja.Context;
 import ninja.FilterWith;
 import ninja.Result;
@@ -21,11 +19,11 @@ import ninja.params.Param;
 @FilterWith(CrossOriginAccessControlFilter.class)
 public class QueryDataController {
     final static Logger logger = Logger.getLogger(QueryDataController.class);
-    private MHandler handler;
+    private QueryHandler handler;
     
     public QueryDataController() {
-        handler = QueryDataHandler.getInstance(); 
-        handler = (MHandler) Proxy.newProxyInstance(MHandler.class.getClassLoader(), new Class[]{MHandler.class}, new ExceptionHandler(handler));
+        handler = new QueryHandlerImpl();
+        handler = (QueryHandler) Proxy.newProxyInstance(QueryHandler.class.getClassLoader(), new Class[]{QueryHandler.class}, new ExceptionHandler(handler));
     }
     public Result getAssigneeTable(@Param("username") String username, @Param("cyclename") String cyclename, @Param("project") String project,
             Context context) {
@@ -48,17 +46,4 @@ public class QueryDataController {
         return handler.getProjectVersionList(id);
     }
     
-    public Result findEpicLinks(@Param("projectName") String projectName, @Param("release") String release){
-    	return handler.findEpicLinks(projectName, release);
-    }
-    
-    public Result getEpicLinks(@Param("project")String project){
-    	return handler.getEpicLinks(project);
-    }
-    public Result findAllIssues(@Param("epic")String epic){
-    	return handler.findAllIssues(epic);
-    }
-    public Result findExecutionIsuee(@Param("issueKey") String issueKey) {
-    	return handler.findExecutionIsuee(issueKey);
-    }
 }

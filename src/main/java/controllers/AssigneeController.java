@@ -8,8 +8,8 @@ import com.google.inject.Singleton;
 
 import filter.CrossOriginAccessControlFilter;
 import handle.ExceptionHandler;
-import handle.MHandler;
-import handle.QueryDataHandler;
+import handle.QueryHandler;
+import handle.QueryHandlerImpl;
 import ninja.FilterWith;
 import ninja.Result;
 import ninja.params.Param;
@@ -18,11 +18,11 @@ import ninja.params.Param;
 @FilterWith(CrossOriginAccessControlFilter.class)
 public class AssigneeController {
 	final static Logger logger = Logger.getLogger(AssigneeController.class);
-    private MHandler handler;
+    private QueryHandler handler;
     
     public AssigneeController() {
-        handler = QueryDataHandler.getInstance(); 
-        handler = (MHandler) Proxy.newProxyInstance(MHandler.class.getClassLoader(), new Class[]{MHandler.class}, new ExceptionHandler(handler));
+        handler = new QueryHandlerImpl();
+        handler = (QueryHandler) Proxy.newProxyInstance(QueryHandler.class.getClassLoader(), new Class[]{QueryHandler.class}, new ExceptionHandler(handler));
     }
     
     public Result getAssigneeList(@Param("project") String projectName){

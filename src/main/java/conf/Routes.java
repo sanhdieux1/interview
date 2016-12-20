@@ -4,6 +4,7 @@ import controllers.ApplicationController;
 import controllers.AssigneeController;
 import controllers.ConfigurationController;
 import controllers.DashboardController;
+import controllers.EpicController;
 import controllers.LoginLogoutController;
 import controllers.QueryDataController;
 import ninja.AssetsController;
@@ -13,11 +14,10 @@ import ninja.application.ApplicationRoutes;
 public class Routes implements ApplicationRoutes {
     @Override
     public void init(Router router) {
-    	router.GET().route("/findExecutionIsuee").with(QueryDataController.class,"findExecutionIsuee");
-    	router.GET().route("/findAllIssues").with(QueryDataController.class,"findAllIssues");
-    	router.GET().route("/getEpicLinks").with(QueryDataController.class,"getEpicLinks");
+    	router.GET().route("/findExecutionIsuee").with(EpicController.class,"findExecutionIsuee");
+    	router.GET().route("/findAllIssues").with(EpicController.class,"findAllIssues");
+    	router.GET().route("/getEpicLinks").with(EpicController.class,"getEpicLinks");
     	router.GET().route("/getassignee").with(AssigneeController.class,"getAssigneeList");
-    	router.GET().route("/findEpicLinks").with(QueryDataController.class,"findEpicLinks");
     	router.GET().route("/listcycle").with(QueryDataController.class,"getListCycleName");
     	router.GET().route("/listproject").with(QueryDataController.class,"getProjectList");
     	router.GET().route("/addGadget").with(QueryDataController.class,"addGadget");

@@ -8,9 +8,9 @@ import models.MException;
 import ninja.Results;
 
 public class ExceptionHandler implements InvocationHandler {
-    private MHandler handler;
+    private Object handler;
 
-    public ExceptionHandler(MHandler handler) {
+    public ExceptionHandler(Object handler) {
         super();
         this.handler = handler;
     }

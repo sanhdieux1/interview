@@ -65,4 +65,7 @@ public class JQLIssuetypeVO {
 		this.avatarId = avatarId;
 	}
 
+	public enum Type {
+	    TEST, BUG, EPIC, STORY, IMPROVEMENT
+	}
 }

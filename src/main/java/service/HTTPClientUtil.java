@@ -25,8 +25,8 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.log4j.Logger;
 
 import util.Constant;
+import util.LinkUtil;
 import util.PropertiesUtil;
-
 public class HTTPClientUtil {
     final static Logger logger = Logger.getLogger(HTTPClientUtil.class);
     private BasicCookieStore cookieStore = new BasicCookieStore();
@@ -36,47 +36,48 @@ public class HTTPClientUtil {
     private HTTPClientUtil() {
 
         httpclient = HttpClients.custom().setDefaultCookieStore(cookieStore).build();
-        try{
+        try {
             login(httpclient);
-        } catch (URISyntaxException | IOException e){
-            logger.error("cannot login to server:", e.getCause());
+        } catch (URISyntaxException | IOException e) {
+            logger.error("cannot login to server:", e);
+            instance = null;
         }
     }
 
     public synchronized static HTTPClientUtil getInstance() {
-        if(instance == null){
+        if (instance == null) {
             instance = new HTTPClientUtil();
         }
         return instance;
     }
 
     public CloseableHttpResponse execute(HttpUriRequest request) {
-        try{
+        try {
             return httpclient.execute(request);
-        } catch (IOException e){
-            logger.error("cannot execute request", e.getCause());
+        } catch (IOException e) {
+            logger.error("cannot execute request", e);
+            instance = null;
         }
         return null;
     }
 
-    private void login(CloseableHttpClient httpclient) throws URISyntaxException, ClientProtocolException, IOException {
-        URI uri = new URI(
-                PropertiesUtil.getString(Constant.RESOURCE_BUNLE_HOST_TYPE) + "://" + (PropertiesUtil.getString(Constant.RESOURCE_BUNLE_HOST) + "/login.jps"));
+    private void login(CloseableHttpClient httpclient)
+            throws URISyntaxException, ClientProtocolException, IOException {
+        URI uri = new URI(PropertiesUtil.getString(Constant.RESOURCE_BUNLE_HOST_TYPE) + "://"
+                + (PropertiesUtil.getString(Constant.RESOURCE_BUNLE_HOST) + "/login.jps"));
         RequestBuilder requestBuilder = RequestBuilder.post().setUri(uri)
-                .addParameter("os_username", "hcongle")
-                .addParameter("os_password", "hcl49#Tma");
-        if(PropertiesUtil.getString(Constant.RESOURCE_BUNLE_PROXY_IP) != null){
-            HttpHost proxy = new HttpHost(PropertiesUtil.getString(Constant.RESOURCE_BUNLE_PROXY_IP),
-                    Integer.parseInt(PropertiesUtil.getString(Constant.RESOURCE_BUNLE_PROXY_PORT)),
-                    PropertiesUtil.getString(Constant.RESOURCE_BUNLE_PROXY_TYPE));
-            RequestConfig config = RequestConfig.custom().setProxy(proxy).build();
+                .addParameter("os_username", "hcongle").addParameter("os_password", "hcl49#Tma");
+        RequestConfig config = LinkUtil.getInstance().getProxyConfig();
+        if (config != null) {
             requestBuilder.setConfig(config);
         }
-        HttpUriRequest loginRequest = requestBuilder.build();
-            CloseableHttpResponse response = httpclient.execute(loginRequest);
-            response.close();
-            logger.info("login successfully");
         
+        HttpUriRequest loginRequest = requestBuilder.build();
+        logger.info("send request login to:" + uri.toString());
+        CloseableHttpResponse response = httpclient.execute(loginRequest);
+        response.close();
+        logger.info("login successfully");
+
     }
 
     public HttpClient getHttpclient() {
