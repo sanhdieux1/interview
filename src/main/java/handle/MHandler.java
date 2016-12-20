@@ -8,4 +8,8 @@ public interface MHandler {
     public Result getListCycleName(String projectName);
     public Result getProjectList();
     public Result addGadget(String type, String jsonData);
+    public Result getProjectVersionList(long id);
+	public Result findEpicLinks(String projectName, String release);
+	public Result getAssigneeList(String projectName);
+	public Result getEpicLinks(String project);
 }

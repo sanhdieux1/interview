@@ -1,6 +1,7 @@
 package conf;
 
 import controllers.ApplicationController;
+import controllers.AssigneeController;
 import controllers.ConfigurationController;
 import controllers.DashboardController;
 import controllers.LoginLogoutController;
@@ -12,10 +13,12 @@ import ninja.application.ApplicationRoutes;
 public class Routes implements ApplicationRoutes {
     @Override
     public void init(Router router) {
-    	router.GET().route("/executeSearch").with(QueryDataController.class, "getAssigneeTable");
+    	router.GET().route("/getEpicLinks").with(QueryDataController.class,"getEpicLinks");
+    	router.GET().route("/getassignee").with(AssigneeController.class,"getAssigneeList");
+    	router.GET().route("/findEpicLinks").with(QueryDataController.class,"findEpicLinks");
     	router.GET().route("/listcycle").with(QueryDataController.class,"getListCycleName");
     	router.GET().route("/listproject").with(QueryDataController.class,"getProjectList");
-    	
+    	router.GET().route("/addGadget").with(QueryDataController.class,"addGadget");
         router.GET().route("/login").with(LoginLogoutController.class, "login");
         router.POST().route("/login").with(LoginLogoutController.class, "loginPost");
         router.GET().route("/logout").with(LoginLogoutController.class, "logout");

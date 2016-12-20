@@ -139,7 +139,6 @@ public class LinkUtil {
         } catch (URISyntaxException | IOException e){
             logger.error("cannot connect to " + host, e.getCause());
         }
-        logger.info("Retrieved data " + result.toString());
         return result.toString();
     }
 }

@@ -141,6 +141,7 @@
   <properties>
     <ninja.version>5.8.0</ninja.version>
     <jetty.version>9.2.10.v20150310</jetty.version>
+    <jackson.version>2.8.5</jackson.version>
   </properties>
 </project>
 
