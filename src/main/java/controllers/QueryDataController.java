@@ -11,6 +11,7 @@ import filter.CrossOriginAccessControlFilter;
 import handle.ExceptionHandler;
 import handle.MHandler;
 import handle.QueryDataHandler;
+import models.ExecutionsVO;
 import ninja.Context;
 import ninja.FilterWith;
 import ninja.Result;
@@ -56,5 +57,8 @@ public class QueryDataController {
     }
     public Result findAllIssues(@Param("epic")String epic){
     	return handler.findAllIssues(epic);
+    }
+    public Result findExecutionIsuee(@Param("issueKey") String issueKey) {
+    	return handler.findExecutionIsuee(issueKey);
     }
 }

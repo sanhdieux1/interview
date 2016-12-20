@@ -22,6 +22,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import models.AssigneeVO;
 import models.ExecutionsVO;
 import models.IssueVO;
+import models.JQLIssueVO;
 import models.JQLReferIssuesVO;
 import models.JQLSearchResult;
 import models.MException;
@@ -64,7 +65,7 @@ public class QueryDataHandler implements MHandler {
 		return Results.json().render(executions);
 	}
 
-	private ExecutionsVO findAllIsuee(String projectName) {
+	private ExecutionsVO findAllExecutionIsuee(String projectName) {
 		String query = "project in ('%s')";
 		Map<String, String> parameters = new HashMap<String, String>();
 		parameters.put(Constant.PARAMERTER_ZQL_QUERY, String.format(query, projectName));
@@ -78,7 +79,7 @@ public class QueryDataHandler implements MHandler {
 
 	public Result getListCycleName(String projectName) {
 		if (cycleNameCache.isEmpty()) {
-			ExecutionsVO executions = findAllIsuee(projectName);
+			ExecutionsVO executions = findAllExecutionIsuee(projectName);
 			if (executions != null) {
 				List<IssueVO> excutions = executions.getExecutions();
 				Stream<IssueVO> excutionsStream = excutions.stream();
@@ -91,7 +92,7 @@ public class QueryDataHandler implements MHandler {
 	public Result getAssigneeList(String projectName) {
 
 		if (assigneesCache.get(projectName) == null || assigneesCache.get(projectName).isEmpty()) {
-			ExecutionsVO executions = findAllIsuee(projectName);
+			ExecutionsVO executions = findAllExecutionIsuee(projectName);
 			if (executions != null) {
 				List<IssueVO> excutions = executions.getExecutions();
 				Stream<IssueVO> excutionsStream = excutions.stream();
@@ -165,7 +166,7 @@ public class QueryDataHandler implements MHandler {
 
 	@Override
 	public Result findEpicLinks(String projectName, String release) {
-		ExecutionsVO executions = findAllIsuee(projectName);
+		ExecutionsVO executions = findAllExecutionIsuee(projectName);
 		String[] epicLinks;
 		if (executions != null) {
 			List<IssueVO> excutions = executions.getExecutions();
@@ -193,7 +194,10 @@ public class QueryDataHandler implements MHandler {
 	}
 
 	public Result findAllIssues(String epic){
-		List<JQLReferIssuesVO> result = null;
+		return Results.json().render(findAllIssues(epic));
+	}
+	
+	private List<JQLReferIssuesVO> findAllIssues2(String epic){
 		String query = "\"Epic Link\"=%s";
 		Map<String, String> parameters = new HashMap<String, String>();
 		parameters.put(Constant.PARAMERTER_JQL_QUERY, String.format(query, epic));
@@ -202,7 +206,29 @@ public class QueryDataHandler implements MHandler {
 		String data = LinkUtil.getInstance()
 				.getLegacyDataWithProxy(PropertiesUtil.getString(Constant.RESOURCE_BUNLE_SEARCH_PATH), parameters);
 		JQLSearchResult searchResult = convertJSONtoObject(data, JQLSearchResult.class);
-		return Results.json().render(searchResult);
+		return searchResult.getIssues();
 	}
 	
+	public JQLIssueVO findIssues(String id){
+		String data = LinkUtil.getInstance()
+				.getLegacyDataWithProxy(PropertiesUtil.getString(Constant.RESOURCE_BUNLE_ISSUE_PATH) +"/" + id, new HashMap<>());
+		JQLIssueVO issueVO = convertJSONtoObject(data, JQLIssueVO.class);
+		return issueVO;
+	}
+	
+	private ExecutionsVO findExecutionIsuee2(String issueKey) {
+		String query = "issue=\"%s\"";
+		Map<String, String> parameters = new HashMap<String, String>();
+		parameters.put(Constant.PARAMERTER_ZQL_QUERY, String.format(query, issueKey));
+		parameters.put(Constant.PARAMERTER_MAXRECORDS, "1000");
+		parameters.put(Constant.PARAMERTER_OFFSET, "0");
+		String result = LinkUtil.getInstance()
+				.getLegacyDataWithProxy(PropertiesUtil.getString(Constant.RESOURCE_BUNLE_PATH), parameters);
+		ExecutionsVO executions = convertJSONtoObject(result, ExecutionsVO.class);
+		return executions;
+	}
+	
+	public Result findExecutionIsuee(String issueKey){
+		return Results.json().render(findExecutionIsuee2(issueKey));
+	}
 }

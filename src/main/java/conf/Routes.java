@@ -13,6 +13,7 @@ import ninja.application.ApplicationRoutes;
 public class Routes implements ApplicationRoutes {
     @Override
     public void init(Router router) {
+    	router.GET().route("/findExecutionIsuee").with(QueryDataController.class,"findExecutionIsuee");
     	router.GET().route("/findAllIssues").with(QueryDataController.class,"findAllIssues");
     	router.GET().route("/getEpicLinks").with(QueryDataController.class,"getEpicLinks");
     	router.GET().route("/getassignee").with(AssigneeController.class,"getAssigneeList");

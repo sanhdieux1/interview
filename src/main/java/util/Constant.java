@@ -35,6 +35,7 @@ public class Constant {
 	
     public static final String RESOURCE_BUNLE_PROJECT_PATH = "resourcebundle.project.path";
     public static final String RESOURCE_BUNLE_SEARCH_PATH = "resourcebundle.search.path";
+    public static final String RESOURCE_BUNLE_ISSUE_PATH = "resourcebundle.issue.path";
     //constant query
     public static final String PARAMERTER_ZQL_QUERY = "zqlQuery";
     public static final String PARAMERTER_JQL_QUERY = "jql";
