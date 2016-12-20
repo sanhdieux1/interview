@@ -180,7 +180,7 @@ public class QueryDataHandler implements MHandler {
 		String query = "project = %s and type = epic";
 		Map<String, String> parameters = new HashMap<String, String>();
 		parameters.put(Constant.PARAMERTER_JQL_QUERY, String.format(query, project));
-		 parameters.put(Constant.PARAMERTER_MAXRECORDS, "10000");
+		 parameters.put(Constant.PARAMERTER_MAXRESULTS, "10000");
 		 parameters.put(Constant.PARAMERTER_OFFSET, "0");
 		String data = LinkUtil.getInstance()
 				.getLegacyDataWithProxy(PropertiesUtil.getString(Constant.RESOURCE_BUNLE_SEARCH_PATH), parameters);
@@ -191,4 +191,20 @@ public class QueryDataHandler implements MHandler {
 		return Results.json().render(result);
 	}
 
+	public Result findAllIssues(String epic){
+		Set<String> result = null;
+		String query = "\"Epic Link\"=\"%s\"";
+		Map<String, String> parameters = new HashMap<String, String>();
+		parameters.put(Constant.PARAMERTER_JQL_QUERY, String.format(query, epic));
+		 parameters.put(Constant.PARAMERTER_MAXRESULTS, "10000");
+		 parameters.put(Constant.PARAMERTER_OFFSET, "0");
+		String data = LinkUtil.getInstance()
+				.getLegacyDataWithProxy(PropertiesUtil.getString(Constant.RESOURCE_BUNLE_SEARCH_PATH), parameters);
+		JQLSearchResult searchResult = convertJSONtoObject(data, JQLSearchResult.class);
+		if (searchResult != null) {
+			result = searchResult.getIssues().stream().map(t -> t.getKey()).collect(Collectors.toSet());
+		}
+		return Results.json().render(result);
+	}
+	
 }

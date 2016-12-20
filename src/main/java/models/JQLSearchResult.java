@@ -10,7 +10,7 @@ public class JQLSearchResult {
 	private int startAt;
 	private int maxResults;
 	private int total;
-	private List<JQLIssuesVO> issues;
+	private List<JQLReferIssuesVO> issues;
 	public String getExpand() {
 		return expand;
 	}
@@ -35,10 +35,10 @@ public class JQLSearchResult {
 	public void setTotal(int total) {
 		this.total = total;
 	}
-	public List<JQLIssuesVO> getIssues() {
+	public List<JQLReferIssuesVO> getIssues() {
 		return issues;
 	}
-	public void setIssues(List<JQLIssuesVO> issues) {
+	public void setIssues(List<JQLReferIssuesVO> issues) {
 		this.issues = issues;
 	}
 	

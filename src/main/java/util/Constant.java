@@ -39,5 +39,6 @@ public class Constant {
     public static final String PARAMERTER_ZQL_QUERY = "zqlQuery";
     public static final String PARAMERTER_JQL_QUERY = "jql";
     public static final String PARAMERTER_MAXRECORDS = "maxRecords";
+    public static final String PARAMERTER_MAXRESULTS = "maxResults";
     public static final String PARAMERTER_OFFSET = "offset";
 }

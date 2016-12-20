@@ -3,7 +3,7 @@ package models;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class JQLIssuesVO {
+public class JQLReferIssuesVO {
 	private String expand;
 	private String  id;
 	private String self;
