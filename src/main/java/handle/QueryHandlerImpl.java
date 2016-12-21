@@ -55,7 +55,7 @@ public class QueryHandlerImpl implements QueryHandler {
         parameters.put(Constant.PARAMERTER_ZQL_QUERY,
                 String.format(QUERY, project, username, cyclename));
         String data = LinkUtil.getInstance().getLegacyDataWithProxy(
-                PropertiesUtil.getString(Constant.RESOURCE_BUNLE_PATH), parameters);
+                PropertiesUtil.getInstance().getString(Constant.RESOURCE_BUNLE_PATH), parameters);
         ExecutionsVO executions = JSONUtil.getInstance().convertJSONtoObject(data, ExecutionsVO.class);
         return Results.json().render(executions);
     }
@@ -67,7 +67,7 @@ public class QueryHandlerImpl implements QueryHandler {
         parameters.put(Constant.PARAMERTER_MAXRECORDS, "10000");
         parameters.put(Constant.PARAMERTER_OFFSET, "0");
         String result = LinkUtil.getInstance().getLegacyDataWithProxy(
-                PropertiesUtil.getString(Constant.RESOURCE_BUNLE_PATH), parameters);
+                PropertiesUtil.getInstance().getString(Constant.RESOURCE_BUNLE_PATH), parameters);
         ExecutionsVO executions = JSONUtil.getInstance().convertJSONtoObject(result, ExecutionsVO.class);
         return executions;
     }
@@ -110,7 +110,7 @@ public class QueryHandlerImpl implements QueryHandler {
     public Result getProjectList() {
         if (projectsCache.isEmpty()) {
             String data = LinkUtil.getInstance().getLegacyDataWithProxy(
-                    PropertiesUtil.getString(Constant.RESOURCE_BUNLE_PROJECT_PATH),
+                    PropertiesUtil.getInstance().getString(Constant.RESOURCE_BUNLE_PROJECT_PATH),
                     new HashMap<String, String>());
             List<ProjectVO> projects = JSONUtil.getInstance().convertJSONtoListObject(data, ProjectVO.class);
             projectsCache = projects.stream().map(p -> p.getName()).collect(Collectors.toSet());
@@ -138,7 +138,7 @@ public class QueryHandlerImpl implements QueryHandler {
     @Override
     public Result getProjectVersionList(long id) {
         String data = LinkUtil.getInstance().getLegacyDataWithProxy(
-                PropertiesUtil
+                PropertiesUtil.getInstance()
                         .getString(Constant.RESOURCE_BUNLE_PROJECT_PATH + "/" + id + "/versions"),
                 new HashMap<String, String>());
         List<ProjectVersionVO> projects = JSONUtil.getInstance().convertJSONtoListObject(data, ProjectVersionVO.class);
@@ -148,7 +148,7 @@ public class QueryHandlerImpl implements QueryHandler {
     
     public JQLIssueVO findIssues(String id) {
         String data = LinkUtil.getInstance().getLegacyDataWithProxy(
-                PropertiesUtil.getString(Constant.RESOURCE_BUNLE_ISSUE_PATH) + "/" + id,
+                PropertiesUtil.getInstance().getString(Constant.RESOURCE_BUNLE_ISSUE_PATH) + "/" + id,
                 new HashMap<>());
         JQLIssueVO issueVO = JSONUtil.getInstance().convertJSONtoObject(data, JQLIssueVO.class);
         return issueVO;

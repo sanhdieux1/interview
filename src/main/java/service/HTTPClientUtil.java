@@ -63,8 +63,8 @@ public class HTTPClientUtil {
 
     private void login(CloseableHttpClient httpclient)
             throws URISyntaxException, ClientProtocolException, IOException {
-        URI uri = new URI(PropertiesUtil.getString(Constant.RESOURCE_BUNLE_HOST_TYPE) + "://"
-                + (PropertiesUtil.getString(Constant.RESOURCE_BUNLE_HOST) + "/login.jps"));
+        URI uri = new URI(PropertiesUtil.getInstance().getString(Constant.RESOURCE_BUNLE_HOST_TYPE) + "://"
+                + (PropertiesUtil.getInstance().getString(Constant.RESOURCE_BUNLE_HOST) + "/login.jps"));
         RequestBuilder requestBuilder = RequestBuilder.post().setUri(uri)
                 .addParameter("os_username", "hcongle").addParameter("os_password", "hcl49#Tma");
         RequestConfig config = LinkUtil.getInstance().getProxyConfig();

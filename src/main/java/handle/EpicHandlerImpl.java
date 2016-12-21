@@ -44,7 +44,7 @@ public class EpicHandlerImpl implements EpicHandler {
         parameters.put(Constant.PARAMERTER_MAXRESULTS, "10000");
         parameters.put(Constant.PARAMERTER_OFFSET, "0");
         String data = LinkUtil.getInstance().getLegacyDataWithProxy(
-                PropertiesUtil.getString(Constant.RESOURCE_BUNLE_SEARCH_PATH), parameters);
+                PropertiesUtil.getInstance().getString(Constant.RESOURCE_BUNLE_SEARCH_PATH), parameters);
         JQLSearchResult searchResult = JSONUtil.getInstance().convertJSONtoObject(data,
                 JQLSearchResult.class);
         if (searchResult != null) {
@@ -66,7 +66,7 @@ public class EpicHandlerImpl implements EpicHandler {
         parameters.put(Constant.PARAMERTER_MAXRESULTS, "10000");
         parameters.put(Constant.PARAMERTER_OFFSET, "0");
         String data = LinkUtil.getInstance().getLegacyDataWithProxy(
-                PropertiesUtil.getString(Constant.RESOURCE_BUNLE_SEARCH_PATH), parameters);
+                PropertiesUtil.getInstance().getString(Constant.RESOURCE_BUNLE_SEARCH_PATH), parameters);
         JQLSearchResult searchResult = JSONUtil.getInstance().convertJSONtoObject(data,
                 JQLSearchResult.class);
         return searchResult.getIssues();
@@ -79,7 +79,7 @@ public class EpicHandlerImpl implements EpicHandler {
         parameters.put(Constant.PARAMERTER_MAXRECORDS, "1000");
         parameters.put(Constant.PARAMERTER_OFFSET, "0");
         String result = LinkUtil.getInstance().getLegacyDataWithProxy(
-                PropertiesUtil.getString(Constant.RESOURCE_BUNLE_PATH), parameters);
+                PropertiesUtil.getInstance().getString(Constant.RESOURCE_BUNLE_PATH), parameters);
         ExecutionsVO executions = JSONUtil.getInstance().convertJSONtoObject(result,
                 ExecutionsVO.class);
         return executions;
