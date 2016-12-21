@@ -168,7 +168,7 @@ public class LinkUtil {
             // ignore exeption
         }
         if (proxyIP != null && proxyType != null) {
-            logger.info("using proxy:" + proxyType + "://" + proxyIP + ":" + proxyPort);
+//            logger.info("using proxy:" + proxyType + "://" + proxyIP + ":" + proxyPort);
             HttpHost proxy = new HttpHost(proxyIP, proxyPort, proxyType);
             config = RequestConfig.custom().setProxy(proxy).build();
         }

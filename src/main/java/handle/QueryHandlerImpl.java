@@ -144,11 +144,6 @@ public class QueryHandlerImpl implements QueryHandler {
         List<ProjectVersionVO> projects = JSONUtil.getInstance().convertJSONtoListObject(data, ProjectVersionVO.class);
         return Results.json().render(projects);
     }
-
- 
-
-    
-
     
     
     public JQLIssueVO findIssues(String id) {
