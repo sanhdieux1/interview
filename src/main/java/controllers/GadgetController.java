@@ -57,7 +57,6 @@ public class GadgetController {
 	
 	public Result getGadgets(){
 		List<Gadget> gadgets = gadgetService.getAll();
-		Set<String> gadgetIds = gadgets.stream().map(g -> g.getId()).collect(Collectors.toSet());
-		return Results.json().render(gadgetIds);
+		return Results.json().render(gadgets);
 	}
 }
