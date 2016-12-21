@@ -21,9 +21,7 @@
 									<td class="col-md-6"><label>Project</label></td>
 									<div class="project-search">
 										<td class="col-md-6"><select class="form-control"
-											id="epicProjectKey"> <#list epicProjectMap?keys as
-												k>
-												<option value="${k}">${k}</option> </#list>
+											id="epicProjectKey">
 										</select></td>
 									</div>
 								</tr>
@@ -33,18 +31,7 @@
 									<div class="">
 										<td class="col-md-6"><select class="form-control"
 											id="epicReleaseKey"> <#list epicRelease as release>
-												<option>${release}</option> </#list>
-										</select></td>
-									</div>
-								</tr>
-								<!-- Metrics row -->
-								<tr>
-									<td class="col-md-6"><label>Metrics</label></td>
-									<div class="">
-										<td class="col-md-6"><select multiple
-											class="form-control" id="epicMetricMultiSelect">
-												<#list epicTestMetric as metric>
-												<option>${metric}</option> </#list>
+												<option value="${release}">${release}</option> </#list>
 										</select></td>
 									</div>
 								</tr>
@@ -53,10 +40,19 @@
 									<td class="col-md-6"><label>Epic Link</label></td>
 									<div class="project-search">
 										<td class="col-md-6"><select multiple
-											class="form-control" id="epicMultiSelectKey"> <#list
-												epicTable?keys as k>
-												<option value="${k}">${k}</option> </#list>
+											class="form-control" id="epicMultiSelect">
 										</select></td>
+								</tr>
+								<!-- Metrics row -->
+								<tr>
+									<td class="col-md-6"><label>Metrics</label></td>
+									<div class="">
+										<td class="col-md-6"><select multiple
+											class="form-control" id="epicMetricMultiSelect">
+												<#list epicTestMetric as metric>
+												<option value="${metric}">${metric}</option> </#list>
+										</select></td>
+									</div>
 								</tr>
 							</tbody>
 						</table>
@@ -135,17 +131,7 @@
 										</select></td>
 									</div>
 								</tr>
-								<!-- US Metrics row -->
-								<tr>
-									<td class="col-md-6"><label>Metrics</label></td>
-									<div class="">
-										<td class="col-md-6"><select multiple
-											class="form-control" id="epicMetricMultiSelect">
-												<#list epicTestMetric as metric>
-												<option>${metric}</option> </#list>
-										</select></td>
-									</div>
-								</tr>
+
 								<!-- Us story row -->
 								<tr>
 									<td class="col-md-6"><label>User Story</label></td>
@@ -154,6 +140,17 @@
 											class="form-control" id="usMultiSelect"> <#list
 												storyTable?keys as k>
 												<option value="${k}">${k}</option> </#list>
+										</select></td>
+									</div>
+								</tr>
+								<!-- US Metrics row -->
+								<tr>
+									<td class="col-md-6"><label>Metrics</label></td>
+									<div class="">
+										<td class="col-md-6"><select multiple
+											class="form-control" id="epicMetricMultiSelect">
+												<#list epicTestMetric as metric>
+												<option>${metric}</option> </#list>
 										</select></td>
 									</div>
 								</tr>
@@ -204,7 +201,7 @@
 					<div class="md-padding" ng-cloak>
 						<table class="table table-bordered">
 							<tbody>
-								<!-- Assginee Project Row -->
+								<!-- Assignee Project Row -->
 								<tr>
 									<td class="col-md-6"><label>Project</label></td>
 									<div class="project-search">
@@ -215,38 +212,29 @@
 										</select></td>
 									</div>
 								</tr>
-								<!-- US Release Row -->
+								<!-- Assignee Release Row -->
 								<tr>
 									<td class="col-md-6"><label>Release</label></td>
 									<div class="">
 										<td class="col-md-6"><select class="form-control"
-											id="epicReleaseKey"> <#list epicRelease as release>
+											id="assigneeReleaseKey"> <#list epicRelease as release>
 												<option>${release}</option> </#list>
 										</select></td>
 									</div>
 								</tr>
-								<!-- US Test Cycle Row -->
+								<!-- Assignee Test Cycle Row -->
 								<tr>
 									<td class="col-md-6"><label>Test Cycle</label></td>
 									<div class="epic-search">
-										<td class="col-md-6"><select class="form-control"
-											id="assigneeCycleKey"> <#list cycleList as cycle>
+										<td class="col-md-6"><select multiple
+											class="form-control" id="assigneeCycleKey"> <#list
+												cycleList as cycle>
 												<option>${cycle}</option> </#list>
 										</select></td>
 									</div>
 								</tr>
-								<!-- US Metrics row -->
-								<tr>
-									<td class="col-md-6"><label>Metrics</label></td>
-									<div class="">
-										<td class="col-md-6"><select multiple
-											class="form-control" id="epicMetricMultiSelect">
-												<#list epicTestMetric as metric>
-												<option>${metric}</option> </#list>
-										</select></td>
-									</div>
-								</tr>
-								<!-- Us story row -->
+
+								<!-- Assignee story row -->
 								<tr>
 									<td class="col-md-6"><label>Assignee</label></td>
 									<div class="story-search">
@@ -254,6 +242,17 @@
 											class="form-control" id="usMultiSelect"> <#list
 												assigneeList as assignee>
 												<option>${assignee}</option> </#list>
+										</select></td>
+									</div>
+								</tr>
+								<!-- Assignee Metrics row -->
+								<tr>
+									<td class="col-md-6"><label>Metrics</label></td>
+									<div class="">
+										<td class="col-md-6"><select multiple
+											class="form-control" id="epicMetricMultiSelect">
+												<#list epicTestMetric as metric>
+												<option>${metric}</option> </#list>
 										</select></td>
 									</div>
 								</tr>
@@ -266,23 +265,26 @@
 				</form>
 			</div>
 			<br>
+			<!-- Assignee Table -->
+			<#list cycleTable?keys as k> <label><b><a>${k}</a></b></label>
 			<table
 				class="table table-striped table-bordered table-hover table-condensed">
 				<thead>
 					<tr>
-						<th>Assignee</th> <#list epicTestMetric as metric>
-						<td><b>${metric}</b></td> </#list>
+						<th>Assignee</th> <#list cycleMetricList as metric>
+						<th><b>${metric}</b></th> </#list>
 					</tr>
 				</thead>
 				<tbody>
-					<#list assigneeTable?keys as k>
+					<#list cycleTable[k]?keys as k1>
 					<tr>
-						<td><a><b>${k}</b></a></td> <#list assigneeTable[k]?keys as k1>
-						<td>${assigneeTable[k][k1]}</td> </#list>
+						<td>${k1}</td> <#list cycleTable[k][k1]?keys as k2>
+						<td>${cycleTable[k][k1][k2]}</td> </#list>
 					</tr>
 					</#list>
 				</tbody>
 			</table>
+			</#list>
 		</div>
 	</div>
 </div>
@@ -325,18 +327,8 @@
 										</select></td>
 									</div>
 								</tr>
-								<!-- Cycle Metrics row -->
-								<tr>
-									<td class="col-md-6"><label>Metrics</label></td>
-									<div class="">
-										<td class="col-md-6"><select multiple
-											class="form-control" id="epicMetricMultiSelect">
-												<#list epicTestMetric as metric>
-												<option>${metric}</option> </#list>
-										</select></td>
-									</div>
-								</tr>
-								<!-- cycle select -->
+
+								<!-- Cycle Multiple Select -->
 								<tr>
 									<td class="col-md-6"><label>Cycle</label></td>
 									<div class="cycle-list">
@@ -344,6 +336,17 @@
 											class="form-control" id="cycleMultiSelect"> <#list
 												cycleList as cycle>
 												<option>${cycle}</option> </#list>
+										</select></td>
+									</div>
+								</tr>
+								<!-- Cycle Metrics row -->
+								<tr>
+									<td class="col-md-6"><label>Metrics</label></td>
+									<div class="">
+										<td class="col-md-6"><select multiple
+											class="form-control" id="epicMetricMultiSelect">
+												<#list cycleMetricList as metric>
+												<option>${metric}</option> </#list>
 										</select></td>
 									</div>
 								</tr>
@@ -355,24 +358,28 @@
 					</#if>
 				</form>
 			</div>
-			<br>
+			<br> <#list cycleTable?keys as k> <label><b><a>${k}</a></b></label>
 			<table
 				class="table table-striped table-bordered table-hover table-condensed">
 				<thead>
 					<tr>
-						<th>Cycle</th> <#list epicTestMetric as metric>
+						<th>Cycle</th> <#list cycleMetricList as metric>
 						<td><b>${metric}</b></td> </#list>
 					</tr>
 				</thead>
 				<tbody>
-					<#list cycleTable?keys as k>
+					<#list cycleTable[k]?keys as k1>
 					<tr>
-						<td><a><b>${k}</b></a></td> <#list cycleTable[k]?keys as k1>
-						<td>${cycleTable[k][k1]}</td> </#list>
+						<td>${k1}</td> <#list cycleTable[k][k1]?keys as k2>
+						<td>${cycleTable[k][k1][k2]}</td> </#list>
 					</tr>
 					</#list>
 				</tbody>
 			</table>
+			<#break>
+			</#list>
+
+
 		</div>
 	</div>
 </div>
