@@ -10,20 +10,27 @@ import org.apache.log4j.Logger;
 
 public class PropertiesUtil {
 	final static Logger logger = Logger.getLogger(PropertiesUtil.class);
-
-	public static String getString(String name) {
+	public static Properties prop = new Properties();
+	private static PropertiesUtil INSTANCE = new PropertiesUtil();
+	private PropertiesUtil(){
+		prop.putAll(load("messages.properties"));
+		prop.putAll(load("databases.properties"));
+	}
+	public String getString(String name) {
+		String result = prop.getProperty(name);
+		return result;
+	}
+	public static PropertiesUtil getInstance(){
+		return INSTANCE;
+	}
+	private Properties load(String file){
 		Properties prop = new Properties();
-		
-		try (InputStream input = PropertiesUtil.class.getClassLoader().getResourceAsStream("messages.properties")) {
+		try (InputStream input = PropertiesUtil.class.getClassLoader().getResourceAsStream(file)) {
 			prop.load(input);
 		} catch (IOException e) {
 			logger.warn("Cannot open messages.proerties");
 			//ignore exception
 		}
-		String result = prop.getProperty(name);
-		if(result == null){
-			logger.warn("Cannot found property name:" + name);
-		}
-		return result;
+		return prop;
 	}
 }

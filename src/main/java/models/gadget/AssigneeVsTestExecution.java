@@ -2,12 +2,14 @@ package models.gadget;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class AssigneeVsTestExecution implements Gadget {
-    private long id;
+    private String id;
     private final Gadget.Type type = Gadget.Type.ASSIGNEE_TEST_EXECUTION;
     private List<String> columnAvaliable;
     @Override
-    public long getId() {
+    public String getId() {
         return id;
     }
 
@@ -16,16 +18,11 @@ public class AssigneeVsTestExecution implements Gadget {
         return type;
     }
 
-    @Override
-    public List<String> getColumnAvaliable() {
-        return columnAvaliable;
-    }
-    
     public void setColumnAvaliable(List<String> columnAvaliable) {
         this.columnAvaliable = columnAvaliable;
     }
 
-    public void setId(long id) {
+    public void setId(String id) {
         this.id = id;
     }
 

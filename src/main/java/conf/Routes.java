@@ -5,6 +5,7 @@ import controllers.AssigneeController;
 import controllers.ConfigurationController;
 import controllers.DashboardController;
 import controllers.EpicController;
+import controllers.GadgetController;
 import controllers.LoginLogoutController;
 import controllers.QueryDataController;
 import ninja.AssetsController;
@@ -14,7 +15,9 @@ import ninja.application.ApplicationRoutes;
 public class Routes implements ApplicationRoutes {
     @Override
     public void init(Router router) {
-        
+    	
+    	router.POST().route("/gadget/addGadget").with(GadgetController.class, "addGadget");
+    	
         router.GET().route("/findAllExecutionIssues").with(EpicController.class,"findAllExecutionIssues");
     	router.GET().route("/findExecutionIssues").with(EpicController.class,"findExecutionIssues");
     	router.GET().route("/findAllIssues").with(EpicController.class,"findAllIssues");

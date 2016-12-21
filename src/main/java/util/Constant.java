@@ -42,4 +42,7 @@ public class Constant {
     public static final String PARAMERTER_MAXRECORDS = "maxRecords";
     public static final String PARAMERTER_MAXRESULTS = "maxResults";
     public static final String PARAMERTER_OFFSET = "offset";
+    
+    //database
+    public static final String DATABASE_SCHEMA = "DATABASE_SCHEMA";
 }

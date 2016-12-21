@@ -2,10 +2,13 @@ package models.gadget;
 
 import java.util.List;
 
-public class EpicVsTestExecution {
-    private long id;
-    private Gadget.Type type;
-    private List<String> columnList;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class EpicVsTestExecution implements Gadget {
+
+	private String id;
+    private Gadget.Type type = Gadget.Type.EPIC_US_TEST_EXECUTION;
     private String cycleName;
     private String projectName;
     //fixVersion
@@ -13,28 +16,21 @@ public class EpicVsTestExecution {
     private List<String> metrics;
     private List<String> epic;
 
-    public long getId() {
-        return id;
-    }
+    
+    public String getId() {
+		return id;
+	}
 
-    public void setId(long id) {
-        this.id = id;
-    }
+	public void setId(String id) {
+		this.id = id;
+	}
 
-    public Gadget.Type getType() {
+	public Gadget.Type getType() {
         return type;
     }
 
     public void setType(Gadget.Type type) {
         this.type = type;
-    }
-
-    public List<String> getColumnList() {
-        return columnList;
-    }
-
-    public void setColumnList(List<String> columnList) {
-        this.columnList = columnList;
     }
 
     public String getCycleName() {
