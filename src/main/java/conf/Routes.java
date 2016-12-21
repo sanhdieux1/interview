@@ -15,7 +15,8 @@ import ninja.application.ApplicationRoutes;
 public class Routes implements ApplicationRoutes {
     @Override
     public void init(Router router) {
-    	
+        
+        router.GET().route("/gadget/getData").with(GadgetController.class, "getDataGadget");
     	router.POST().route("/gadget/addGadget").with(GadgetController.class, "addGadget");
     	router.GET().route("/gadget/gadgets").with(GadgetController.class, "getGadgets");
         router.GET().route("/findAllExecutionIssues").with(EpicController.class,"findAllExecutionIssues");
