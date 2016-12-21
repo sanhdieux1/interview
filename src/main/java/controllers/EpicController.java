@@ -34,7 +34,10 @@ public class EpicController {
         return handler.findAllIssues(epic);
     }
 
-    public Result findExecutionIsuee(@Param("issueKey") String issueKey) {
+    public Result findExecutionIssues(@Param("issueKey") String issueKey) {
         return handler.findExecutionIsuee(issueKey);
+    }
+    public Result findAllExecutionIssues(@Param("epic") String epic){
+        return handler.findAllExecutionIssues(epic);
     }
 }

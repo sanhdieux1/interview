@@ -4,7 +4,7 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-import models.MException;
+import models.exception.MException;
 import ninja.Results;
 
 public class ExceptionHandler implements InvocationHandler {

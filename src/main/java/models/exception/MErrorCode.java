@@ -1,4 +1,4 @@
-package models;
+package models.exception;
 
 public enum MErrorCode {
     GENERIC

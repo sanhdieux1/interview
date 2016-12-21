@@ -10,10 +10,11 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import models.ExecutionIssueVO;
-import models.ExecutionsVO;
 import models.JQLIssueVO;
 import models.JQLIssuetypeVO;
-import models.JQLSearchResult;
+import models.gadget.EpicVsTestExecution;
+import models.main.ExecutionsVO;
+import models.main.JQLSearchResult;
 import ninja.Result;
 import ninja.Results;
 import util.Constant;
@@ -86,5 +87,21 @@ public class EpicHandlerImpl implements EpicHandler{
     }
     private void findData(){
         
+    }
+    @Override
+    public Result findAllExecutionIssues(String epic) {
+        List<ExecutionIssueVO> executionIssueVOs = findAllTestExecutionIssue(epic);
+        return Results.json().render(executionIssueVOs);
+    }
+    
+    private void getDataPic(EpicVsTestExecution settings){
+        List<String> epics = settings.getEpic();
+        List<String> metrics = settings.getMetrics();
+        epics.forEach(new Consumer<String>() {
+            @Override
+            public void accept(String epic) {
+                
+            }
+        });
     }
 }

@@ -1,4 +1,4 @@
-package service;
+package models.gadget;
 
 import java.util.List;
 

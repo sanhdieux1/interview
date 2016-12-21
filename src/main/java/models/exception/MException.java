@@ -1,4 +1,4 @@
-package models;
+package models.exception;
 
 public class MException extends RuntimeException {
     private static final long serialVersionUID = -4530140103715612384L;

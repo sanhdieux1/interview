@@ -5,7 +5,7 @@ import java.util.List;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import models.MException;
+import models.exception.MException;
 
 public class JSONUtil {
     private static JSONUtil INSTANCE = new JSONUtil();

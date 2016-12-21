@@ -1,4 +1,4 @@
-package service;
+package models.gadget;
 
 import java.util.List;
 
@@ -8,9 +8,10 @@ public class EpicVsTestExecution {
     private List<String> columnList;
     private String cycleName;
     private String projectName;
+    //fixVersion
     private String release;
     private List<String> metrics;
-    private String epic;
+    private List<String> epic;
 
     public long getId() {
         return id;
@@ -68,12 +69,13 @@ public class EpicVsTestExecution {
         this.metrics = metrics;
     }
 
-    public String getEpic() {
+    public List<String> getEpic() {
         return epic;
     }
 
-    public void setEpic(String epic) {
+    public void setEpic(List<String> epic) {
         this.epic = epic;
     }
+
 
 }
