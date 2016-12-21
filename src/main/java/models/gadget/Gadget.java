@@ -5,6 +5,8 @@ public interface Gadget {
 
     public Type getType();
 
+    public String getUser();
+    
     public enum Type {
         ASSIGNEE_TEST_EXECUTION, TEST_CYCLE_TEST_EXECUTION, EPIC_US_TEST_EXECUTION;
     }

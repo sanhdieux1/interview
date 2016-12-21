@@ -127,10 +127,6 @@ public class QueryHandlerImpl implements QueryHandler {
         return Results.json();
     }
 
-   
-
-   
-
     public void clearSession() {
         cycleNameCache = null;
     }

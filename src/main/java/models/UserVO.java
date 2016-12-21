@@ -1,15 +1,28 @@
 package models;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class UserVO {
-    private long id;
+	
+    private String id;
     private String username;
     private String friendlyName;
 
-    public long getId() {
+    
+    public UserVO() {
+	}
+
+	public UserVO(String username, String friendlyName) {
+		this.username = username;
+		this.friendlyName = friendlyName;
+	}
+
+	public String getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(String id) {
         this.id = id;
     }
 
