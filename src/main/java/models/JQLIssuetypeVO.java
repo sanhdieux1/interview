@@ -66,6 +66,15 @@ public class JQLIssuetypeVO {
 	}
 
 	public enum Type {
-	    TEST, BUG, EPIC, STORY, IMPROVEMENT
+	    TEST, BUG, EPIC, STORY, IMPROVEMENT;
+	    
+	    public static Type fromString(String str){
+	        for(Type t : values()){
+	            if(t.toString().equalsIgnoreCase(str)){
+	                return t;
+	            }
+	        }
+	        return null;
+	    }
 	}
 }

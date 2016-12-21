@@ -22,8 +22,8 @@ public class EpicController {
 
     public EpicController() {
         handler = new EpicHandlerImpl();
-        handler = (EpicHandler) Proxy.newProxyInstance(EpicHandler.class.getClassLoader(),
-                new Class[] { EpicHandler.class }, new ExceptionHandler(handler));
+//        handler = (EpicHandler) Proxy.newProxyInstance(EpicHandler.class.getClassLoader(),
+//                new Class[] { EpicHandler.class }, new ExceptionHandler(handler));
     }
 
     public Result getEpicLinks(@Param("project") String project) {

@@ -10,12 +10,14 @@ import models.main.ExecutionsVO;
 
 public interface EpicService {
 
-    ExecutionsVO findAllExecutionIsuee2(String issueKey);
+    ExecutionsVO findExecutionIsuee(String issueKey);
 
     List<JQLIssueVO> findAllIssues(String epic);
 
-    List<ExecutionIssueVO> findAllTestExecutionIssue(String epic);
+    List<ExecutionIssueVO> findAllExecutionIssue(String epic);
 
     List<GadgetData> getDataEPic(EpicVsTestExecution epicGadget);
+
+    List<ExecutionIssueVO> findAllExecutionIsueeInStory(JQLIssueVO issue);
 
 }

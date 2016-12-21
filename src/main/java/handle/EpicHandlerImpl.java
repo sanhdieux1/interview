@@ -46,12 +46,12 @@ public class EpicHandlerImpl extends EpicHandler {
 
     @Override
     public Result findExecutionIsuee(String issueKey) {
-        return Results.json().render(epicService.findAllExecutionIsuee2(issueKey));
+        return Results.json().render(epicService.findExecutionIsuee(issueKey));
     }
 
     @Override
     public Result findAllExecutionIssues(String epic) {
-        List<ExecutionIssueVO> executionIssueVOs = epicService.findAllTestExecutionIssue(epic);
+        List<ExecutionIssueVO> executionIssueVOs = epicService.findAllExecutionIssue(epic);
         return Results.json().render(executionIssueVOs);
     }
 
