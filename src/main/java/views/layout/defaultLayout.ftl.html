@@ -59,6 +59,26 @@ body {
 	padding-top: 60px;
 	padding-bottom: 40px;
 }
+
+.loader {
+	z-index: 1;
+	border: 16px solid #f3f3f3; /* Light grey */
+	border-top: 16px solid #3498db; /* Blue */
+	border-radius: 50%;
+	width: 10px;
+	height: 10px;
+	animation: spin 2s linear infinite;
+	display: none;
+}
+
+@keyframes spin { 
+	0% {
+	transform: rotate(0deg);
+	}
+	100%{
+	transform: rotate(360deg);
+ 	}
+}
 </style>
 
 <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
@@ -335,22 +355,57 @@ body {
 	</script>
 	<script>
 	$( document ).ready(function() {
-		if($('#epicProjectKey').length != 0){
+		if($('#epicProject').length != 0){
 			$.get("/listproject", function(data){
-				$('#epicProjectKey').find('option').remove().end();
+				$('#epicProject').find('option').remove().end();
 				for(var i = 0; i < data.length; i++){
-					$('<option value="'+data[i]+'">'+data[i]+'</option>').appendTo('#epicProjectKey');
+					$('<option value="'+data[i]+'">'+data[i]+'</option>').appendTo('#epicProject');
 				}
 			});
 		}	
 	});
 	
-	$("#epicProjectKey").change(function() {
-		$.get("/getEpicLinks?project=" + $(this).val(), function(data){
-			$('#epicMultiSelect').find('option').remove().end();
-			for(var i = 0; i < data.length; i++){
-				$('<option value="'+data[i]+'">'+data[i]+'</option>').appendTo('#epicMultiSelect');
-			}
+	$("#epicProject").change(function() {
+		$.ajax({
+			  url: "/getEpicLinks?",
+			  data: { project: $(this).val()},
+			  
+			  beforeSend: function( ) {
+					$('#epicMultiSelect').hide();
+					$('#epic-link-loader').show();
+			  }
+			})
+			 .done(function( data ) {
+				  $('#epicMultiSelect').find('option').remove().end();
+					for(var i = 0; i < data.length; i++){
+						$('<option value="'+data[i]+'">'+data[i]+'</option>').appendTo('#epicMultiSelect');
+				  }
+				  $('#epicMultiSelect').show();
+				  $('#epic-link-loader').hide();
+			 });
+	});
+	
+	$("#epic-submit").click(function(){
+		var object = {};
+		object['id'] = 7;
+		object['cycleName'] = "";
+		object['projectName'] = $("#epicProject").val();
+		object['release'] = $("#epicRelease").val();
+		object['metrics'] = $("#epicMetricMultiSelect").val();
+		object['epic'] = $("#epicMultiSelect").val();
+		var jsonString = JSON.stringify(object);
+		$.ajax({
+			url: '/gadget/addGadget',
+			method: 'POST',
+			data: { type: 'EPIC_US_TEST_EXECUTION', data: jsonString},
+			beforeSend: function( ) {
+				$('#epic-link-loader').show();
+		   }
+		})
+		.done(function(data){
+			$('#epic-link-loader').hide();
+			console.log(data);
+			alert(data);
 		});
 	});
 	</script>

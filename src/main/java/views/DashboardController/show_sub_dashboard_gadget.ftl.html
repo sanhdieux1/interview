@@ -19,29 +19,35 @@
 								<!-- Project Row -->
 								<tr>
 									<td class="col-md-6"><label>Project</label></td>
-									<div class="project-search">
+									<div class="project-search-div">
 										<td class="col-md-6"><select class="form-control"
-											id="epicProjectKey">
+											id="epicProject">
 										</select></td>
 									</div>
 								</tr>
 								<!-- Release Row -->
 								<tr>
 									<td class="col-md-6"><label>Release</label></td>
-									<div class="">
-										<td class="col-md-6"><select class="form-control"
-											id="epicReleaseKey"> <#list epicRelease as release>
-												<option value="${release}">${release}</option> </#list>
-										</select></td>
-									</div>
+									<td class="col-md-6"><select class="form-control"
+										id="epicRelease"> <#list epicRelease as release>
+											<option value="${release}">${release}</option> </#list>
+									</select></td>
+								</tr>
+								<!-- Product Row -->
+								<tr>
+									<td class="col-md-6"><label>Product</label></td>
+									<td class="col-md-6"><select multiple id="epicProduct" class="form-control">
+									</select></td>
 								</tr>
 								<!-- Epic Link Row -->
 								<tr>
 									<td class="col-md-6"><label>Epic Link</label></td>
-									<div class="project-search">
-										<td class="col-md-6"><select multiple
-											class="form-control" id="epicMultiSelect">
-										</select></td>
+									<td class="col-md-6"><select multiple class="form-control"
+										id="epicMultiSelect">
+									</select>
+										<div id="epic-link-loader" class="loader"></div>
+									</td>
+
 								</tr>
 								<!-- Metrics row -->
 								<tr>
@@ -58,7 +64,7 @@
 						</table>
 					</div>
 					<#if dashboard.owner == alias>
-					<button type="submit" class="btn btn-success">Update</button>
+						<button type="button" id="epic-submit" class="btn btn-success">Update</button>
 					</#if>
 				</form>
 			</div>
@@ -96,7 +102,7 @@
 				<a id="us-config-toggle">Show Configuration</a>
 			</div>
 			<div id="us-config">
-				<form action="/dashboard/${id}/update" method="post"
+				<form action="/dashboard/${id}/update"method="post" 
 					class="form-horizontal" role="form">
 					<div class="md-padding" ng-cloak>
 						<table class="table table-bordered">
@@ -158,7 +164,7 @@
 						</table>
 					</div>
 					<#if dashboard.owner == alias>
-					<button type="submit" class="btn btn-success">Update</button>
+					<button type="button" id="epic-submit" class="btn btn-success">Update</button>
 					</#if>
 				</form>
 			</div>
@@ -217,7 +223,8 @@
 									<td class="col-md-6"><label>Release</label></td>
 									<div class="">
 										<td class="col-md-6"><select class="form-control"
-											id="assigneeReleaseKey"> <#list epicRelease as release>
+											id="assigneeReleaseKey"> <#list epicRelease as
+												release>
 												<option>${release}</option> </#list>
 										</select></td>
 									</div>
@@ -376,8 +383,7 @@
 					</#list>
 				</tbody>
 			</table>
-			<#break>
-			</#list>
+			<#break> </#list>
 
 
 		</div>

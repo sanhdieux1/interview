@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -54,14 +55,14 @@ import util.LinkUtil;
 public class DashboardController {
 
 	final static Logger logger = Logger.getLogger(DashboardController.class);
-	
+
 	@FilterWith(SecureFilter.class)
-    public Result dashboard(@SessionParam("username") String username, @PathParam("id") Integer id) {
+	public Result dashboard(@SessionParam("username") String username, @PathParam("id") Integer id) {
 		if (id == null) {
 			id = 1;
 		}
-    	MongoClient mongoClient = new MongoClient();
-    	MongoCollection<Document> collection = mongoClient.getDatabase("Interview").getCollection("Sonar_Metric");
+		MongoClient mongoClient = new MongoClient();
+		MongoCollection<Document> collection = mongoClient.getDatabase("Interview").getCollection("Sonar_Metric");
 		FindIterable<Document> iterable = collection.find();
 		Map<String, Object> metricMap = new HashMap<>();
 		iterable.forEach(new Block<Document>() {
@@ -70,7 +71,7 @@ public class DashboardController {
 				metricMap.put(document.getString("code"), document.get("name"));
 			}
 		});
-		
+
 		collection = mongoClient.getDatabase("Interview").getCollection("Dashboard");
 		iterable = collection.find(new Document("owner", username)).sort(new Document("_id", -1));
 		List<Map<String, Object>> dashboards = new ArrayList<>();
@@ -79,19 +80,20 @@ public class DashboardController {
 			Map<String, Object> map = new HashMap<>();
 			map.put("id", document.get("_id"));
 			String shortname = document.getString("owner");
-			org.jsoup.nodes.Document doc = LinkUtil.getInstance().getConnection(String.format(Constant.LINK_GET_JIRA_USER_INFO, shortname), Constant.TOKEN);
+			org.jsoup.nodes.Document doc = LinkUtil.getInstance()
+					.getConnection(String.format(Constant.LINK_GET_JIRA_USER_INFO, shortname), Constant.TOKEN);
 			logger.info("CHANGE SHORTNAME: " + shortname + " TO ALIAS: " + (doc != null));
-    		if (doc != null) {
-    			String json = doc.body().text();
-        		JSONParser parser = new JSONParser();
-        		try {
-        			JSONObject jsonObject = (JSONObject) parser.parse(json);
-        			shortname = jsonObject.get("displayName").toString();
-        		} catch (ParseException e) {
-        			logger.error(String.format("GET_USER_INFO OF %s ERROR ", shortname, e));
-        		}
-            }
-			
+			if (doc != null) {
+				String json = doc.body().text();
+				JSONParser parser = new JSONParser();
+				try {
+					JSONObject jsonObject = (JSONObject) parser.parse(json);
+					shortname = jsonObject.get("displayName").toString();
+				} catch (ParseException e) {
+					logger.error(String.format("GET_USER_INFO OF %s ERROR ", shortname, e));
+				}
+			}
+
 			map.put("owner", shortname);
 			map.put("name", document.get("dashboard_name"));
 			map.put("s_ia", document.get("sonar_ia"));
@@ -100,7 +102,7 @@ public class DashboardController {
 				String[] metricArr = document.getString("sonar_metrics").split(",");
 				for (int i = 0; i < metricArr.length; i++) {
 					sb.append(metricMap.get(metricArr[i])).append(",");
-					
+
 				}
 			}
 			map.put("metric", sb);
@@ -109,42 +111,43 @@ public class DashboardController {
 			map.put("share", document.get("share"));
 			dashboards.add(map);
 		}
-		
+
 		logger.info("DASHBOARDS " + dashboards);
 		mongoClient.close();
-        return Results.html().render("dashboards", dashboards).render("id", id);
-    }
-	
-	@FilterWith(SecureFilter.class)
-    public Result new_dashboard() {
-    	return Results.html();
-    }
+		return Results.html().render("dashboards", dashboards).render("id", id);
+	}
 
 	@FilterWith(SecureFilter.class)
-    public Result new_dashboard_post(@SessionParam("username") String username,
-    		@Param("name") String name, @Param("share") String share) {
-    	
-    	MongoClient mongoClient = new MongoClient();
+	public Result new_dashboard() {
+		return Results.html();
+	}
+
+	@FilterWith(SecureFilter.class)
+	public Result new_dashboard_post(@SessionParam("username") String username, @Param("name") String name,
+			@Param("share") String share) {
+
+		MongoClient mongoClient = new MongoClient();
 		MongoCollection<Document> collection = mongoClient.getDatabase("Interview").getCollection("Dashboard");
 		FindIterable<Document> iterable = collection.find().sort(new Document("_id", -1)).limit(1);
 		Integer max_id = 0;
 		if (iterable.first() != null) {
 			max_id = iterable.first().getInteger("_id");
 		}
-    	collection.insertOne(new Document("_id", ++max_id).append("owner", username).append("dashboard_name", name).append("share", share));
+		collection.insertOne(new Document("_id", ++max_id).append("owner", username).append("dashboard_name", name)
+				.append("share", share));
 		mongoClient.close();
-        return Results.redirect("../dashboard/" + max_id);
-    }
+		return Results.redirect("../dashboard/" + max_id);
+	}
 
 	@FilterWith(SecureFilter.class)
-    public Result find_dashboard() {
-        return Results.html();
-    }
-    
+	public Result find_dashboard() {
+		return Results.html();
+	}
+
 	@FilterWith(SecureFilter.class)
-    public Result find_dashboard_post(@Param("name") String name) {
-    	MongoClient mongoClient = new MongoClient();
-    	MongoCollection<Document> collection = mongoClient.getDatabase("Interview").getCollection("Sonar_Metric");
+	public Result find_dashboard_post(@Param("name") String name) {
+		MongoClient mongoClient = new MongoClient();
+		MongoCollection<Document> collection = mongoClient.getDatabase("Interview").getCollection("Sonar_Metric");
 		FindIterable<Document> iterable = collection.find();
 		Map<String, Object> metricMap = new HashMap<>();
 		iterable.forEach(new Block<Document>() {
@@ -153,28 +156,30 @@ public class DashboardController {
 				metricMap.put(document.getString("code"), document.get("name"));
 			}
 		});
-		
+
 		collection = mongoClient.getDatabase("Interview").getCollection("Dashboard");
-		iterable = collection.find(new Document("dashboard_name", Pattern.compile(name, Pattern.CASE_INSENSITIVE)).append("share", "public")).sort(new Document("_id", -1));
+		iterable = collection.find(new Document("dashboard_name", Pattern.compile(name, Pattern.CASE_INSENSITIVE))
+				.append("share", "public")).sort(new Document("_id", -1));
 		List<Map<String, Object>> dashboards = new ArrayList<>();
 
 		for (Document document : iterable) {
 			Map<String, Object> map = new HashMap<>();
 			map.put("id", document.get("_id"));
 			String shortname = document.getString("owner");
-			org.jsoup.nodes.Document doc = LinkUtil.getInstance().getConnection(String.format(Constant.LINK_GET_JIRA_USER_INFO, shortname), Constant.TOKEN);
+			org.jsoup.nodes.Document doc = LinkUtil.getInstance()
+					.getConnection(String.format(Constant.LINK_GET_JIRA_USER_INFO, shortname), Constant.TOKEN);
 			logger.info("CHANGE SHORTNAME: " + shortname + " TO ALIAS: " + (doc != null));
-    		if (doc != null) {
-    			String json = doc.body().text();
-        		JSONParser parser = new JSONParser();
-        		try {
-        			JSONObject jsonObject = (JSONObject) parser.parse(json);
-        			shortname = jsonObject.get("displayName").toString();
-        		} catch (ParseException e) {
-        			logger.error(String.format("GET_USER_INFO OF %s ERROR ", shortname, e));
-        		}
-            }
-			
+			if (doc != null) {
+				String json = doc.body().text();
+				JSONParser parser = new JSONParser();
+				try {
+					JSONObject jsonObject = (JSONObject) parser.parse(json);
+					shortname = jsonObject.get("displayName").toString();
+				} catch (ParseException e) {
+					logger.error(String.format("GET_USER_INFO OF %s ERROR ", shortname, e));
+				}
+			}
+
 			map.put("owner", shortname);
 			map.put("name", document.get("dashboard_name"));
 			map.put("s_ia", document.get("sonar_ia"));
@@ -183,7 +188,7 @@ public class DashboardController {
 				String[] metricArr = document.getString("sonar_metrics").split(",");
 				for (int i = 0; i < metricArr.length; i++) {
 					sb.append(metricMap.get(metricArr[i])).append(",");
-					
+
 				}
 			}
 			map.put("r_ia", document.get("od_review_ia"));
@@ -191,16 +196,17 @@ public class DashboardController {
 			map.put("share", document.get("share"));
 			dashboards.add(map);
 		}
-		
+
 		logger.info("DASHBOARDS " + dashboards);
 		mongoClient.close();
-        return Results.html().render("name", name).render("dashboards", dashboards);
-    }
-    
+		return Results.html().render("name", name).render("dashboards", dashboards);
+	}
+
 	@FilterWith(SecureFilter.class)
-    public Result show_dashboard(@SessionParam("username") String username, @SessionParam("alias") String alias, @SessionParam("role") String role, @PathParam("id") Long id, Context context) {
+	public Result show_dashboard(@SessionParam("username") String username, @SessionParam("alias") String alias,
+			@SessionParam("role") String role, @PathParam("id") Long id, Context context) {
 		MongoClient mongoClient = new MongoClient();
-    	MongoCollection<Document> collection = mongoClient.getDatabase("Interview").getCollection("Release");
+		MongoCollection<Document> collection = mongoClient.getDatabase("Interview").getCollection("Release");
 		FindIterable<Document> iterable = collection.find();
 		Set<String> releases = new TreeSet<>();
 		iterable.forEach(new Block<Document>() {
@@ -209,22 +215,24 @@ public class DashboardController {
 				releases.add(document.getString("name"));
 			}
 		});
-		
+
 		collection = mongoClient.getDatabase("Interview").getCollection("Dashboard");
 		iterable = collection.find(new Document("_id", id));
-		
+
 		if (iterable.first() != null) {
 			if (iterable.first().get("sonar_ia") != null) {
 				logger.info("WRITE SONAR COOKIE FOR DASHBOARD_ID=" + id);
-				context.addCookie(new Cookie("sonar", "open", null, context.getHostname().split(":")[0], Constant.MAX_AGE, "/dashboard/"+id, false, false));
+				context.addCookie(new Cookie("sonar", "open", null, context.getHostname().split(":")[0],
+						Constant.MAX_AGE, "/dashboard/" + id, false, false));
 			}
-			
+
 			if (iterable.first().get("od_review_ia") != null) {
 				logger.info("WRITE REVIEW COOKIE FOR DASHBOARD_ID=" + id);
-				context.addCookie(new Cookie("review", "open", null, context.getHostname().split(":")[0], Constant.MAX_AGE, "/dashboard/"+id, false, false));
+				context.addCookie(new Cookie("review", "open", null, context.getHostname().split(":")[0],
+						Constant.MAX_AGE, "/dashboard/" + id, false, false));
 			}
 		}
-		
+
 		Map<String, Object> dashboard = new HashMap<>();
 		String iaNames = "";
 		String metric = "";
@@ -232,7 +240,7 @@ public class DashboardController {
 		String proj = "";
 		String release = "";
 		String period = "";
-		
+
 		for (Document document : iterable) {
 			release = document.getString("release");
 			iaNames = document.getString("sonar_ia");
@@ -242,20 +250,21 @@ public class DashboardController {
 			period = document.getString("period");
 			dashboard.put("id", document.get("_id"));
 			String shortname = document.getString("owner");
-			
-			org.jsoup.nodes.Document doc = LinkUtil.getInstance().getConnection(String.format(Constant.LINK_GET_JIRA_USER_INFO, shortname), Constant.TOKEN);
+
+			org.jsoup.nodes.Document doc = LinkUtil.getInstance()
+					.getConnection(String.format(Constant.LINK_GET_JIRA_USER_INFO, shortname), Constant.TOKEN);
 			logger.info("CHANGE SHORTNAME: " + shortname + " TO ALIAS: " + (doc != null));
-    		if (doc != null) {
-    			String json = doc.body().text();
-        		JSONParser parser = new JSONParser();
-        		try {
-        			JSONObject jsonObject = (JSONObject) parser.parse(json);
-        			shortname = jsonObject.get("displayName").toString();
-        		} catch (ParseException e) {
-        			logger.error(String.format("GET_USER_INFO OF %s ERROR ", shortname, e));
-        		}
-            }
-			
+			if (doc != null) {
+				String json = doc.body().text();
+				JSONParser parser = new JSONParser();
+				try {
+					JSONObject jsonObject = (JSONObject) parser.parse(json);
+					shortname = jsonObject.get("displayName").toString();
+				} catch (ParseException e) {
+					logger.error(String.format("GET_USER_INFO OF %s ERROR ", shortname, e));
+				}
+			}
+
 			dashboard.put("owner", shortname);
 			dashboard.put("name", document.get("dashboard_name"));
 			dashboard.put("s_ia", document.get("sonar_ia"));
@@ -267,14 +276,14 @@ public class DashboardController {
 			dashboard.put("period", document.get("period"));
 		}
 		logger.info("DASHBOARD " + dashboard);
-		
+
 		collection = mongoClient.getDatabase("Interview").getCollection("Release");
 		iterable = collection.find(new Document("name", release));
 		String url2 = "";
 		for (Document document : iterable) {
 			url2 = document.getString("url");
 		}
-		
+
 		Set<String> s_ia = new TreeSet<>();
 		URL url;
 		try {
@@ -282,7 +291,7 @@ public class DashboardController {
 			URLConnection conn = url.openConnection();
 			BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
 			String inputLine;
-			
+
 			while ((inputLine = br.readLine()) != null) {
 				String[] arr = inputLine.split(",");
 				s_ia.add(arr[0]);
@@ -294,7 +303,7 @@ public class DashboardController {
 			logger.error("IOEXCEPTION " + e);
 		}
 		logger.info("LIST IA OF LINK " + url2 + " IS " + s_ia);
-		
+
 		collection = mongoClient.getDatabase("Interview").getCollection("Sonar_Metric");
 		iterable = collection.find().sort(new Document("name", 1));
 		List<Map<String, Object>> metrics = new ArrayList<>();
@@ -305,17 +314,17 @@ public class DashboardController {
 			map.put("code", document.get("code"));
 			metrics.add(map);
 		}
-		
+
 		logger.info("METRICS " + metrics);
-		
+
 		mongoClient.close();
 
 		Map<String, List<Map<String, Object>>> s_datas = new TreeMap<>();
-		List<Map<String, Object>> s_data2 = new ArrayList<>(); 
+		List<Map<String, Object>> s_data2 = new ArrayList<>();
 		if (iaNames != null) {
 			SonarStatisticsService service = new SonarStatisticsServiceImpl();
 			Map<String, Sonar> sonarMap = service.getSonarStatistic(iaNames, metric, url2, period);
-			sonarMap.forEach((k,v)->{
+			sonarMap.forEach((k, v) -> {
 				List<Map<String, Object>> s_data = new ArrayList<>();
 				Collection<ComponentMetrics> list = v.getComponentMetrics().values();
 				for (ComponentMetrics cm : list) {
@@ -333,11 +342,11 @@ public class DashboardController {
 			logger.info("S_DATA: " + s_data2);
 		}
 
-		List<Map<String, Object>> r_datas = new ArrayList<>(); 
+		List<Map<String, Object>> r_datas = new ArrayList<>();
 		if (r_ia != null) {
 			ODReviewsService od_service = new ODReviewsServiceImpl();
 			logger.info("GETODREVIEWS OF IA=" + r_ia + " IN PROJECT=" + proj);
-			List<IA> r_data= od_service.getODReviews(r_ia, proj);
+			List<IA> r_data = od_service.getODReviews(r_ia, proj);
 			for (IA ia : r_data) {
 				Map<String, Object> map = new HashMap<>();
 				map.put("ia", ia.getIaName());
@@ -348,214 +357,198 @@ public class DashboardController {
 			}
 		}
 		logger.info("R_DATAS " + r_datas);
-		
-		
+
 		SonarStatisticsService service = new SonarStatisticsServiceImpl();
 		Map<String, Object> periods = service.getPeriods();
 		logger.info("PERIODS " + periods);
-		
+
 		// dummy epic link
-				Map<String,List<String>> epicProjectMap = new HashMap<>();
-				List<String> listForEpicProjectMap = new ArrayList<>();
-				List<String> epicTestMetric = new ArrayList<>();
-				List<String> epicRelease = new ArrayList<>();
-				listForEpicProjectMap.add("FNMS-11");
-				listForEpicProjectMap.add("FNMS-39");
-				Map<String, Map<String, Object>> epicTable = new HashMap<>();
-				
-				
-				epicProjectMap.put("FNMS 577x",listForEpicProjectMap);
-				listForEpicProjectMap = new ArrayList<>();
-				listForEpicProjectMap.add("FNMS-35");
-				listForEpicProjectMap.add("FNMS-89");
-				epicProjectMap.put("FNMS 578x",listForEpicProjectMap);
-				epicTestMetric.add("UNEXECUTED");
-				epicTestMetric.add("FAILED");
-				epicTestMetric.add("WIP");
-				epicTestMetric.add("BLOCKED");
-				epicTestMetric.add("PASSED");
-				epicTestMetric.add("PLANNED");
-				epicTestMetric.add("UNPLANNED");
-				
-				epicRelease.add("R1.2.01");
-				epicRelease.add("R1.2.1");
-				epicRelease.add("R1.3.0");
-				
-				for (int i = 0; i < 5; i++) {
-					Map<String, Object> m_statisBasket = new LinkedHashMap<>();
-					Random ran = new Random();
-					
-					int unexecuted = ran.nextInt(50);
-					int passed = ran.nextInt(50);
-					int failed = ran.nextInt(50);
-					int wip = ran.nextInt(50);
-					int blocked = ran.nextInt(50);
-					int planned = 0;
-					int unplanned = unexecuted + failed + passed + wip + blocked;
-					m_statisBasket.put("UNEXECUTED", unexecuted);
-					m_statisBasket.put("FAILED", failed);
-					m_statisBasket.put("WIP", wip);
-					m_statisBasket.put("BLOCKED", blocked);
-					m_statisBasket.put("PASSED", passed);
-					m_statisBasket.put("PLANNED", 0);
-					m_statisBasket.put("UNPLANNED", unplanned);
-					epicTable.put("FNMS-" + ran.nextInt(99), m_statisBasket);
-				}
-				
-				
-				
-				// dummy user story
-				Map<String, Map<String, Integer>> storyTable = new HashMap<>();
-				for (int i = 0; i < 5; i++) {
-					Map<String, Integer> m_statisBasket = new LinkedHashMap<>();
-					Random ran = new Random();
-					int unexecuted = ran.nextInt(50);
-					int passed = ran.nextInt(20);
-					int failed = ran.nextInt(50);
-					int wip = ran.nextInt(50);
-					int blocked = ran.nextInt(50);
-					int planned = 0;
-					int unplanned = unexecuted + failed + passed + wip + blocked;
-					
-					m_statisBasket.put("UNEXECUTED", unexecuted);
-					m_statisBasket.put("FAILED", failed);
-					m_statisBasket.put("WIP", wip);
-					m_statisBasket.put("BLOCKED", blocked);
-					m_statisBasket.put("PASSED", passed);
-					m_statisBasket.put("PLANNED", 0);
-					m_statisBasket.put("UNPLANNED", unplanned);
-					storyTable.put("FNMS-" + ran.nextInt(999), m_statisBasket);
-				}
-				
-				// dummy assignee
-				List<String> assigneeList = new ArrayList<>();
-				assigneeList.add("Hoa VAN TRAN");
-				Map<String, Map<String, Integer>> assigneeTable = new HashMap<>();
-				for(int i = 0; i < assigneeList.size(); i++){
-					Map<String, Integer> m_statisBasket = new LinkedHashMap<>();
-					Random ran = new Random();
-					int unexecuted = ran.nextInt(50);
-					int passed = ran.nextInt(20);
-					int failed = ran.nextInt(50);
-					int wip = ran.nextInt(50);
-					int blocked = ran.nextInt(50);
-					int planned = 0;
-					
-					int unplanned = unexecuted + failed + passed + wip + blocked;
-					
-					m_statisBasket.put("UNEXECUTED", unexecuted);
-					m_statisBasket.put("FAILED", failed);
-					m_statisBasket.put("WIP", wip);
-					m_statisBasket.put("BLOCKED", blocked);
-					m_statisBasket.put("PASSED", passed);
-					m_statisBasket.put("PLANNED", 0);
-					m_statisBasket.put("UNPLANNED", unplanned);
-					assigneeTable.put(assigneeList.get(i), m_statisBasket);
-				}
-				
-				//dummy test cycle
-				List<String> cycleList = new ArrayList<>();
-				cycleList.add("SD-OLT E2E Testing");
-				cycleList.add("HBDC Regression");
-				cycleList.add("Ad hoc");
-				cycleList.add("TS 1.2.01 Spring Iteration 9");
-				Map<String, Map<String, Integer>> cycleTable = new HashMap<>();
-				for(int i = 0; i < cycleList.size(); i++){
-					Map<String, Integer> m_statisBasket = new LinkedHashMap<>();
-					Random ran = new Random();
-					int unexecuted = ran.nextInt(50);
-					int passed = ran.nextInt(20);
-					int failed = ran.nextInt(50);
-					int wip = ran.nextInt(50);
-					int blocked = ran.nextInt(50);
-					int planned = 0;
-					int unplanned = unexecuted + failed + passed + wip + blocked;
-					
-					m_statisBasket.put("UNEXECUTED", unexecuted);
-					m_statisBasket.put("FAILED", failed);
-					m_statisBasket.put("WIP", wip);
-					m_statisBasket.put("BLOCKED", blocked);
-					m_statisBasket.put("PASSED", passed);
-					m_statisBasket.put("PLANNED", 0);
-					m_statisBasket.put("UNPLANNED", unplanned);
-					cycleTable.put(cycleList.get(i), m_statisBasket);
-				}
-				
-		        return Results.html()
-		        		.render("id", id)
-		        		.render("dashboard", dashboard)
-		        		.render("username", username)
-		        		.render("alias", alias)
-		        		.render("role", role)
-		        		.render("s_data", s_data2)
-		        		.render("s_datas", s_datas)
-		        		.render("r_datas", r_datas)
-		        		.render("s_ia", s_ia)
-		        		.render("metrics", metrics)
-		        		.render("releases", releases)
-		        		.render("periods", periods)
-		        		.render("epicProjectMap",epicProjectMap)
-		        		.render("epicTable",epicTable)
-		        		.render("epicTestMetric", epicTestMetric)
-		        		.render("epicRelease", epicRelease)
-		        		.render("storyTable",storyTable)
-		        		.render("assigneeList", assigneeList)
-		        		.render("assigneeTable", assigneeTable)
-		        		.render("cycleList",cycleList)
-		        		.render("cycleTable", cycleTable);
-    }
+		Map<String, List<String>> epicProjectMap = new HashMap<>();
+		List<String> listForEpicProjectMap = new ArrayList<>();
+		List<String> epicTestMetric = new ArrayList<>();
+		List<String> epicRelease = new ArrayList<>();
+		listForEpicProjectMap.add("FNMS-11");
+		listForEpicProjectMap.add("FNMS-39");
+		Map<String, Map<String, Object>> epicTable = new HashMap<>();
+
+		epicProjectMap.put("FNMS 577x", listForEpicProjectMap);
+		listForEpicProjectMap = new ArrayList<>();
+		listForEpicProjectMap.add("FNMS-35");
+		listForEpicProjectMap.add("FNMS-89");
+		epicProjectMap.put("FNMS 578x", listForEpicProjectMap);
+		epicTestMetric.add("UNEXECUTED");
+		epicTestMetric.add("FAILED");
+		epicTestMetric.add("WIP");
+		epicTestMetric.add("BLOCKED");
+		epicTestMetric.add("PASSED");
+		epicTestMetric.add("PLANNED");
+		epicTestMetric.add("UNPLANNED");
+
+		epicRelease.add("1.2.01");
+		epicRelease.add("1.2.1");
+		epicRelease.add("1.3.0");
+
+		for (int i = 0; i < 5; i++) {
+			Map<String, Object> m_statisBasket = new LinkedHashMap<>();
+			Random ran = new Random();
+
+			int unexecuted = ran.nextInt(50);
+			int passed = ran.nextInt(50);
+			int failed = ran.nextInt(50);
+			int wip = ran.nextInt(50);
+			int blocked = ran.nextInt(50);
+			int planned = 0;
+			int unplanned = unexecuted + failed + passed + wip + blocked;
+			m_statisBasket.put("UNEXECUTED", unexecuted);
+			m_statisBasket.put("FAILED", failed);
+			m_statisBasket.put("WIP", wip);
+			m_statisBasket.put("BLOCKED", blocked);
+			m_statisBasket.put("PASSED", passed);
+			m_statisBasket.put("PLANNED", 0);
+			m_statisBasket.put("UNPLANNED", unplanned);
+			epicTable.put("FNMS-" + ran.nextInt(99), m_statisBasket);
+		}
+
+		// dummy user story
+		Map<String, Map<String, Integer>> storyTable = new HashMap<>();
+		for (int i = 0; i < 5; i++) {
+			Map<String, Integer> m_statisBasket = new LinkedHashMap<>();
+			Random ran = new Random();
+			int unexecuted = ran.nextInt(50);
+			int passed = ran.nextInt(20);
+			int failed = ran.nextInt(50);
+			int wip = ran.nextInt(50);
+			int blocked = ran.nextInt(50);
+			int planned = 0;
+			int unplanned = unexecuted + failed + passed + wip + blocked;
+			
+			m_statisBasket.put("UNEXECUTED", unexecuted);
+			m_statisBasket.put("FAILED", failed);
+			m_statisBasket.put("WIP", wip);
+			m_statisBasket.put("BLOCKED", blocked);
+			m_statisBasket.put("PASSED", passed);
+			m_statisBasket.put("PLANNED", 0);
+			m_statisBasket.put("UNPLANNED", unplanned);
+			storyTable.put("FNMS-" + ran.nextInt(999), m_statisBasket);
+		}
+
+		// dummy assignee
+		List<String> assigneeList = new ArrayList<>();
+		assigneeList.add("Assignee-0");
+		assigneeList.add("Assignee-1");
+		Map<String, Map<String, Integer>> assigneeTable = new HashMap<>();
+		for (int i = 0; i < assigneeList.size(); i++) {
+			Map<String, Integer> m_statisBasket = new LinkedHashMap<>();
+			Random ran = new Random();
+			int unexecuted = ran.nextInt(50);
+			int passed = ran.nextInt(20);
+			int failed = ran.nextInt(50);
+			int wip = ran.nextInt(50);
+			int blocked = ran.nextInt(50);
+			int planned = 0;
+
+			int unplanned = unexecuted + failed + passed + wip + blocked;
+
+			m_statisBasket.put("UNEXECUTED", unexecuted);
+			m_statisBasket.put("FAILED", failed);
+			m_statisBasket.put("WIP", wip);
+			m_statisBasket.put("BLOCKED", blocked);
+			m_statisBasket.put("PASSED", passed);
+			m_statisBasket.put("PLANNED", 0);
+			m_statisBasket.put("UNPLANNED", unplanned);
+			assigneeTable.put(assigneeList.get(i), m_statisBasket);
+		}
+
+		// dummy test cycle
+		List<String> cycleMetricList = new LinkedList<String>();
+		cycleMetricList.add("UNEXECUTED");
+		cycleMetricList.add("FAILED");
+		cycleMetricList.add("WIP");
+		cycleMetricList.add("BLOCKED");
+		cycleMetricList.add("PASSED");
+		List<String> cycleList = new ArrayList<>();
+		cycleList.add("SD-OLT E2E Testing");
+		cycleList.add("TS 1.2.01 Spring Iteration 9");
+		Map<String, Map<String, Object>> cycleTable = new HashMap<>();
+		for (int i = 0; i < cycleList.size(); i++) {
+			Map<String, Object> assignees = new LinkedHashMap<>();
+
+			for (int t = 0; t < 2; t++) {
+				Map<String, Object> m_statisBasket = new LinkedHashMap<>();
+				Random ran = new Random();
+				int unexecuted = ran.nextInt(50);
+				int passed = ran.nextInt(20);
+				int failed = ran.nextInt(50);
+				int wip = ran.nextInt(50);
+				int blocked = ran.nextInt(50);
+				int planned = 0;
+				int unplanned = unexecuted + failed + passed + wip + blocked;
+
+				m_statisBasket.put("UNEXECUTED", unexecuted);
+				m_statisBasket.put("FAILED", failed);
+				m_statisBasket.put("WIP", wip);
+				m_statisBasket.put("BLOCKED", blocked);
+				m_statisBasket.put("PASSED", passed);
+				assignees.put("Assignee-" + t, m_statisBasket);
+			}
+
+			cycleTable.put(cycleList.get(i), assignees);
+		}
+
+		return Results.html().render("id", id).render("dashboard", dashboard).render("username", username)
+				.render("alias", alias).render("role", role).render("s_data", s_data2).render("s_datas", s_datas)
+				.render("r_datas", r_datas).render("s_ia", s_ia).render("metrics", metrics).render("releases", releases)
+				.render("periods", periods).render("epicProjectMap", epicProjectMap).render("epicTable", epicTable)
+				.render("epicTestMetric", epicTestMetric).render("epicRelease", epicRelease)
+				.render("storyTable", storyTable).render("assigneeList", assigneeList)
+				.render("assigneeTable", assigneeTable).render("cycleList", cycleList).render("cycleTable", cycleTable)
+				.render("cycleMetricList", cycleMetricList);
+	}
 
 	@FilterWith(SecureFilter.class)
-    public Result update_dashboard(@SessionParam("username") String username, @SessionParam("alias") String alias, @PathParam("id") Long id) {
-    	MongoClient mongoClient = new MongoClient();
-    	
-    	MongoCollection<Document> collection = mongoClient.getDatabase("Interview").getCollection("Dashboard");
+	public Result update_dashboard(@SessionParam("username") String username, @SessionParam("alias") String alias,
+			@PathParam("id") Long id) {
+		MongoClient mongoClient = new MongoClient();
+
+		MongoCollection<Document> collection = mongoClient.getDatabase("Interview").getCollection("Dashboard");
 		FindIterable<Document> iterable = collection.find(new Document("_id", id));
 		Map<String, Object> dashboard = new HashMap<>();
 
 		for (Document document : iterable) {
 			dashboard.put("id", document.get("_id"));
 			String shortname = document.getString("owner");
-			
-			org.jsoup.nodes.Document doc = LinkUtil.getInstance().getConnection(String.format(Constant.LINK_GET_JIRA_USER_INFO, shortname), Constant.TOKEN);
+
+			org.jsoup.nodes.Document doc = LinkUtil.getInstance()
+					.getConnection(String.format(Constant.LINK_GET_JIRA_USER_INFO, shortname), Constant.TOKEN);
 			logger.info("CHANGE SHORTNAME: " + shortname + " TO ALIAS: " + (doc != null));
-    		if (doc != null) {
-    			String json = doc.body().text();
-        		JSONParser parser = new JSONParser();
-        		try {
-        			JSONObject jsonObject = (JSONObject) parser.parse(json);
-        			shortname = jsonObject.get("displayName").toString();
-        		} catch (ParseException e) {
-        			logger.error(String.format("GET_USER_INFO OF %s ERROR ", shortname, e));
-        		}
-            }
-			
+			if (doc != null) {
+				String json = doc.body().text();
+				JSONParser parser = new JSONParser();
+				try {
+					JSONObject jsonObject = (JSONObject) parser.parse(json);
+					shortname = jsonObject.get("displayName").toString();
+				} catch (ParseException e) {
+					logger.error(String.format("GET_USER_INFO OF %s ERROR ", shortname, e));
+				}
+			}
+
 			dashboard.put("owner", shortname);
 			dashboard.put("name", document.get("dashboard_name"));
 			dashboard.put("share", document.get("share"));
 		}
-		
+
 		logger.info("DASHBOARD " + dashboard);
-				
+
 		mongoClient.close();
-        return Results.html()
-        		.render("dashboard", dashboard)
-        		.render("username", username)
-        		.render("alias", alias)
-        		.render("id", id);
-    }
+		return Results.html().render("dashboard", dashboard).render("username", username).render("alias", alias)
+				.render("id", id);
+	}
 
 	@FilterWith(SecureFilter.class)
-    public Result update_dashboard_post(@PathParam("id") Long id, @SessionParam("username") String username,
-    		@Param("name") String name,
-    		@Params("s_ia") String[] s_ia,
-    		@Params("metric") String[] metric,
-    		@Param("r_ia") String r_ia,
-    		@Param("project") String project,
-    		@Param("share") String share,
-    		@Param("release") String release,
-    		@Param("period") String period
-    		) {
+	public Result update_dashboard_post(@PathParam("id") Long id, @SessionParam("username") String username,
+			@Param("name") String name, @Params("s_ia") String[] s_ia, @Params("metric") String[] metric,
+			@Param("r_ia") String r_ia, @Param("project") String project, @Param("share") String share,
+			@Param("release") String release, @Param("period") String period) {
 		if (s_ia != null) {
 			for (int i = 0; i < s_ia.length; i++) {
 				s_ia[i] = s_ia[i].trim();
@@ -566,7 +559,7 @@ public class DashboardController {
 		FindIterable<Document> iterable = collection.find(new Document("_id", id));
 
 		String owner = "";
-		
+
 		for (Document document : iterable) {
 			owner = document.getString("owner");
 		}
@@ -575,72 +568,73 @@ public class DashboardController {
 			mongoClient.close();
 			return Results.redirect("../../dashboard/" + id);
 		}
-		
+
 		String new_s_ia = "";
 		String new_metric = "";
 		if (s_ia != null) {
 			new_s_ia = String.join(",", s_ia);
 		}
-		
+
 		if (metric != null) {
 			new_metric = String.join(",", metric);
 		}
-    	
 
 		if (name != null) {
 			collection.updateOne(new Document("_id", id), new Document("$set", new Document("dashboard_name", name)));
 		}
-		
+
 		if (!new_s_ia.equals("")) {
 			collection.updateOne(new Document("_id", id), new Document("$set", new Document("sonar_ia", new_s_ia)));
 		}
-		
+
 		if (!new_metric.equals("")) {
-			collection.updateOne(new Document("_id", id), new Document("$set", new Document("sonar_metrics", new_metric)));
+			collection.updateOne(new Document("_id", id),
+					new Document("$set", new Document("sonar_metrics", new_metric)));
 		}
-		
+
 		if (r_ia != null) {
 			collection.updateOne(new Document("_id", id), new Document("$set", new Document("od_review_ia", r_ia)));
 		}
-		
+
 		if (project != null) {
-			collection.updateOne(new Document("_id", id), new Document("$set", new Document("od_review_project", project)));
+			collection.updateOne(new Document("_id", id),
+					new Document("$set", new Document("od_review_project", project)));
 		}
-		
+
 		if (share != null) {
 			collection.updateOne(new Document("_id", id), new Document("$set", new Document("share", share)));
 		}
-		
+
 		if (release != null) {
 			collection.updateOne(new Document("_id", id), new Document("$set", new Document("release", release)));
 		}
-		
+
 		if (period != null) {
 			collection.updateOne(new Document("_id", id), new Document("$set", new Document("period", period)));
 		}
-		
+
 		mongoClient.close();
-        return Results.redirect("../../dashboard/" + id);
-    }
+		return Results.redirect("../../dashboard/" + id);
+	}
 
 	@FilterWith(SecureFilter.class)
-    public Result delete_dashboard(@PathParam("id") Long id, @SessionParam("username") String username) {
-    	MongoClient mongoClient = new MongoClient();
-    	MongoCollection<Document> collection = mongoClient.getDatabase("Interview").getCollection("Dashboard");
-    	FindIterable<Document> iterable = collection.find(new Document("_id", id));
-    	String owner = iterable.first().getString("owner");
+	public Result delete_dashboard(@PathParam("id") Long id, @SessionParam("username") String username) {
+		MongoClient mongoClient = new MongoClient();
+		MongoCollection<Document> collection = mongoClient.getDatabase("Interview").getCollection("Dashboard");
+		FindIterable<Document> iterable = collection.find(new Document("_id", id));
+		String owner = iterable.first().getString("owner");
 		if (owner.equals(username)) {
 			collection.deleteOne(new Document("_id", id));
 		}
-    	mongoClient.close();
-        return Results.redirect("../../dashboard");
-    }
+		mongoClient.close();
+		return Results.redirect("../../dashboard");
+	}
 
 	@FilterWith(SecureFilter.class)
-    public Result clone_dashboard(@PathParam("id") Long id, @SessionParam("username") String username) {
-    	MongoClient mongoClient = new MongoClient();
-    	MongoCollection<Document> collection = mongoClient.getDatabase("Interview").getCollection("Dashboard");
-    	FindIterable<Document> iterable = collection.find().sort(new Document("_id", -1)).limit(1);
+	public Result clone_dashboard(@PathParam("id") Long id, @SessionParam("username") String username) {
+		MongoClient mongoClient = new MongoClient();
+		MongoCollection<Document> collection = mongoClient.getDatabase("Interview").getCollection("Dashboard");
+		FindIterable<Document> iterable = collection.find().sort(new Document("_id", -1)).limit(1);
 		Integer max_id = 0;
 		if (iterable.first() != null) {
 			max_id = iterable.first().getInteger("_id");
@@ -652,21 +646,18 @@ public class DashboardController {
 				FindIterable<Document> iterable2 = collection.find().sort(new Document("_id", -1)).limit(1);
 				if (iterable2.first() != null) {
 					collection.insertOne(new Document("_id", iterable2.first().getInteger("_id") + 1)
-						.append("owner", username)
-						.append("dashboard_name", document.get("dashboard_name"))
-						.append("sonar_ia", document.get("sonar_ia"))
-						.append("sonar_metrics", document.get("sonar_metrics"))
-						.append("od_review_ia", document.get("od_review_ia"))
-						.append("od_review_project", document.get("od_review_project"))
-						.append("share", document.get("share"))
-						.append("release", document.get("release"))
-						.append("period", document.get("period")));
+							.append("owner", username).append("dashboard_name", document.get("dashboard_name"))
+							.append("sonar_ia", document.get("sonar_ia"))
+							.append("sonar_metrics", document.get("sonar_metrics"))
+							.append("od_review_ia", document.get("od_review_ia"))
+							.append("od_review_project", document.get("od_review_project"))
+							.append("share", document.get("share")).append("release", document.get("release"))
+							.append("period", document.get("period")));
 				}
 			}
 		});
-		
-    	
+
 		mongoClient.close();
-        return Results.redirect("../../dashboard/" + ++max_id);
-    }
+		return Results.redirect("../../dashboard/" + ++max_id);
+	}
 }
