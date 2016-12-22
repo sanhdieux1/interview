@@ -68,6 +68,11 @@ body {
 	width: 10px;
 	height: 10px;
 	animation: spin 2s linear infinite;
+}
+
+.warning {
+	position: fixed;
+	z-index: 999;
 	display: none;
 }
 
@@ -102,15 +107,25 @@ body {
 			<a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
 			${flash.success}
 		</div>
-		</#if> <br> <br> <#nested/> <br> <br> <br>
+	</div>
+	</#if>
+	<div id="dashboard-alert" class="warning alert-warning alert-dismissable">
+		<a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+		<div id="warning-message">
+			<strong>Warning!</strong> Indicates a warning that might need
+			attention.
+		</div>
+	</div>
+	<br> <br> <#nested/> <br> <br> <br>
 		<#include "footer.ftl.html"/>
 
 	</div>
 	<!-- /container -->
-
+	
 	<script src="/assets/lobipanel/lib/jquery.1.11.min.js"></script>
 	<script src="/assets/lobipanel/lib/jquery-ui.min.js"></script>
 	<script src="/assets/lobipanel/lib/jquery.ui.touch-punch.min.js"></script>
+	<script src="/assets/lib/javascript/jquery.dataTables.min.js"></script>
 	<script src="/assets/lobipanel/bootstrap/dist/js/bootstrap.min.js"></script>
 	<script src="/assets/lobipanel/lib/highlight/highlight.pack.js"></script>
 	<script src="/assets/lobipanel/dist/js/lobipanel.js"></script>
@@ -121,7 +136,7 @@ body {
 	<script src="/assets/lobipanel/js/angular-material.min.js"></script>
 	<!--<script src="/assets/lobipanel/js/bootstrap-select.min.js"></script>-->
 	<script src="/assets/lobipanel/js/app.js"></script>
-
+	
 	<script>
     	window.setTimeout(function() {
 	    	$(".alert").fadeTo(500, 0).slideUp(500, function(){
@@ -357,7 +372,7 @@ body {
 	$( document ).ready(function() {
 		if($('#epicProject').length != 0){
 			$.get("/listproject", function(data){
-				$('#epicProject').find('option').remove().end();
+				
 				for(var i = 0; i < data.length; i++){
 					$('<option value="'+data[i]+'">'+data[i]+'</option>').appendTo('#epicProject');
 				}
@@ -366,9 +381,12 @@ body {
 	});
 	
 	$("#epicProject").change(function() {
+		if($("#epicRelease").val() == null || $("#epicRelease").val() == ""){
+			return;
+		}
 		$.ajax({
 			  url: "/getEpicLinks?",
-			  data: { project: $(this).val()},
+			  data: { project: $(this).val(), release: $("#epicRelease").val()},
 			  
 			  beforeSend: function( ) {
 					$('#epicMultiSelect').hide();
@@ -377,7 +395,7 @@ body {
 			})
 			 .done(function( data ) {
 				  $('#epicMultiSelect').find('option').remove().end();
-					for(var i = 0; i < data.length; i++){
+				  for(var i = 0; i < data.length; i++){
 						$('<option value="'+data[i]+'">'+data[i]+'</option>').appendTo('#epicMultiSelect');
 				  }
 				  $('#epicMultiSelect').show();
@@ -385,7 +403,38 @@ body {
 			 });
 	});
 	
-	$("#epic-submit").click(function(){
+	$("#epicRelease").change(function() {
+		if($("#epicProject").val() == null || $("#epicProject").val() == ""){
+			return;
+		}
+		$.ajax({
+			  url: "/getEpicLinks?",
+			  data: { project: $("#epicProject").val(), release: $(this).val()},
+			  
+			  beforeSend: function( ) {
+					$('#epicMultiSelect').hide();
+					$('#epic-link-loader').show();
+			  }
+			})
+			 .done(function( data ) {
+				  $('#epicMultiSelect').find('option').remove().end();
+				  for(var i = 0; i < data.length; i++){
+						$('<option value="'+data[i]+'">'+data[i]+'</option>').appendTo('#epicMultiSelect');
+				  }
+				  $('#epicMultiSelect').show();
+				  $('#epic-link-loader').hide();
+			 });
+	});
+	
+	
+	
+	$("#epic-add-gadget").click(function(){
+		if($("#epicProject").val() == "" || $("#epicProject").val() == null || $("#epicRelease").val() == "" || $("#epicRelease").val() == null){
+			$("#warning-message").val("Please select project name for this gadget.");
+			$("dashboard-alert").show();
+		}else{
+			
+		
 		var object = {};
 		object['id'] = 7;
 		object['cycleName'] = "";
@@ -399,15 +448,82 @@ body {
 			method: 'POST',
 			data: { type: 'EPIC_US_TEST_EXECUTION', data: jsonString},
 			beforeSend: function( ) {
-				$('#epic-link-loader').show();
+				$('#epic-table-loader').show();
 		   }
 		})
-		.done(function(data){
-			$('#epic-link-loader').hide();
-			console.log(data);
-			alert(data);
+		.done(function(data1){
+			$('#epic-table-loader').hide();
+		});
+		
+		}
+	});
+	
+	$("#epic-get-data").click(function(){
+		$.ajax({
+			url:'/gadget/gadgets',
+			beforeSend: function(){
+				$('#epic-table-loader').show();
+				$("#epic-table-container").hide();
+			}
+		})
+		.done(function(gadgetList){
+			console.log(gadgetList);
+			for(var i =0; i < gadgetList.length; i++){
+				if(gadgetList[i]["projectName"] != "" && gadgetList[i]["projectName"] != null){
+					$("#epicProject").val(gadgetList[i]["projectName"]);
+				}
+				
+				if(gadgetList[i]["release"] != "" && gadgetList[i]["release"] != null){
+					$("#epicRelease").val(gadgetList[i]["release"]);
+				}
+
+				if(gadgetList[i]["metrics"] != "" && gadgetList[i]["metrics"] != null){
+					$("#epicMetricMultiSelect").val(gadgetList[i]["metrics"]);
+				}
+				if(gadgetList[i]["epic"] != "" && gadgetList[i]["epic"] != null){
+					$('#epicMultiSelect').find('option').remove().end();
+					for(var z = 0;  z < gadgetList[i]["epic"].length; z++){
+						$('<option value="'+gadgetList[i]["epic"][z]+'" selected>'+gadgetList[i]["epic"][z]+'</option>').appendTo('#epicMultiSelect');
+					}
+					$("#epicMultiSelect").val(gadgetList[i]["epic"]);
+				}
+				if(globalEpicTable != null){
+					console.log(globalEpicTable);
+					globalEpicTable.api().ajax.reload();
+				}
+				else{
+					globalEpicTable = $('#epic-table').dataTable( {
+						"fnDrawCallback": function( oSettings ) {
+							$('#epic-table-loader').hide();
+							$("#epic-table-container").show();
+						 },
+						"lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]],
+						"processing": true,
+						"ajax": {
+							url: "/gadget/getData",
+							data:{"id": gadgetList[i]["id"]},
+							beforeSend: function(){
+								$('#epic-table-loader').show();
+								$("#epic-table-container").hide();
+							}
+						},
+				        "columns": [
+				            { "data": "title" },
+				            { "data": "unexecuted" },
+				            { "data": "failed" },
+				            { "data": "wip" },
+				            { "data": "blocked" },
+				            { "data": "passed" },
+				            { "data": "planned" },
+				            { "data": "unplanned" }
+				        ]
+				    });
+				}
+				break;
+			}
 		});
 	});
+	var globalEpicTable = null;
 	</script>
 </body>
 </html>

@@ -22,6 +22,7 @@
 									<div class="project-search-div">
 										<td class="col-md-6"><select class="form-control"
 											id="epicProject">
+											<option selected disabled>-Select Project-</option>
 										</select></td>
 									</div>
 								</tr>
@@ -29,14 +30,18 @@
 								<tr>
 									<td class="col-md-6"><label>Release</label></td>
 									<td class="col-md-6"><select class="form-control"
-										id="epicRelease"> <#list epicRelease as release>
-											<option value="${release}">${release}</option> </#list>
+										id="epicRelease">
+										<option selected disabled>-Select Version-</option>
+										<option value="1.2.0">R1.2.0</option>
+										<option value="1.2.01">R1.2.01</option>
+										<option value="1.3.0">R1.3.0</option>
 									</select></td>
 								</tr>
 								<!-- Product Row -->
 								<tr>
 									<td class="col-md-6"><label>Product</label></td>
 									<td class="col-md-6"><select multiple id="epicProduct" class="form-control">
+									<option selected disabled>-Select Product-</option>
 									</select></td>
 								</tr>
 								<!-- Epic Link Row -->
@@ -45,7 +50,9 @@
 									<td class="col-md-6"><select multiple class="form-control"
 										id="epicMultiSelect">
 									</select>
-										<div id="epic-link-loader" class="loader"></div>
+										<div id="epic-link-loader" style="display:none">
+											<div class="loader"></div>
+										</div>
 									</td>
 
 								</tr>
@@ -64,28 +71,44 @@
 						</table>
 					</div>
 					<#if dashboard.owner == alias>
-						<button type="button" id="epic-submit" class="btn btn-success">Update</button>
+						<button type="button" id="epic-add-gadget" class="btn btn-success">Add Gadget To Database</button>
+						<button type="button" id="epic-get-data" class="btn btn-success">Draw Table</button>
 					</#if>
 				</form>
 			</div>
 			<br>
-			<table
-				class="table table-striped table-bordered table-hover table-condensed">
-				<thead>
-					<tr>
-						<th>Epic url</th> <#list epicTestMetric as metric>
-						<td><b>${metric}</b></td> </#list>
-					</tr>
-				</thead>
-				<tbody>
-					<#list epicTable?keys as k>
-					<tr>
-						<td><b><a>${k}</a></b></td> <#list epicTable[k]?keys as k1>
-						<td>${epicTable[k][k1]}</td> </#list>
-					</tr>
-					</#list>
-				</tbody>
-			</table>
+			<div id="epic-table-container">
+				<table id="epic-table" class="table table-striped table-bordered table-hover table-condensed">
+					<thead>
+						<tr>
+							<th>Title</th>
+							<th>UNEXECUTED</th>
+							<th>FAILED</th>
+							<th>WIP</th>
+							<th>BLOCKED</th>
+							<th>PASSED</th>
+							<th>PLANNED</th>
+							<th>UNPLANNED</th>
+						</tr>
+					</thead>
+					<tfoot>
+						<tr>
+							<th>Title</th>
+							<th>UNEXECUTED</th>
+							<th>FAILED</th>
+							<th>WIP</th>
+							<th>BLOCKED</th>
+							<th>PASSED</th>
+							<th>PLANNED</th>
+							<th>UNPLANNED</th>
+						</tr>
+					</tfoot>
+				</table>
+			</div>
+			<div id="epic-table-loader" style="display:none" align="center">
+				<div class="loader"></div>
+				<h2>Data is loading...</h2>
+			</div>
 		</div>
 	</div>
 </div>
