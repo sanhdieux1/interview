@@ -10,9 +10,11 @@ import filter.CrossOriginAccessControlFilter;
 import handle.ExceptionHandler;
 import handle.QueryHandler;
 import handle.QueryHandlerImpl;
+import models.exception.MException;
 import ninja.Context;
 import ninja.FilterWith;
 import ninja.Result;
+import ninja.Results;
 import ninja.params.Param;
 
 @Singleton
@@ -27,23 +29,48 @@ public class QueryDataController {
     }
     public Result getAssigneeTable(@Param("username") String username, @Param("cyclename") String cyclename, @Param("project") String project,
             Context context) {
-        return handler.getAssigneeTable(username, cyclename, project, context);
+        try{
+            return handler.getAssigneeTable(username, cyclename, project, context);
+        } catch (MException e){
+            return handleException(e);
+        }
     }
     public Result getListCycleName(@Param("project") String projectName) {
-        return handler.getListCycleName(projectName);
+        try{
+            return handler.getListCycleName(projectName);
+        } catch (MException e){
+            return handleException(e);
+        }
     }
     
     public Result getProjectList(){
-        return handler.getProjectList();
+        try{
+            return handler.getProjectList();
+        } catch (MException e){
+            return handleException(e);
+        }
     }
     
     public Result addGadget(@Param("type") String type, @Param("gadgetData") String gadgetData){
         logger.info(gadgetData);
-        return handler.addGadget(type, gadgetData);
+        try{
+            return handler.addGadget(type, gadgetData);
+        } catch (MException e){
+            return handleException(e);
+        }
     }
     
     public Result getProjectVersionList(@Param("projectId") long id){
-        return handler.getProjectVersionList(id);
+        try{
+            return handler.getProjectVersionList(id);
+        } catch (MException e){
+            return handleException(e);
+        }
     }
-    
+    public Result handleException(MException e){
+        Result result = Results.json();
+        result.render("type", "error");
+        result.render("data", e.getMessage());
+        return result;
+    }
 }

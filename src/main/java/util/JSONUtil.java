@@ -16,17 +16,17 @@ public class JSONUtil {
     public static JSONUtil getInstance(){
         return INSTANCE;
     }
-    public <T> List<T> convertJSONtoListObject(String json, Class<T> t) {
+    public <T> List<T> convertJSONtoListObject(String json, Class<T> t) throws MException {
         List<T> listObject;
         try {
             listObject = mapper.readValue(json,
                     mapper.getTypeFactory().constructCollectionType(List.class, t));
         } catch (IOException e) {
-            throw new MException("cannot parse result");
+            throw new MException("cannot parse json");
         }
         return listObject;
     }
-    public <T> T convertJSONtoObject(String json, Class<T> type) {
+    public <T> T convertJSONtoObject(String json, Class<T> type) throws MException {
         if(json == null){
             return null;
         }
@@ -35,7 +35,7 @@ public class JSONUtil {
             ObjectMapper mapper = new ObjectMapper();
             result = mapper.readValue(json, type);
         } catch (IOException e) {
-            throw new MException("cannot parse result");
+            throw new MException("cannot parse json");
         }
         return result;
     }

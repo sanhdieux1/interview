@@ -1,6 +1,6 @@
 package models.exception;
 
-public class MException extends RuntimeException {
+public class MException extends Exception {
     private static final long serialVersionUID = -4530140103715612384L;
     private String message;
     private MErrorCode errorCode = MErrorCode.GENERIC;

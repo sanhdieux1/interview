@@ -1,14 +1,10 @@
 package handle;
 
-import java.io.IOException;
-import java.lang.reflect.Proxy;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -20,13 +16,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import models.AssigneeVO;
 import models.ExecutionIssueVO;
 import models.JQLIssueVO;
-import models.JQLIssuetypeVO;
 import models.ProjectVO;
 import models.ProjectVersionVO;
 import models.exception.MException;
 import models.gadget.Gadget;
 import models.main.ExecutionsVO;
-import models.main.JQLSearchResult;
 import ninja.Context;
 import ninja.Result;
 import ninja.Results;
@@ -48,7 +42,7 @@ public class QueryHandlerImpl implements QueryHandler {
     }
 
     public Result getAssigneeTable(String username, String cyclename, String project,
-            Context context) {
+            Context context) throws MException {
         logger.info("getAssigneeTable(" + username + "," + cyclename + "," + project + ")");
 
         Map<String, String> parameters = new HashMap<String, String>();
@@ -60,7 +54,7 @@ public class QueryHandlerImpl implements QueryHandler {
         return Results.json().render(executions);
     }
 
-    private ExecutionsVO findAllExecutionIsuee(String projectName) {
+    private ExecutionsVO findAllExecutionIsuee(String projectName) throws MException {
         String query = "project in ('%s')";
         Map<String, String> parameters = new HashMap<String, String>();
         parameters.put(Constant.PARAMERTER_ZQL_QUERY, String.format(query, projectName));
@@ -72,7 +66,7 @@ public class QueryHandlerImpl implements QueryHandler {
         return executions;
     }
 
-    public Result getListCycleName(String projectName) {
+    public Result getListCycleName(String projectName) throws MException {
         if (cycleNameCache.isEmpty()) {
             ExecutionsVO executions = findAllExecutionIsuee(projectName);
             if (executions != null) {
@@ -85,7 +79,7 @@ public class QueryHandlerImpl implements QueryHandler {
         return Results.json().render(cycleNameCache);
     }
 
-    public Result getAssigneeList(String projectName) {
+    public Result getAssigneeList(String projectName) throws MException {
 
         if (assigneesCache.get(projectName) == null || assigneesCache.get(projectName).isEmpty()) {
             ExecutionsVO executions = findAllExecutionIsuee(projectName);
@@ -107,7 +101,7 @@ public class QueryHandlerImpl implements QueryHandler {
         return Results.json().render(assigneesCache.get(projectName));
     }
 
-    public Result getProjectList() {
+    public Result getProjectList() throws MException {
         if (projectsCache.isEmpty()) {
             String data = LinkUtil.getInstance().getLegacyDataWithProxy(
                     PropertiesUtil.getInstance().getString(Constant.RESOURCE_BUNLE_PROJECT_PATH),
@@ -118,7 +112,7 @@ public class QueryHandlerImpl implements QueryHandler {
         return Results.json().render(projectsCache);
     }
 
-    public Result addGadget(String typeStr, String jsonData) {
+    public Result addGadget(String typeStr, String jsonData) throws MException {
         Gadget.Type type = Gadget.Type.valueOf(typeStr);
         if (type == null) {
             throw new MException(typeStr + " is not an existing type");
@@ -132,7 +126,7 @@ public class QueryHandlerImpl implements QueryHandler {
     }
 
     @Override
-    public Result getProjectVersionList(long id) {
+    public Result getProjectVersionList(long id) throws MException {
         String data = LinkUtil.getInstance().getLegacyDataWithProxy(
                 PropertiesUtil.getInstance()
                         .getString(Constant.RESOURCE_BUNLE_PROJECT_PATH + "/" + id + "/versions"),
@@ -142,7 +136,7 @@ public class QueryHandlerImpl implements QueryHandler {
     }
     
     
-    public JQLIssueVO findIssues(String id) {
+    public JQLIssueVO findIssues(String id) throws MException {
         String data = LinkUtil.getInstance().getLegacyDataWithProxy(
                 PropertiesUtil.getInstance().getString(Constant.RESOURCE_BUNLE_ISSUE_PATH) + "/" + id,
                 new HashMap<>());

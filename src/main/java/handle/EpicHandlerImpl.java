@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import org.apache.log4j.Logger;
 
 import models.ExecutionIssueVO;
+import models.exception.MException;
 import models.main.JQLSearchResult;
 import ninja.Result;
 import ninja.Results;
@@ -21,7 +22,7 @@ public class EpicHandlerImpl extends EpicHandler {
     final static Logger logger = Logger.getLogger(EpicHandlerImpl.class);
 
     @Override
-    public Result getEpicLinks(String project, String release) {
+    public Result getEpicLinks(String project, String release) throws MException {
         Set<String> result = null;
         String query = "project = \"%s\" and type = epic and fixVersion=%s";
         Map<String, String> parameters = new HashMap<String, String>();
@@ -40,12 +41,12 @@ public class EpicHandlerImpl extends EpicHandler {
     }
 
     @Override
-    public Result findAllIssues(String epic) {
+    public Result findAllIssues(String epic) throws MException {
         return Results.json().render(epicService.findAllIssuesInEpicLink(epic));
     }
 
     @Override
-    public Result findExecutionIsuee(String issueKey) {
+    public Result findExecutionIsuee(String issueKey) throws MException {
         return Results.json().render(epicService.findTestExecutionInIsuee(issueKey));
     }
 

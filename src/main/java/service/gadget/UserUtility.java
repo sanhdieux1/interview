@@ -29,7 +29,7 @@ public class UserUtility extends DatabaseUtility {
 	public static UserUtility getInstance(){
 	    return INSTANCE;
 	}
-	public UserVO find(String username, String friendlyName) {
+	public UserVO find(String username, String friendlyName) throws MException {
 		UserVO userVO = null;
 		BasicDBObject whereQuery = new BasicDBObject();
 		whereQuery.put("username", username);
@@ -48,7 +48,7 @@ public class UserUtility extends DatabaseUtility {
 		return userVO;
 	}
 
-	public WriteResult insert(UserVO user) {
+	public WriteResult insert(UserVO user) throws MException {
 		try {
 			DBObject dbObject = (DBObject) JSON.parse(mapper.writeValueAsString(user));
 			dbObject.removeField("id");

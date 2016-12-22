@@ -7,8 +7,10 @@ import com.google.inject.Singleton;
 import filter.CrossOriginAccessControlFilter;
 import handle.EpicHandler;
 import handle.EpicHandlerImpl;
+import models.exception.MException;
 import ninja.FilterWith;
 import ninja.Result;
+import ninja.Results;
 import ninja.params.Param;
 
 @Singleton
@@ -24,14 +26,33 @@ public class EpicController {
     }
 
     public Result getEpicLinks(@Param("project") String project, @Param("release") String release) {
-        return handler.getEpicLinks(project, release);
+        try{
+            return handler.getEpicLinks(project, release);
+        } catch (MException e){
+            return handleException(e);
+        }
     }
 
     public Result findAllIssues(@Param("epic") String epic) {
-        return handler.findAllIssues(epic);
+        try{
+            return handler.findAllIssues(epic);
+        } catch (MException e){
+            return handleException(e);
+        }
     }
 
     public Result findExecutionIssues(@Param("issueKey") String issueKey) {
-        return handler.findExecutionIsuee(issueKey);
+        try{
+            return handler.findExecutionIsuee(issueKey);
+        } catch (MException e){
+            return handleException(e);
+        }
+    }
+    
+    public Result handleException(MException e){
+        Result result = Results.json();
+        result.render("type", "error");
+        result.render("data", e.getMessage());
+        return result;
     }
 }

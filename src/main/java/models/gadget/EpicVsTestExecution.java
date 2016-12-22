@@ -12,7 +12,6 @@ public class EpicVsTestExecution implements Gadget {
 	private String user;
 	private String id;
 	private Gadget.Type type = Gadget.Type.EPIC_US_TEST_EXECUTION;
-	private String cycleName;
 	private String projectName;
 	// fixVersion
 	private Release release;
@@ -41,14 +40,6 @@ public class EpicVsTestExecution implements Gadget {
 
 	public void setUser(String user) {
 		this.user = user;
-	}
-
-	public String getCycleName() {
-		return cycleName;
-	}
-
-	public void setCycleName(String cycleName) {
-		this.cycleName = cycleName;
 	}
 
 	public String getProjectName() {
