@@ -1,7 +1,5 @@
 package controllers;
 
-import java.lang.reflect.Proxy;
-
 import org.apache.log4j.Logger;
 
 import com.google.inject.Singleton;
@@ -9,7 +7,6 @@ import com.google.inject.Singleton;
 import filter.CrossOriginAccessControlFilter;
 import handle.EpicHandler;
 import handle.EpicHandlerImpl;
-import handle.ExceptionHandler;
 import ninja.FilterWith;
 import ninja.Result;
 import ninja.params.Param;
@@ -26,8 +23,8 @@ public class EpicController {
 //                new Class[] { EpicHandler.class }, new ExceptionHandler(handler));
     }
 
-    public Result getEpicLinks(@Param("project") String project) {
-        return handler.getEpicLinks(project);
+    public Result getEpicLinks(@Param("project") String project, @Param("release") String release) {
+        return handler.getEpicLinks(project, release);
     }
 
     public Result findAllIssues(@Param("epic") String epic) {
@@ -36,8 +33,5 @@ public class EpicController {
 
     public Result findExecutionIssues(@Param("issueKey") String issueKey) {
         return handler.findExecutionIsuee(issueKey);
-    }
-    public Result findAllExecutionIssues(@Param("epic") String epic){
-        return handler.findAllExecutionIssues(epic);
     }
 }

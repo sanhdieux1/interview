@@ -4,6 +4,8 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import models.main.Release;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class EpicVsTestExecution implements Gadget {
 
@@ -13,7 +15,7 @@ public class EpicVsTestExecution implements Gadget {
 	private String cycleName;
 	private String projectName;
 	// fixVersion
-	private String release;
+	private Release release;
 	private List<String> metrics;
 	private List<String> epic;
 
@@ -57,15 +59,15 @@ public class EpicVsTestExecution implements Gadget {
 		this.projectName = projectName;
 	}
 
-	public String getRelease() {
-		return release;
-	}
+	public Release getRelease() {
+        return release;
+    }
 
-	public void setRelease(String release) {
-		this.release = release;
-	}
+    public void setRelease(Release release) {
+        this.release = release;
+    }
 
-	public List<String> getMetrics() {
+    public List<String> getMetrics() {
 		return metrics;
 	}
 

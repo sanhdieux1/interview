@@ -16,7 +16,7 @@ public interface EpicService {
 
     List<JQLIssueVO> findAllIssuesInEpicLink(String epic);
 
-    ExecutionIssueResultWapper findAllExecutionIssueInEpic(String epic) throws MException;
+    ExecutionIssueResultWapper findAllExecutionIssueInEpic(String epic);
 
     List<GadgetData> getDataEPic(EpicVsTestExecution epicGadget);
 

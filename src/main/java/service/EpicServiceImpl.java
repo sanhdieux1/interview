@@ -25,6 +25,7 @@ import models.exception.MException;
 import models.gadget.EpicVsTestExecution;
 import models.main.ExecutionsVO;
 import models.main.JQLSearchResult;
+import models.main.Release;
 import util.Constant;
 import util.JSONUtil;
 import util.LinkUtil;
@@ -37,6 +38,7 @@ public class EpicServiceImpl implements EpicService {
     public List<GadgetData> getDataEPic(EpicVsTestExecution epicGadget) {
         List<String> epics = epicGadget.getEpic();
         List<String> metrics = epicGadget.getMetrics();
+        Release release = epicGadget.getRelease();
         List<GadgetData> result = new ArrayList<>();
 
         epics.forEach(new Consumer<String>() {
@@ -82,6 +84,9 @@ public class EpicServiceImpl implements EpicService {
     public ExecutionIssueResultWapper findAllExecutionIssueInEpic(String epic) throws MException {
         ExecutionIssueResultWapper resultWapper = new ExecutionIssueResultWapper(); 
         List<JQLIssueVO> issues = findAllIssuesInEpicLink(epic);
+        if(issues == null || issues.isEmpty()){
+            return resultWapper;
+        }
         ExecutorService taskExecutor = Executors.newFixedThreadPool(issues.size());
         List<ExecutionCallable> tasks = new ArrayList<ExecutionCallable>();
         EpicService handler = this;

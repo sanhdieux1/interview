@@ -21,11 +21,11 @@ public class EpicHandlerImpl extends EpicHandler {
     final static Logger logger = Logger.getLogger(EpicHandlerImpl.class);
 
     @Override
-    public Result getEpicLinks(String project) {
+    public Result getEpicLinks(String project, String release) {
         Set<String> result = null;
-        String query = "project = \"%s\" and type = epic";
+        String query = "project = \"%s\" and type = epic and fixVersion=%s";
         Map<String, String> parameters = new HashMap<String, String>();
-        parameters.put(Constant.PARAMERTER_JQL_QUERY, String.format(query, project));
+        parameters.put(Constant.PARAMERTER_JQL_QUERY, String.format(query, project, release));
         parameters.put(Constant.PARAMERTER_MAXRESULTS, "10000");
         parameters.put(Constant.PARAMERTER_OFFSET, "0");
         String data = LinkUtil.getInstance().getLegacyDataWithProxy(
@@ -49,11 +49,4 @@ public class EpicHandlerImpl extends EpicHandler {
         return Results.json().render(epicService.findTestExecutionInIsuee(issueKey));
     }
 
-    @Override
-    public Result findAllExecutionIssues(String epic) {
-        List<ExecutionIssueVO> executionIssueVOs = epicService.findAllExecutionIssueInEpic(epic);
-        return Results.json().render(executionIssueVOs);
-    }
-
-    
 }
