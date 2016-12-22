@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 public class JQLIssuefields {
     private JQLIssuetypeVO issuetype;
     private List<JQLIssueLinkVO> issuelinks;
+    private int customfield_14809;
 
     public JQLIssuetypeVO getIssuetype() {
         return issuetype;
@@ -23,6 +24,14 @@ public class JQLIssuefields {
 
     public void setIssuelinks(List<JQLIssueLinkVO> issuelinks) {
         this.issuelinks = issuelinks;
+    }
+
+    public int getCustomfield_14809() {
+        return customfield_14809;
+    }
+
+    public void setCustomfield_14809(int customfield_14809) {
+        this.customfield_14809 = customfield_14809;
     }
 
 }
