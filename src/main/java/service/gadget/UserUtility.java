@@ -18,13 +18,17 @@ import util.JSONUtil;
 
 public class UserUtility extends DatabaseUtility {
 	final static Logger logger = Logger.getLogger(GadgetUtility.class);
+	public static UserUtility INSTANCE = new UserUtility();
 	protected DBCollection collection;
-
-	public UserUtility() {
+	
+	private UserUtility() {
 		super();
 		collection = db.getCollection(UserVO.class.getSimpleName());
 	}
 
+	public static UserUtility getInstance(){
+	    return INSTANCE;
+	}
 	public UserVO find(String username, String friendlyName) {
 		UserVO userVO = null;
 		BasicDBObject whereQuery = new BasicDBObject();

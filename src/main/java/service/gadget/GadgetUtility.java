@@ -2,7 +2,6 @@ package service.gadget;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -67,21 +66,6 @@ public class GadgetUtility extends DatabaseUtility {
 			}
 		}
 		return gadget;
-	}
-
-	public static void main(String[] args) {
-		GadgetUtility i = new GadgetUtility();
-//		EpicVsTestExecution gadget = new EpicVsTestExecution();
-//		gadget.setMetrics(Arrays.asList("PASSED"));
-//		gadget.setRelease("1.2.01");
-//		gadget.setEpic(Arrays.asList("FNMS-96"));
-//		gadget.setProjectName("FMNS-557x");
-//		i.insert(gadget);
-
-		// Gadget g = i.get("585a3cc08dbec732644e0ecb");
-		// System.out.println(g.getType());
-		List<Gadget> test = i.getAll();
-		System.out.println(test.size());
 	}
 
 	public List<Gadget> getAll() {

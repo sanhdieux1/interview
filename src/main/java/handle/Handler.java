@@ -7,7 +7,7 @@ public abstract class Handler {
 	protected UserUtility userService;
 	protected EpicUtility epicService;
 	public Handler() {
-		userService = new UserUtility();
+		userService = UserUtility.getInstance();
 		epicService = EpicUtility.getInstance();
 	}
 	
