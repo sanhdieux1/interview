@@ -1,15 +1,14 @@
 package handle;
 
-import service.EpicService;
-import service.EpicServiceImpl;
-import service.UserServiceImpl;
+import service.gadget.EpicUtility;
+import service.gadget.UserUtility;
 
 public abstract class Handler {
-	protected UserServiceImpl userService;
-	protected EpicService epicService;
+	protected UserUtility userService;
+	protected EpicUtility epicService;
 	public Handler() {
-		userService = new UserServiceImpl();
-		epicService = new EpicServiceImpl();
+		userService = new UserUtility();
+		epicService = EpicUtility.getInstance();
 	}
 	
 }

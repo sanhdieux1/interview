@@ -1,4 +1,4 @@
-package service;
+package service.gadget;
 
 import org.apache.log4j.Logger;
 import org.bson.types.ObjectId;
@@ -13,13 +13,14 @@ import com.mongodb.util.JSON;
 
 import models.UserVO;
 import models.exception.MException;
+import service.DatabaseUtility;
 import util.JSONUtil;
 
-public class UserServiceImpl extends DatabaseService {
-	final static Logger logger = Logger.getLogger(GadgetServiceImpl.class);
+public class UserUtility extends DatabaseUtility {
+	final static Logger logger = Logger.getLogger(GadgetUtility.class);
 	protected DBCollection collection;
 
-	public UserServiceImpl() {
+	public UserUtility() {
 		super();
 		collection = db.getCollection(UserVO.class.getSimpleName());
 	}

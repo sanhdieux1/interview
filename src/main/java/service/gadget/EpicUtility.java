@@ -1,14 +1,11 @@
-package service;
+package service.gadget;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.function.Consumer;
 
 import org.apache.log4j.Logger;
@@ -25,20 +22,23 @@ import models.exception.MException;
 import models.gadget.EpicVsTestExecution;
 import models.main.ExecutionsVO;
 import models.main.JQLSearchResult;
-import models.main.Release;
 import util.Constant;
 import util.JSONUtil;
 import util.LinkUtil;
 import util.PropertiesUtil;
 
-public class EpicServiceImpl implements EpicService {
-    final static Logger logger = Logger.getLogger(EpicServiceImpl.class);
-
-    @Override
+public class EpicUtility {
+    final static Logger logger = Logger.getLogger(EpicUtility.class);
+    private static EpicUtility INSTANCE = new EpicUtility();
+    private EpicUtility(){
+        
+    }
+    public static EpicUtility getInstance(){
+        return INSTANCE;
+    }
     public List<GadgetData> getDataEPic(EpicVsTestExecution epicGadget) {
         List<String> epics = epicGadget.getEpic();
         List<String> metrics = epicGadget.getMetrics();
-        Release release = epicGadget.getRelease();
         List<GadgetData> result = new ArrayList<>();
 
         epics.forEach(new Consumer<String>() {
@@ -89,7 +89,6 @@ public class EpicServiceImpl implements EpicService {
         }
         ExecutorService taskExecutor = Executors.newFixedThreadPool(issues.size());
         List<ExecutionCallable> tasks = new ArrayList<ExecutionCallable>();
-        EpicService handler = this;
 
         issues.stream().forEach(new Consumer<JQLIssueVO>() {
             @Override
@@ -97,28 +96,13 @@ public class EpicServiceImpl implements EpicService {
                 Type type = JQLIssuetypeVO.Type.fromString(issue.getFields().getIssuetype().getName());
                 //ignore other
                 if(type == Type.TEST || type == Type.STORY){
-                    tasks.add(new ExecutionCallable(handler, issue, type, resultWapper));
+                    tasks.add(new ExecutionCallable(issue, type, resultWapper));
                 }
             }
         });
-//        List<Future<ExecutionIssueResultWapper>> results;
         try{
             taskExecutor.invokeAll(tasks);
             taskExecutor.shutdown();
-//            results.forEach(new Consumer<Future<ExecutionIssueResultWapper>>() {
-//                @Override
-//                public void accept(Future<ExecutionIssueResultWapper> t) {
-//                    ExecutionIssueResultWapper resultWapper = null;
-//                    try{
-//                            resultWapper = t.get();
-//                    } catch (InterruptedException | ExecutionException e){
-//                        logger.error("ingore", e);
-//                    }
-//                    if(resultWapper != null){
-//                        executionIssueVOs.addAll(resultWapper.getExecutionsVO());
-//                    }
-//                }
-//            });
         } catch (InterruptedException e){
             logger.error("can't execute thread", e);
             throw new MException("Timeout exeption");
@@ -137,7 +121,6 @@ public class EpicServiceImpl implements EpicService {
         return executions;
     }
 
-    @Override
     public List<JQLIssueVO> findAllIssuesInEpicLink(String epic) {
         String query = "\"Epic Link\"=%s";
         Map<String, String> parameters = new HashMap<String, String>();
@@ -149,7 +132,6 @@ public class EpicServiceImpl implements EpicService {
         return searchResult.getIssues();
     }
 
-    @Override
     public List<ExecutionIssueVO> findAllTestExecutionInStory(JQLIssueVO issue) {
         List<ExecutionIssueVO> result = new ArrayList<>();
         if(JQLIssuetypeVO.Type.STORY.toString().equalsIgnoreCase(issue.getFields().getIssuetype().getName())){

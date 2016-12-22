@@ -10,16 +10,15 @@ import models.ExecutionIssueResultWapper;
 import models.ExecutionIssueVO;
 import models.JQLIssueVO;
 import models.JQLIssuetypeVO.Type;
-import service.EpicService;
-import service.EpicServiceImpl;
+import service.gadget.EpicUtility;
 
 public class ExecutionCallable implements Callable<Void> {
     final static Logger logger = Logger.getLogger(ExecutionCallable.class);
-    private EpicService handler;
+    private EpicUtility handler = EpicUtility.getInstance();
     private JQLIssueVO issue;
     private Type type;
     private ExecutionIssueResultWapper result;
-    public ExecutionCallable(EpicService handler, JQLIssueVO issue, Type type, ExecutionIssueResultWapper result) {
+    public ExecutionCallable(JQLIssueVO issue, Type type, ExecutionIssueResultWapper result) {
         super();
         this.handler = handler;
         this.issue = issue;

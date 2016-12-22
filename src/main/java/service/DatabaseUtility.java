@@ -12,7 +12,7 @@ import models.gadget.Gadget;
 import util.Constant;
 import util.PropertiesUtil;
 
-public class DatabaseService {
+public class DatabaseUtility {
 	protected MongoClient mongoClient = new MongoClient();
 	protected DB db = mongoClient.getDB(PropertiesUtil.getInstance().getString(Constant.DATABASE_SCHEMA));
 	protected ObjectMapper mapper = new ObjectMapper();

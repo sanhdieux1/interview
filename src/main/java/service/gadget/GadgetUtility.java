@@ -1,4 +1,4 @@
-package service;
+package service.gadget;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -19,13 +19,14 @@ import com.mongodb.util.JSON;
 import models.exception.MException;
 import models.gadget.EpicVsTestExecution;
 import models.gadget.Gadget;
+import service.DatabaseUtility;
 import util.JSONUtil;
 
-public class GadgetServiceImpl extends DatabaseService {
-	final static Logger logger = Logger.getLogger(GadgetServiceImpl.class);
+public class GadgetUtility extends DatabaseUtility {
+	final static Logger logger = Logger.getLogger(GadgetUtility.class);
 	protected DBCollection collection;
 
-	public GadgetServiceImpl() {
+	public GadgetUtility() {
 		super();
 		collection = db.getCollection(Gadget.class.getSimpleName());
 	}
@@ -69,7 +70,7 @@ public class GadgetServiceImpl extends DatabaseService {
 	}
 
 	public static void main(String[] args) {
-		GadgetServiceImpl i = new GadgetServiceImpl();
+		GadgetUtility i = new GadgetUtility();
 //		EpicVsTestExecution gadget = new EpicVsTestExecution();
 //		gadget.setMetrics(Arrays.asList("PASSED"));
 //		gadget.setRelease("1.2.01");
