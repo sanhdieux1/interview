@@ -37,6 +37,7 @@ public class ExecutionCallable implements Callable<ExecutionIssueResultWapper> {
                 List<ExecutionIssueVO> executionIssues = StoryUtility.getInstance().findAllTestExecutionInStory(issue);
                 resultWapper.setPlanned(issue.getFields().getCustomfield_14809());
                 if(executionIssues != null && !executionIssues.isEmpty()){
+                    logger.info("STORY:"+issue.getKey()+":"+executionIssues.size());
                     resultWapper.getExecutionsVO().addAll(executionIssues);
                 }
             }

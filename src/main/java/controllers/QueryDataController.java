@@ -35,9 +35,9 @@ public class QueryDataController {
             return handleException(e);
         }
     }
-    public Result getListCycleName(@Param("project") String projectName) {
+    public Result getListCycleName(@Param("project") String projectName, @Param("release") String release) {
         try{
-            return handler.getListCycleName(projectName);
+            return handler.getListCycleName(projectName, release);
         } catch (MException e){
             return handleException(e);
         }
@@ -60,13 +60,6 @@ public class QueryDataController {
         }
     }
     
-    public Result getProjectVersionList(@Param("projectId") long id){
-        try{
-            return handler.getProjectVersionList(id);
-        } catch (MException e){
-            return handleException(e);
-        }
-    }
     public Result handleException(MException e){
         Result result = Results.json();
         result.render("type", "error");
