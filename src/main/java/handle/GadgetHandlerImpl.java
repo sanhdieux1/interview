@@ -1,8 +1,16 @@
 package handle;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.BiConsumer;
+import java.util.stream.Collectors;
+
+import org.apache.log4j.Logger;
 
 import models.GadgetData;
+import models.JQLIssueVO;
 import models.UserVO;
 import models.exception.MException;
 import models.gadget.EpicVsTestExecution;
@@ -13,11 +21,11 @@ import ninja.Context;
 import ninja.Result;
 import ninja.Results;
 import service.gadget.GadgetUtility;
+import service.gadget.StoryUtility;
 import util.JSONUtil;
 
 public class GadgetHandlerImpl extends GadgetHandler {
-    private GadgetUtility gadgetService;
-
+    final static Logger logger = Logger.getLogger(GadgetHandlerImpl.class);
     public GadgetHandlerImpl() {
         gadgetService = GadgetUtility.getInstance();
     }
@@ -78,7 +86,7 @@ public class GadgetHandlerImpl extends GadgetHandler {
 
             } else if(Gadget.Type.STORY_TEST_EXECUTION.equals(gadget.getType())){
                 StoryVsTestExecution storyGadget = (StoryVsTestExecution) gadget;
-                storyService.getDataStory(storyGadget);
+                gadgetsData = storyService.getDataStory(storyGadget);
             }
         }
         Result result = Results.json();
@@ -86,5 +94,21 @@ public class GadgetHandlerImpl extends GadgetHandler {
         result.render("data", gadgetsData);
         
         return result;
+    }
+
+    @Override
+    public Result getStoryInEpic(List<String> epics) throws MException {
+        Map<String, List<JQLIssueVO>> storiesIssues = storyService.findStoryInEpic(epics);
+        Map<String, Set<String>> storiesInEpic = new HashMap<>();
+        storiesIssues.forEach(new BiConsumer<String, List<JQLIssueVO>>() {
+            @Override
+            public void accept(String epic, List<JQLIssueVO> storiesIssue) {
+                logger.info(epic+":"+storiesIssue);
+                //Filter issueKey
+                storiesInEpic.put(epic, storiesIssue.stream().map(i -> i.getKey()).collect(Collectors.toSet()));
+            }
+        });
+        
+        return Results.json().render(storiesInEpic);
     }
 }

@@ -10,6 +10,34 @@ public class GadgetData {
     private int planned;
     private int unplanned;
 
+    public void increaseUnexecuted(int number) {
+        unexecuted += number;
+    }
+
+    public void increaseFailed(int number) {
+        failed += number;
+    }
+
+    public void increaseWip(int number) {
+        wip += number;
+    }
+
+    public void increaseBlocked(int number) {
+        blocked += number;
+    }
+
+    public void increasePassed(int number) {
+        passed += number;
+    }
+
+    public void increasePland(int number) {
+        planned += number;
+    }
+
+    public void increaseUnpland(int number) {
+        unplanned += number;
+    }
+
     public String getTitle() {
         return title;
     }

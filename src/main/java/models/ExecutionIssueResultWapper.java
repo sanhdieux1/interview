@@ -6,11 +6,11 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class ExecutionIssueResultWapper {
-    private volatile List<ExecutionIssueVO> executionsVO = Collections.synchronizedList(new ArrayList<>());
-    private AtomicInteger planned = new AtomicInteger(0);
+    private volatile List<ExecutionIssueVO> executionsVO = new ArrayList<>();
+    private int planned;
     
     public void increasePland(int number){
-        planned.addAndGet(number);
+        planned += number;
     }
     
     public List<ExecutionIssueVO> getExecutionsVO() {
@@ -20,12 +20,12 @@ public class ExecutionIssueResultWapper {
         this.executionsVO = executionsVO;
     }
 
-    public Integer getPlanned() {
-        return planned.get();
+    public int getPlanned() {
+        return planned;
     }
 
-    public void setPlanned(Integer planned) {
-        this.planned = new AtomicInteger(planned);
+    public void setPlanned(int planned) {
+        this.planned = planned;
     }
     
 }

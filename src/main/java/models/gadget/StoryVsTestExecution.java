@@ -2,8 +2,10 @@ package models.gadget;
 
 import java.util.List;
 
-import models.main.Release;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import models.main.Release;
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class StoryVsTestExecution implements Gadget {
     private String id;
     private Type type = Type.STORY_TEST_EXECUTION;

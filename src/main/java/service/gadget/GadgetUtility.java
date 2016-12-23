@@ -2,6 +2,7 @@ package service.gadget;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -58,7 +59,11 @@ public class GadgetUtility extends DatabaseUtility {
             throw new MException("cannot insert gadget");
         }
     }
-
+    public static void main(String[] args) throws MException {
+        StoryVsTestExecution gadget = new StoryVsTestExecution();
+        gadget.setStories(Arrays.asList("FNMS-1483", "FNMS-1484","FNMS-1490"));
+        GadgetUtility.getInstance().insert(gadget);
+    }
     public Gadget get(String gadgetId) throws MException {
         Gadget gadget = null;
         BasicDBObject query = new BasicDBObject();
@@ -107,33 +112,34 @@ public class GadgetUtility extends DatabaseUtility {
         return gadgets;
     }
 
-    public GadgetData convertToGadgetData(ExecutionIssueResultWapper result){
+    public GadgetData convertToGadgetData(ExecutionIssueResultWapper wapper) {
         GadgetData gadgetData = new GadgetData();
-        result.getExecutionsVO().forEach(new Consumer<ExecutionIssueVO>() {
-            @Override
-            public void accept(ExecutionIssueVO issue) {
-                switch (issue.getStatus().getName()) {
-                case "PASS":
-                    gadgetData.setPassed(gadgetData.getPassed() + 1);
-                    break;
-                case "FAIL":
-                    gadgetData.setFailed(gadgetData.getFailed() + 1);
-                    break;
-                case "UNEXECUTED":
-                    gadgetData.setUnexecuted(gadgetData.getUnexecuted() + 1);
-                    break;
-                case "WIP":
-                    gadgetData.setWip(gadgetData.getWip() + 1);
-                    break;
-                case "BLOCKED":
-                    gadgetData.setBlocked(gadgetData.getBlocked() + 1);
-                    break;
-                default:
-                    break;
+        if(wapper!=null && wapper.getExecutionsVO() != null){
+            wapper.getExecutionsVO().forEach(new Consumer<ExecutionIssueVO>() {
+                @Override
+                public void accept(ExecutionIssueVO issue) {
+                    switch (issue.getStatus().getName()) {
+                    case "PASS":
+                        gadgetData.increasePassed(1);
+                        break;
+                    case "FAIL":
+                        gadgetData.increaseFailed(1);
+                        break;
+                    case "UNEXECUTED":
+                        gadgetData.increaseUnexecuted(1);
+                        break;
+                    case "WIP":
+                        gadgetData.increaseWip(1);
+                        break;
+                    case "BLOCKED":
+                        gadgetData.increaseBlocked(1);
+                        break;
+                    default:
+                        break;
+                    }
                 }
-            }
-        });
-        
+            });
+        }
         return gadgetData;
     }
     

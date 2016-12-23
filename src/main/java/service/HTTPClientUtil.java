@@ -5,6 +5,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
@@ -32,7 +34,6 @@ public class HTTPClientUtil {
     private BasicCookieStore cookieStore = new BasicCookieStore();
     private static HTTPClientUtil instance;
     private CloseableHttpClient httpclient;
-
     private HTTPClientUtil() {
 
         httpclient = HttpClients.custom().setDefaultCookieStore(cookieStore).build();

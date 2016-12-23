@@ -17,6 +17,9 @@ public class JSONUtil {
         return INSTANCE;
     }
     public <T> List<T> convertJSONtoListObject(String json, Class<T> t) throws MException {
+        if(json == null){
+            return null;
+        }
         List<T> listObject;
         try {
             listObject = mapper.readValue(json,

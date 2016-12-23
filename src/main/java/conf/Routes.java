@@ -19,7 +19,9 @@ public class Routes implements ApplicationRoutes {
         router.GET().route("/gadget/getData").with(GadgetController.class, "getDataGadget");
     	router.POST().route("/gadget/addGadget").with(GadgetController.class, "addGadget");
     	router.GET().route("/gadget/gadgets").with(GadgetController.class, "getGadgets");
+    	router.GET().route("/gadget/getStoryInEpic").with(GadgetController.class,"getStoryInEpic");
     	router.GET().route("/findExecutionIssues").with(EpicController.class,"findExecutionIssues");
+    	
     	router.GET().route("/findAllIssues").with(EpicController.class,"findAllIssues");
     	router.GET().route("/getEpicLinks").with(EpicController.class,"getEpicLinks");
     	router.GET().route("/getassignee").with(AssigneeController.class,"getAssigneeList");

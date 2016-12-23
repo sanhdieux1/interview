@@ -13,31 +13,30 @@ import models.JQLIssuetypeVO.Type;
 import service.gadget.EpicUtility;
 import service.gadget.StoryUtility;
 
-public class ExecutionCallable implements Callable<Void> {
+public class ExecutionCallable implements Callable<ExecutionIssueResultWapper> {
     final static Logger logger = Logger.getLogger(ExecutionCallable.class);
     private JQLIssueVO issue;
     private Type type;
-    private ExecutionIssueResultWapper result;
-    public ExecutionCallable(JQLIssueVO issue, Type type, ExecutionIssueResultWapper result) {
+    public ExecutionCallable(JQLIssueVO issue, Type type) {
         super();
         this.issue = issue;
         this.type = type;
-        this.result = result;
     }
 
     @Override
-    public Void call() throws Exception {
+    public ExecutionIssueResultWapper call() throws Exception {
+        ExecutionIssueResultWapper resultWapper = new ExecutionIssueResultWapper();
         try{
             if(type.equals(Type.TEST)){
                 List<ExecutionIssueVO> executionIssues = EpicUtility.getInstance().findTestExecutionInIsuee(issue.getKey()).getExecutions();
                 if(executionIssues != null && !executionIssues.isEmpty()){
-                    result.getExecutionsVO().addAll(executionIssues);
+                    resultWapper.getExecutionsVO().addAll(executionIssues);
                 }
             } else{
                 List<ExecutionIssueVO> executionIssues = StoryUtility.getInstance().findAllTestExecutionInStory(issue);
-                result.increasePland(issue.getFields().getCustomfield_14809());
+                resultWapper.setPlanned(issue.getFields().getCustomfield_14809());
                 if(executionIssues != null && !executionIssues.isEmpty()){
-                    result.getExecutionsVO().addAll(executionIssues);
+                    resultWapper.getExecutionsVO().addAll(executionIssues);
                 }
             }
         }catch (Exception e) {

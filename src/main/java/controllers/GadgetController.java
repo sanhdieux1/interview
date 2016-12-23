@@ -1,5 +1,7 @@
 package controllers;
 
+import java.util.List;
+
 import com.google.inject.Singleton;
 
 import handle.GadgetHandler;
@@ -9,6 +11,7 @@ import ninja.Context;
 import ninja.Result;
 import ninja.Results;
 import ninja.params.Param;
+import util.JSONUtil;
 
 @Singleton
 public class GadgetController {
@@ -43,6 +46,14 @@ public class GadgetController {
             return handleException(e);
         }
     }
+    public Result getStoryInEpic(@Param("epics") String epic){
+        try{
+            List<String> epics = JSONUtil.getInstance().convertJSONtoListObject(epic, String.class);
+            return handler.getStoryInEpic(epics);
+        } catch (MException e){
+            return handleException(e);
+        }
+    }
 
     public Result handleException(MException e) {
         Result result = Results.json();
@@ -50,4 +61,5 @@ public class GadgetController {
         result.render("data", e.getMessage());
         return result;
     }
+    
 }
