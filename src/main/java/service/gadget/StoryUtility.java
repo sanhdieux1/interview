@@ -117,7 +117,9 @@ public class StoryUtility {
             for(Future<ExecutionIssueResultWapper> result :results){
                 ExecutionIssueResultWapper wapper = result.get();
                 GadgetData data = GadgetUtility.getInstance().convertToGadgetData(wapper);
+                logger.info(wapper);
                 data.setUnplanned(wapper.getPlanned());
+                data.setTitle(wapper.getTitle());
                 storyDatas.add(data);
             }
             return storyDatas;

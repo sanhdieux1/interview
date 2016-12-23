@@ -27,6 +27,7 @@ public class ExecutionCallable implements Callable<ExecutionIssueResultWapper> {
     public ExecutionIssueResultWapper call() throws Exception {
         ExecutionIssueResultWapper resultWapper = new ExecutionIssueResultWapper();
         try{
+            resultWapper.setTitle(issue.getKey());
             if(type.equals(Type.TEST)){
                 List<ExecutionIssueVO> executionIssues = EpicUtility.getInstance().findTestExecutionInIsuee(issue.getKey()).getExecutions();
                 if(executionIssues != null && !executionIssues.isEmpty()){
@@ -42,7 +43,7 @@ public class ExecutionCallable implements Callable<ExecutionIssueResultWapper> {
         }catch (Exception e) {
             logger.error("error:", e);
         }
-        return null;
+        return resultWapper;
     }
 
 }

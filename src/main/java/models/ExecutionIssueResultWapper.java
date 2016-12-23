@@ -8,11 +8,20 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class ExecutionIssueResultWapper {
     private volatile List<ExecutionIssueVO> executionsVO = new ArrayList<>();
     private int planned;
+    private String title;
     
     public void increasePland(int number){
         planned += number;
     }
     
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
     public List<ExecutionIssueVO> getExecutionsVO() {
         return executionsVO;
     }
