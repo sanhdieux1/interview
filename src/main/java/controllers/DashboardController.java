@@ -35,6 +35,7 @@ import filter.SecureFilter;
 import models.ComponentMetrics;
 import models.IA;
 import models.Sonar;
+import models.gadget.Gadget;
 import ninja.Context;
 import ninja.Cookie;
 import ninja.FilterWith;
@@ -494,6 +495,12 @@ public class DashboardController {
 
 			cycleTable.put(cycleList.get(i), assignees);
 		}
+		
+		Map<String, String> gadgetType = new LinkedHashMap<>();
+		gadgetType.put("epic", Gadget.Type.EPIC_US_TEST_EXECUTION.toString());
+		gadgetType.put("story", Gadget.Type.STORY_TEST_EXECUTION.toString());
+		gadgetType.put("cycle", Gadget.Type.TEST_CYCLE_TEST_EXECUTION.toString());
+		gadgetType.put("cycle", Gadget.Type.ASSIGNEE_TEST_EXECUTION.toString());
 
 		return Results.html().render("id", id).render("dashboard", dashboard).render("username", username)
 				.render("alias", alias).render("role", role).render("s_data", s_data2).render("s_datas", s_datas)
@@ -502,7 +509,8 @@ public class DashboardController {
 				.render("epicTestMetric", epicTestMetric).render("epicRelease", epicRelease)
 				.render("storyTable", storyTable).render("assigneeList", assigneeList)
 				.render("assigneeTable", assigneeTable).render("cycleList", cycleList).render("cycleTable", cycleTable)
-				.render("cycleMetricList", cycleMetricList);
+				.render("cycleMetricList", cycleMetricList)
+				.render("gadgetType",gadgetType);
 	}
 
 	@FilterWith(SecureFilter.class)

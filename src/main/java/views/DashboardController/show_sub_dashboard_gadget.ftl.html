@@ -19,12 +19,10 @@
 								<!-- Project Row -->
 								<tr>
 									<td class="col-md-6"><label>Project</label></td>
-									<div class="project-search-div">
 										<td class="col-md-6"><select class="form-control"
 											id="epicProject">
 											<option selected disabled>-Select Project-</option>
 										</select></td>
-									</div>
 								</tr>
 								<!-- Release Row -->
 								<tr>
@@ -59,13 +57,18 @@
 								<!-- Metrics row -->
 								<tr>
 									<td class="col-md-6"><label>Metrics</label></td>
-									<div class="">
-										<td class="col-md-6"><select multiple
-											class="form-control" id="epicMetricMultiSelect">
-												<#list epicTestMetric as metric>
-												<option value="${metric}">${metric}</option> </#list>
-										</select></td>
-									</div>
+									<td class="col-md-6">
+									<select multiple class="form-control"
+										id="epicMetricMultiSelect">
+											<option value="UNEXECUTED">UNEXECUTED</option>
+											<option value="FAILED">FAILED</option>
+											<option value="WIP">WIP</option>
+											<option value="BLOCKED">BLOCKED</option>
+											<option value="PASSED">PASSED</option>
+											<option value="PLANNED">PLANNED</option>
+											<option value="UNPLANNED">UNPLANNED</option>
+									</select>
+									</td>
 								</tr>
 							</tbody>
 						</table>
@@ -125,7 +128,7 @@
 				<a id="us-config-toggle">Show Configuration</a>
 			</div>
 			<div id="us-config">
-				<form action="/dashboard/${id}/update"method="post" 
+				<form
 					class="form-horizontal" role="form">
 					<div class="md-padding" ng-cloak>
 						<table class="table table-bordered">
@@ -133,82 +136,128 @@
 								<!-- US Project Row -->
 								<tr>
 									<td class="col-md-6"><label>Project</label></td>
-									<div class="project-search">
 										<td class="col-md-6"><select class="form-control"
-											id="usProjectKey"> <#list epicTable?keys as project>
-												<option>${project}</option> </#list>
+											id="usProject"> 
+											<option selected disabled>-Select Project-</option>
 										</select></td>
-									</div>
 								</tr>
 								<!-- US Release Row -->
 								<tr>
 									<td class="col-md-6"><label>Release</label></td>
-									<div class="">
 										<td class="col-md-6"><select class="form-control"
-											id="epicReleaseKey"> <#list epicRelease as release>
-												<option>${release}</option> </#list>
+											id="usRelease">
+											<option selected disabled>-Select Version-</option>
+											<option value="1.2.0">R1.2.0</option>
+											<option value="1.2.01">R1.2.01</option>
+											<option value="1.3.0">R1.3.0</option>
 										</select></td>
-									</div>
+								</tr>
+								<!-- Product Row -->
+								<tr>
+									<td class="col-md-6"><label>Product</label></td>
+									<td class="col-md-6"><select multiple id="usProduct" class="form-control">
+									<option selected disabled>-Select Product-</option>
+									<option value="ANV">ANV</option>
+									<option value="PCC">PCC</option>
+									<option value="UTC">UTC</option>
+									<option value="557x Infrastructure">557x Infrastructure</option>
+									</select></td>
 								</tr>
 								<!-- US EPIC LINK Row -->
 								<tr>
 									<td class="col-md-6"><label>Epic Link</label></td>
-									<div class="epic-search">
-										<td class="col-md-6"><select class="form-control"
-											id="assigneeEpicKey"> <#list epicTable?keys as k>
-												<option>${k}</option> </#list>
-										</select></td>
-									</div>
+									<td class="col-md-6">
+										<div id="us-epic-loader" style="display: none;">
+											<div class="loader"></div>
+										</div>
+										
+										<div id="us-epic-available-div" class="col-md-12">
+										<div align="center">
+											<div class="col-md-6" align="center">
+												<label>Available</label> <select class="form-control"
+													multiple id="usEpicAvailable">
+												</select>
+												
+												<button id="us-add-epic-btn" class="btn btn-success">Add</button>
+											</div>
+											<div class="col-md-6" align="center">
+												<label>To be fetched</label> <select class="form-control"
+													multiple id="usEpic">
+												</select>
+												<button id="us-remove-epic-btn" class="btn btn-success">Remove</button>
+											</div>
+										</div>
+									</td>
 								</tr>
 
 								<!-- Us story row -->
 								<tr>
 									<td class="col-md-6"><label>User Story</label></td>
-									<div class="story-search">
-										<td class="col-md-6"><select multiple
-											class="form-control" id="usMultiSelect"> <#list
-												storyTable?keys as k>
-												<option value="${k}">${k}</option> </#list>
-										</select></td>
-									</div>
+										<td class="col-md-6">
+										<select multiple
+											class="form-control" id="usMultiSelect">
+										</select>
+										<div id="us-us-loader" style="display: none">
+												<div class="loader"></div>
+										</div>
+										</td>
+										
 								</tr>
 								<!-- US Metrics row -->
 								<tr>
 									<td class="col-md-6"><label>Metrics</label></td>
-									<div class="">
-										<td class="col-md-6"><select multiple
-											class="form-control" id="epicMetricMultiSelect">
-												<#list epicTestMetric as metric>
-												<option>${metric}</option> </#list>
-										</select></td>
-									</div>
+									<td class="col-md-6"><select multiple class="form-control"
+										id="usMetricMultiSelect">
+											<option value="UNEXECUTED">UNEXECUTED</option>
+											<option value="FAILED">FAILED</option>
+											<option value="WIP">WIP</option>
+											<option value="BLOCKED">BLOCKED</option>
+											<option value="PASSED">PASSED</option>
+											<option value="PLANNED">PLANNED</option>
+											<option value="UNPLANNED">UNPLANNED</option>
+									</select></td>
 								</tr>
 							</tbody>
 						</table>
 					</div>
 					<#if dashboard.owner == alias>
-					<button type="button" id="epic-submit" class="btn btn-success">Update</button>
+					<button type="button" id="us-update" class="btn btn-success">Update</button>
 					</#if>
 				</form>
 			</div>
 			<br>
-			<table
-				class="table table-striped table-bordered table-hover table-condensed">
-				<thead>
-					<tr>
-						<th>USER STORY</th> <#list epicTestMetric as metric>
-						<td><b>${metric}</b></td> </#list>
-					</tr>
-				</thead>
-				<tbody>
-					<#list storyTable?keys as k>
-					<tr>
-						<td><a><b>${k}</b></a></td> <#list storyTable[k]?keys as k1>
-						<td>${storyTable[k][k1]}</td> </#list>
-					</tr>
-					</#list>
-				</tbody>
-			</table>
+			<div id="us-table-container">
+				<table id="us-table"
+					class="table table-striped table-bordered table-hover table-condensed">
+					<thead>
+						<tr>
+							<th>Epic Url</th>
+							<th>UNEXECUTED</th>
+							<th>FAILED</th>
+							<th>WIP</th>
+							<th>BLOCKED</th>
+							<th>PASSED</th>
+							<th>PLANNED</th>
+							<th>UNPLANNED</th>
+						</tr>
+					</thead>
+					<tfoot>
+						<tr>
+							<th>Epic Url</th>
+							<th>UNEXECUTED</th>
+							<th>FAILED</th>
+							<th>WIP</th>
+							<th>BLOCKED</th>
+							<th>PASSED</th>
+							<th>PLANNED</th>
+							<th>UNPLANNED</th>
+						</tr>
+					</tfoot>
+				</table>
+			</div>
+			<div id="us-table-loader" style="display: none">
+				<div class="loader"></div>
+			</div>
 		</div>
 	</div>
 </div>

@@ -1,0 +1,107 @@
+<div id="epic-test-execution-div" class="col-md-12" style="min-height: 20px;" ng-controller="epicController">
+	<input type="hidden" ng-model="widgetId">
+	<div class="panel panel-info">
+		<div class="panel-heading">
+			<div class="panel-title">
+				<h4>Epic Test Execution Report</h4>
+			</div>
+		</div>
+		<div class="panel-body">
+			<div class="text-align-right">
+				<a id="epic-config-toggle">Show Configuration</a>
+			</div>
+			<div id="epic-config">
+				<form class="form-horizontal" role="form">
+					<div class="md-padding" ng-cloak>
+						<table class="table table-bordered">
+							<tbody>
+								<!-- Project Row -->
+								<tr>
+									<td class="col-md-6"><label>Project</label></td>
+										<td class="col-md-6"><select class="form-control" ng-change="fetchEpics()" ng-init="initFetchProjects()" ng-model="selectedProject">
+											<option selected disabled>-Select Project-</option>
+											<option ng-repeat="project in projects" value="{{project}}">{{project}}</option>
+										</select></td>
+								</tr>
+								<!-- Release Row -->
+								<tr>
+									<td class="col-md-6"><label>Release</label></td>
+									<td class="col-md-6"><select class="form-control" ng-change="fetchEpics()" ng-model="selectedRelease">
+										<option selected disabled>-Select Version-</option>
+										<option ng-repeat="release in eeleases" value="{{release}}">R{{release}}</option>
+									</select></td>
+								</tr>
+								<!-- Product Row -->
+								<tr>
+									<td class="col-md-6"><label>Product</label></td>
+									<td class="col-md-6"><select multiple class="form-control" ng-model="selectedProducts">
+									<option selected disabled>-Select Product-</option>
+									<option ng-repeat="product in products" value="{{product}}">{{product}}</option>
+									</select></td>
+								</tr>
+								<!-- Epic Link Row -->
+								<tr>
+									<td class="col-md-6"><label>Epic Link</label></td>
+									<td class="col-md-6"><select multiple class="form-control" ng-model="epics">
+										<option ng-repeat="epic in epics" value="{{epic}}">{{epic}}</option>
+									</select>
+										<div style="display:none" ng-show="epic-loading">
+											<div class="loader"></div>
+										</div>
+									</td>
+
+								</tr>
+								<!-- Metrics row -->
+								<tr>
+									<td class="col-md-6"><label>Metrics</label></td>
+									<td class="col-md-6">
+									<select multiple class="form-control" ng-model="selectedMetrics">
+										<option ng-repeat="metric in metrics" value={{metric}}>{{metric}}</option>
+									</select>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+					<#if dashboard.owner == alias>
+						<button type="button" id="epic-add-gadget" class="btn btn-success">Add Gadget To Database</button>
+						<button type="button" id="epic-get-data" class="btn btn-success">Draw Table</button>
+					</#if>
+				</form>
+			</div>
+			<br>
+			<div id="epic-table-container">
+				<table class="table table-striped table-bordered table-hover table-condensed" ng-model="epicTable">
+					<thead>
+						<tr>
+							<th>Title</th>
+							<th>UNEXECUTED</th>
+							<th>FAILED</th>
+							<th>WIP</th>
+							<th>BLOCKED</th>
+							<th>PASSED</th>
+							<th>PLANNED</th>
+							<th>UNPLANNED</th>
+						</tr>
+					</thead>
+					<tfoot>
+						<tr>
+							<th>Title</th>
+							<th>UNEXECUTED</th>
+							<th>FAILED</th>
+							<th>WIP</th>
+							<th>BLOCKED</th>
+							<th>PASSED</th>
+							<th>PLANNED</th>
+							<th>UNPLANNED</th>
+						</tr>
+					</tfoot>
+				</table>
+			</div>
+			<div style="display:none" align="center" ng-show="table-loading">
+				<div class="loader"></div>
+				<h2>Data is loading...</h2>
+			</div>
+		</div>
+	</div>
+</div>
