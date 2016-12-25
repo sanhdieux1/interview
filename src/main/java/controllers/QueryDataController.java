@@ -10,7 +10,8 @@ import filter.CrossOriginAccessControlFilter;
 import handle.ExceptionHandler;
 import handle.QueryHandler;
 import handle.QueryHandlerImpl;
-import models.exception.MException;
+import manament.log.LoggerWapper;
+import models.exception.APIException;
 import ninja.Context;
 import ninja.FilterWith;
 import ninja.Result;
@@ -20,7 +21,7 @@ import ninja.params.Param;
 @Singleton
 @FilterWith(CrossOriginAccessControlFilter.class)
 public class QueryDataController {
-    final static Logger logger = Logger.getLogger(QueryDataController.class);
+    final static LoggerWapper logger = LoggerWapper.getLogger(QueryDataController.class);
     private QueryHandler handler;
     
     public QueryDataController() {
@@ -31,14 +32,14 @@ public class QueryDataController {
             Context context) {
         try{
             return handler.getAssigneeTable(username, cyclename, project, context);
-        } catch (MException e){
+        } catch (APIException e){
             return handleException(e);
         }
     }
     public Result getListCycleName(@Param("project") String projectName, @Param("release") String release) {
         try{
             return handler.getListCycleName(projectName, release);
-        } catch (MException e){
+        } catch (APIException e){
             return handleException(e);
         }
     }
@@ -46,21 +47,20 @@ public class QueryDataController {
     public Result getProjectList(){
         try{
             return handler.getProjectList();
-        } catch (MException e){
+        } catch (APIException e){
             return handleException(e);
         }
     }
     
     public Result addGadget(@Param("type") String type, @Param("gadgetData") String gadgetData){
-        logger.info(gadgetData);
         try{
             return handler.addGadget(type, gadgetData);
-        } catch (MException e){
+        } catch (APIException e){
             return handleException(e);
         }
     }
     
-    public Result handleException(MException e){
+    public Result handleException(APIException e){
         Result result = Results.json();
         result.render("type", "error");
         result.render("data", e.getMessage());

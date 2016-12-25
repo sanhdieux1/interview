@@ -12,6 +12,7 @@ import org.jsoup.nodes.Document;
 
 import com.google.inject.Singleton;
 
+import manament.log.LoggerWapper;
 import ninja.Context;
 import ninja.Result;
 import ninja.Results;
@@ -25,7 +26,7 @@ import util.LinkUtil;
 @Singleton
 public class LoginLogoutController {
 
-	final static Logger logger = Logger.getLogger(LoginLogoutController.class);
+	final static LoggerWapper logger = LoggerWapper.getLogger(LoginLogoutController.class);
 	
     public Result login(Context context) {
         return Results.html();
@@ -50,7 +51,7 @@ public class LoginLogoutController {
         			JSONObject jsonObject = (JSONObject) parser.parse(json);
         			session.put("alias", jsonObject.get("displayName").toString());
         		} catch (ParseException e) {
-        			logger.error(String.format("GET_USER_INFO OF %s ERROR ", username, e));
+        			logger.fastDebug(String.format("GET_USER_INFO OF %s ERROR ", username, e));
         		}
             } else {
             	session.put("alias", username);

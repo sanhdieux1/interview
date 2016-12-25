@@ -9,10 +9,11 @@ import java.util.stream.Collectors;
 
 import org.apache.log4j.Logger;
 
+import manament.log.LoggerWapper;
 import models.GadgetData;
 import models.JQLIssueVO;
 import models.UserVO;
-import models.exception.MException;
+import models.exception.APIException;
 import models.gadget.EpicVsTestExecution;
 import models.gadget.Gadget;
 import models.gadget.Gadget.Type;
@@ -20,25 +21,25 @@ import models.gadget.StoryVsTestExecution;
 import ninja.Context;
 import ninja.Result;
 import ninja.Results;
-import service.gadget.GadgetUtility;
-import service.gadget.StoryUtility;
 import util.JSONUtil;
+import util.gadget.GadgetUtility;
+import util.gadget.StoryUtility;
 
 public class GadgetHandlerImpl extends GadgetHandler {
-    final static Logger logger = Logger.getLogger(GadgetHandlerImpl.class);
+    final static LoggerWapper logger = LoggerWapper.getLogger(GadgetHandlerImpl.class);
     public GadgetHandlerImpl() {
         gadgetService = GadgetUtility.getInstance();
     }
 
     @Override
-    public Result addGadget(String type, String data, Context context) throws MException {
+    public Result addGadget(String type, String data, Context context) throws APIException {
         Gadget gadget = null;
         Type gadgetType = Gadget.Type.valueOf(type);
         if(gadgetType == null){
-            throw new MException("type " + type + " not available");
+            throw new APIException("type " + type + " not available");
         }
         if(data == null){
-            throw new MException("data cannot be null");
+            throw new APIException("data cannot be null");
         }
         String username = (String) context.getAttribute("username");
         String friendlyname = (String) context.getAttribute("alias");
@@ -58,22 +59,22 @@ public class GadgetHandlerImpl extends GadgetHandler {
             gadget = storyGadget;
         }
         if(gadget != null){
-            gadgetService.insert(gadget);
+            gadgetService.insertOrUpdate(gadget);
         } else{
-            throw new MException("can not map to Epic gadget");
+            throw new APIException("can not map to Epic gadget");
         }
 
         return Results.json().render("message", "successful");
     }
 
     @Override
-    public Result getGadgets() throws MException {
+    public Result getGadgets() throws APIException {
         List<Gadget> gadgets = gadgetService.getAll();
         return Results.json().render(gadgets);
     }
 
     @Override
-    public Result getDataGadget(String id) throws MException {
+    public Result getDataGadget(String id) throws APIException {
         List<GadgetData> gadgetsData = null;
         Gadget gadget = gadgetService.get(id);
         if(gadget != null){
@@ -97,13 +98,12 @@ public class GadgetHandlerImpl extends GadgetHandler {
     }
 
     @Override
-    public Result getStoryInEpic(List<String> epics) throws MException {
+    public Result getStoryInEpic(List<String> epics) throws APIException {
         Map<String, List<JQLIssueVO>> storiesIssues = storyService.findStoryInEpic(epics);
         Map<String, Set<String>> storiesInEpic = new HashMap<>();
         storiesIssues.forEach(new BiConsumer<String, List<JQLIssueVO>>() {
             @Override
             public void accept(String epic, List<JQLIssueVO> storiesIssue) {
-                logger.info(epic+":"+storiesIssue);
                 //Filter issueKey
                 storiesInEpic.put(epic, storiesIssue.stream().map(i -> i.getKey()).collect(Collectors.toSet()));
             }

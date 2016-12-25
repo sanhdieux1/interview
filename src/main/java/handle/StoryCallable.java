@@ -5,12 +5,13 @@ import java.util.concurrent.Callable;
 
 import org.apache.log4j.Logger;
 
+import manament.log.LoggerWapper;
 import models.JQLIssueVO;
 import models.StoryResultWapper;
-import service.gadget.EpicUtility;
+import util.gadget.EpicUtility;
 
 public class StoryCallable implements Callable<StoryResultWapper> {
-    final static Logger logger = Logger.getLogger(StoryCallable.class);
+    final static LoggerWapper logger = LoggerWapper.getLogger(StoryCallable.class);
     private String epic;
     
     public StoryCallable(String epic) {

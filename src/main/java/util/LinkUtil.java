@@ -67,6 +67,7 @@ public class LinkUtil {
             URL url = new URL(link);
             Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(ip, port));
             HttpURLConnection uc = (HttpURLConnection) url.openConnection(proxy);
+            uc.setConnectTimeout(3000);
             // non-proxy
             // HttpURLConnection uc = (HttpURLConnection)url.openConnection();
 
@@ -95,9 +96,11 @@ public class LinkUtil {
             try {
                 respond = Jsoup.connect(Constant.LINK_CRUCIBLE)
                         .header("authorization", "Basic " + token).timeout(Constant.TIMEOUT)
+                        .ignoreHttpErrors(true)
+                        .ignoreContentType(true)
                         .execute();
             } catch (IOException e) {
-                logger.error(e);
+                logger.error("Cannot verify user",e);
                 return false;
             }
             return respond.header("X-AUSERNAME").equals(username);
@@ -105,73 +108,5 @@ public class LinkUtil {
         return false;
     }
 
-    public String getLegacyDataWithProxy(String path, Map<String, String> parameters) {
-        String host = PropertiesUtil.getInstance().getString(Constant.RESOURCE_BUNLE_HOST);
-        String scheme = PropertiesUtil.getInstance().getString(Constant.RESOURCE_BUNLE_HOST_TYPE);
-        URIBuilder builder = new URIBuilder();
-        builder.setCharset(StandardCharsets.UTF_8);
-        builder.setScheme(scheme).setHost(host).setPath(path);
-        builder.setUserInfo("\"");
-        parameters.forEach(new BiConsumer<String, String>() {
-            @Override
-            public void accept(String paramName, String paramValue) {
-                builder.setParameter(paramName, paramValue);
-            }
-        });
-
-        StringBuffer result = new StringBuffer();
-        CloseableHttpResponse response = null;
-        BufferedReader rd = null;
-        try {
-            URI uri = builder.build();
-            logger.info("Connecting to URI " + uri);
-            HttpGet httpget = new HttpGet(uri);
-            RequestConfig config = getProxyConfig();
-            if (config != null) {
-                httpget.setConfig(config);
-            }
-            try {
-                response = HTTPClientUtil.getInstance().execute(httpget);
-                String line = "";
-                if (response != null) {
-                    rd = new BufferedReader(
-                            new InputStreamReader(response.getEntity().getContent()));
-                    while ((line = rd.readLine()) != null) {
-                        result.append(line);
-                    }
-                }
-            } finally {
-                if (response != null) {
-                    response.close();
-                }
-                if(rd != null){
-                    rd.close();
-                }
-            }
-        } catch (URISyntaxException | IOException e) {
-            logger.error("cannot connect to " + host, e);
-        }
-        return result.toString();
-    }
-
-    public RequestConfig getProxyConfig() {
-        RequestConfig config = null;
-        String proxyIP = PropertiesUtil.getInstance().getString(Constant.RESOURCE_BUNLE_PROXY_IP);
-        String proxyPortStr = PropertiesUtil.getInstance().getString(Constant.RESOURCE_BUNLE_PROXY_PORT);
-        String proxyType = PropertiesUtil.getInstance().getString(Constant.RESOURCE_BUNLE_PROXY_TYPE);
-        int proxyPort = 0;
-        try {
-            if (proxyPortStr != null) {
-                proxyPort = Integer.parseInt(proxyPortStr);
-            }
-        } catch (NumberFormatException e) {
-            // ignore exeption
-        }
-        if (proxyIP != null && proxyType != null) {
-//            logger.info("using proxy:" + proxyType + "://" + proxyIP + ":" + proxyPort);
-            HttpHost proxy = new HttpHost(proxyIP, proxyPort, proxyType);
-            config = RequestConfig.custom().setProxy(proxy).build();
-        }
-        return config;
-    }
+  
 }

@@ -1,10 +1,12 @@
 package models.gadget;
 
 import java.util.List;
+import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import models.main.Release;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class StoryVsTestExecution implements Gadget {
     private String id;
@@ -14,8 +16,8 @@ public class StoryVsTestExecution implements Gadget {
     private Release release;
     private List<String> metrics;
     private String epic;
-    private List<String> stories;
-
+    private Set<String> stories;
+    private boolean selectAll;
     private String user;
 
     @Override
@@ -77,12 +79,21 @@ public class StoryVsTestExecution implements Gadget {
         this.epic = epic;
     }
 
-    public List<String> getStories() {
+    public Set<String> getStories() {
         return stories;
     }
 
-    public void setStories(List<String> stories) {
+    public void setStories(Set<String> stories) {
         this.stories = stories;
+    }
+
+    @Override
+    public boolean isSelectAll() {
+        return selectAll;
+    }
+
+    public void setSelectAll(boolean selectAll) {
+        this.selectAll = selectAll;
     }
 
 }

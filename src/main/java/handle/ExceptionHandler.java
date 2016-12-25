@@ -4,7 +4,7 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-import models.exception.MException;
+import models.exception.APIException;
 import ninja.Results;
 
 public class ExceptionHandler implements InvocationHandler {
@@ -21,8 +21,8 @@ public class ExceptionHandler implements InvocationHandler {
             return method.invoke(handler, args);
         } catch (InvocationTargetException e){
             Throwable t = e.getTargetException();
-            if(t instanceof MException){
-                MException mException = (MException) t;
+            if(t instanceof APIException){
+                APIException mException = (APIException) t;
                 return Results.json().render(mException);
             }
             throw t;

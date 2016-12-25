@@ -1,15 +1,14 @@
 package util;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
-import org.apache.log4j.Logger;
+import manament.log.LoggerWapper;
 
 
 public class PropertiesUtil {
-	final static Logger logger = Logger.getLogger(PropertiesUtil.class);
+	final static LoggerWapper logger = LoggerWapper.getLogger(PropertiesUtil.class);
 	public static Properties prop = new Properties();
 	private static PropertiesUtil INSTANCE = new PropertiesUtil();
 	private PropertiesUtil(){

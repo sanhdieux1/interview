@@ -1,20 +1,28 @@
 package models.exception;
 
-public class MException extends Exception {
+public class APIException extends Exception {
     private static final long serialVersionUID = -4530140103715612384L;
     private String message;
     private MErrorCode errorCode = MErrorCode.GENERIC;
-    public MException() {
+    public APIException() {
         super();
         
     }
-    public MException(String message) {
+    public APIException(String message) {
         super(message);
         this.message = message;
     }
-    
-    public MException(String message, MErrorCode errorCode) {
+    public APIException(String message, Throwable t) {
+        super(message, t);
+        this.message = message;
+    }
+    public APIException(String message, MErrorCode errorCode) {
         super();
+        this.message = message;
+        this.errorCode = errorCode;
+    }
+    public APIException(String message, MErrorCode errorCode, Throwable t) {
+        super(t);
         this.message = message;
         this.errorCode = errorCode;
     }

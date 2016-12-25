@@ -1,9 +1,9 @@
 package handle;
 
-import service.gadget.EpicUtility;
-import service.gadget.GadgetUtility;
-import service.gadget.StoryUtility;
-import service.gadget.UserUtility;
+import util.gadget.EpicUtility;
+import util.gadget.GadgetUtility;
+import util.gadget.StoryUtility;
+import util.gadget.UserUtility;
 
 public abstract class Handler {
 	protected UserUtility userService;

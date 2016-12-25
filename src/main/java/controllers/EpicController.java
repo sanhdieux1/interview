@@ -7,7 +7,8 @@ import com.google.inject.Singleton;
 import filter.CrossOriginAccessControlFilter;
 import handle.EpicHandler;
 import handle.EpicHandlerImpl;
-import models.exception.MException;
+import manament.log.LoggerWapper;
+import models.exception.APIException;
 import ninja.FilterWith;
 import ninja.Result;
 import ninja.Results;
@@ -16,7 +17,7 @@ import ninja.params.Param;
 @Singleton
 @FilterWith(CrossOriginAccessControlFilter.class)
 public class EpicController {
-    final static Logger logger = Logger.getLogger(EpicController.class);
+    final static LoggerWapper logger = LoggerWapper.getLogger(EpicController.class);
     private EpicHandler handler;
 
     public EpicController() {
@@ -28,7 +29,7 @@ public class EpicController {
     public Result getEpicLinks(@Param("project") String project, @Param("release") String release) {
         try{
             return handler.getEpicLinks(project, release);
-        } catch (MException e){
+        } catch (APIException e){
             return handleException(e);
         }
     }
@@ -36,7 +37,7 @@ public class EpicController {
     public Result findAllIssues(@Param("epic") String epic) {
         try{
             return handler.findAllIssues(epic);
-        } catch (MException e){
+        } catch (APIException e){
             return handleException(e);
         }
     }
@@ -44,12 +45,12 @@ public class EpicController {
     public Result findExecutionIssues(@Param("issueKey") String issueKey) {
         try{
             return handler.findExecutionIsuee(issueKey);
-        } catch (MException e){
+        } catch (APIException e){
             return handleException(e);
         }
     }
     
-    public Result handleException(MException e){
+    public Result handleException(APIException e){
         Result result = Results.json();
         result.render("type", "error");
         result.render("data", e.getMessage());

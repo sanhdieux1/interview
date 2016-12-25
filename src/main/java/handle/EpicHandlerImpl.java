@@ -8,45 +8,36 @@ import java.util.stream.Collectors;
 
 import org.apache.log4j.Logger;
 
+import manament.log.LoggerWapper;
 import models.ExecutionIssueVO;
-import models.exception.MException;
+import models.exception.APIException;
+import models.main.ExecutionsVO;
 import models.main.JQLSearchResult;
 import ninja.Result;
 import ninja.Results;
+import service.HTTPClientUtil;
 import util.Constant;
 import util.JSONUtil;
 import util.LinkUtil;
 import util.PropertiesUtil;
 
 public class EpicHandlerImpl extends EpicHandler {
-    final static Logger logger = Logger.getLogger(EpicHandlerImpl.class);
+    final static LoggerWapper logger = LoggerWapper.getLogger(EpicHandlerImpl.class);
+    
 
     @Override
-    public Result getEpicLinks(String project, String release) throws MException {
-        Set<String> result = null;
-        String query = "project = \"%s\" and type = epic and fixVersion=%s";
-        Map<String, String> parameters = new HashMap<String, String>();
-        parameters.put(Constant.PARAMERTER_JQL_QUERY, String.format(query, project, release));
-        parameters.put(Constant.PARAMERTER_MAXRESULTS, "10000");
-        parameters.put(Constant.PARAMERTER_OFFSET, "0");
-        String data = LinkUtil.getInstance().getLegacyDataWithProxy(
-                PropertiesUtil.getInstance().getString(Constant.RESOURCE_BUNLE_SEARCH_PATH), parameters);
-        JQLSearchResult searchResult = JSONUtil.getInstance().convertJSONtoObject(data,
-                JQLSearchResult.class);
-        if (searchResult != null) {
-            result = searchResult.getIssues().stream().map(t -> t.getKey())
-                    .collect(Collectors.toSet());
-        }
+    public Result getEpicLinks(String project, String release) throws APIException {
+        Set<String> result = epicService.getEpicLinks(project, release);
         return Results.json().render(result);
     }
 
     @Override
-    public Result findAllIssues(String epic) throws MException {
+    public Result findAllIssues(String epic) throws APIException {
         return Results.json().render(epicService.findAllIssuesInEpicLink(epic));
     }
 
     @Override
-    public Result findExecutionIsuee(String issueKey) throws MException {
+    public Result findExecutionIsuee(String issueKey) throws APIException {
         return Results.json().render(epicService.findTestExecutionInIsuee(issueKey));
     }
 
