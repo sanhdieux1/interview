@@ -7,13 +7,12 @@ import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
-import org.apache.log4j.Logger;
-
 import manament.log.LoggerWapper;
 import models.GadgetData;
 import models.JQLIssueVO;
 import models.UserVO;
 import models.exception.APIException;
+import models.gadget.AssigneeVsTestExecution;
 import models.gadget.EpicVsTestExecution;
 import models.gadget.Gadget;
 import models.gadget.Gadget.Type;
@@ -23,10 +22,10 @@ import ninja.Result;
 import ninja.Results;
 import util.JSONUtil;
 import util.gadget.GadgetUtility;
-import util.gadget.StoryUtility;
 
 public class GadgetHandlerImpl extends GadgetHandler {
     final static LoggerWapper logger = LoggerWapper.getLogger(GadgetHandlerImpl.class);
+    
     public GadgetHandlerImpl() {
         gadgetService = GadgetUtility.getInstance();
     }
@@ -50,7 +49,9 @@ public class GadgetHandlerImpl extends GadgetHandler {
             epicGadget.setUser(userVO.getUsername());
             gadget = epicGadget;
         } else if(Gadget.Type.ASSIGNEE_TEST_EXECUTION.equals(gadgetType)){
-
+            AssigneeVsTestExecution assigneeGadget = JSONUtil.getInstance().convertJSONtoObject(data, AssigneeVsTestExecution.class);
+            assigneeGadget.setUser(userVO.getUsername());
+            gadget = assigneeGadget;
         } else if(Gadget.Type.TEST_CYCLE_TEST_EXECUTION.equals(gadgetType)){
 
         } else if(Gadget.Type.STORY_TEST_EXECUTION.equals(gadgetType)){
@@ -84,9 +85,10 @@ public class GadgetHandlerImpl extends GadgetHandler {
                 gadgetsData = new HashMap<>();
                 gadgetsData.put(epicGadget.getProjectName(), epicData);
             } else if(Gadget.Type.TEST_CYCLE_TEST_EXECUTION.equals(gadget.getType())){
-
+                
             } else if(Gadget.Type.ASSIGNEE_TEST_EXECUTION.equals(gadget.getType())){
-
+                AssigneeVsTestExecution assigneeGadget = (AssigneeVsTestExecution) gadget;
+                gadgetsData = assigneeService.getDataAssignee(assigneeGadget);
             } else if(Gadget.Type.STORY_TEST_EXECUTION.equals(gadget.getType())){
                 StoryVsTestExecution storyGadget = (StoryVsTestExecution) gadget;
                 gadgetsData = storyService.getDataStory(storyGadget);
@@ -113,4 +115,11 @@ public class GadgetHandlerImpl extends GadgetHandler {
         
         return Results.json().render(storiesInEpic);
     }
+
+    @Override
+    public Result getProjectList() throws APIException {
+        return Results.json().render(gadgetService.getProjectList());
+    }
+    
+   
 }

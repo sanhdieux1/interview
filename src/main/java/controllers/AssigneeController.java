@@ -8,8 +8,8 @@ import com.google.inject.Singleton;
 
 import filter.CrossOriginAccessControlFilter;
 import handle.ExceptionHandler;
-import handle.QueryHandler;
-import handle.QueryHandlerImpl;
+import handle.AssigneeHandler;
+import handle.AssigneeHandlerImpl;
 import manament.log.LoggerWapper;
 import models.exception.APIException;
 import ninja.FilterWith;
@@ -21,11 +21,10 @@ import ninja.params.Param;
 @FilterWith(CrossOriginAccessControlFilter.class)
 public class AssigneeController {
 	final static LoggerWapper logger = LoggerWapper.getLogger(AssigneeController.class);
-    private QueryHandler handler;
+    private AssigneeHandler handler;
     
     public AssigneeController() {
-        handler = new QueryHandlerImpl();
-        handler = (QueryHandler) Proxy.newProxyInstance(QueryHandler.class.getClassLoader(), new Class[]{QueryHandler.class}, new ExceptionHandler(handler));
+        handler = new AssigneeHandlerImpl();
     }
     
     public Result getAssigneeList(@Param("project") String projectName){
@@ -36,7 +35,13 @@ public class AssigneeController {
             return handleException(e);
         }
     }
-    
+    public Result getListCycleName(@Param("project") String projectName, @Param("release") String release) {
+        try{
+            return handler.getListCycleName(projectName, release);
+        } catch (APIException e){
+            return handleException(e);
+        }
+    }
     public Result handleException(APIException e){
         Result result = Results.json();
         result.render("type", "error");

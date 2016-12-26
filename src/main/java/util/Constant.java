@@ -43,6 +43,7 @@ public class Constant {
     public static final String PARAMERTER_MAXRESULTS = "maxResults";
     public static final String PARAMERTER_OFFSET = "offset";
     public static final String AND = " AND ";
+    public static final String OR = " OR ";
     //database
     public static final String DATABASE_SCHEMA = "DATABASE_SCHEMA";
 }

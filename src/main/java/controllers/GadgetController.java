@@ -62,4 +62,11 @@ public class GadgetController {
         return result;
     }
     
+    public Result getProjectList(){
+        try{
+            return handler.getProjectList();
+        } catch (APIException e){
+            return handleException(e);
+        }
+    }
 }

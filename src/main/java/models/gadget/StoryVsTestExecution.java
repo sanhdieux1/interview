@@ -13,8 +13,7 @@ public class StoryVsTestExecution implements Gadget {
     private String id;
     private Type type = Type.STORY_TEST_EXECUTION;
     private String projectName;
-    // fixVersion
-    private Release release;
+    private Release release; // fixVersion
     private List<String> metrics;
     private Set<String> epic;
     private Map<String, Set<String>> stories;

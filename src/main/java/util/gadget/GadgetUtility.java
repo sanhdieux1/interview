@@ -26,12 +26,16 @@ import models.ExecutionIssueResultWapper;
 import models.ExecutionIssueVO;
 import models.GadgetData;
 import models.JQLIssueVO;
+import models.ProjectVO;
 import models.exception.APIErrorCode;
 import models.exception.APIException;
+import models.gadget.AssigneeVsTestExecution;
 import models.gadget.EpicVsTestExecution;
 import models.gadget.Gadget;
 import models.gadget.StoryVsTestExecution;
 import models.main.JQLSearchResult;
+import ninja.Result;
+import ninja.Results;
 import service.DatabaseUtility;
 import service.HTTPClientUtil;
 import util.Constant;
@@ -40,6 +44,7 @@ import util.PropertiesUtil;
 
 public class GadgetUtility extends DatabaseUtility {
     final static LoggerWapper logger = LoggerWapper.getLogger(GadgetUtility.class);
+    private static Set<String> projectsCache = new HashSet<>();
     private static GadgetUtility INSTANCE = new GadgetUtility();
 
     protected DBCollection collection;
@@ -68,8 +73,10 @@ public class GadgetUtility extends DatabaseUtility {
                 updateQuery.append("$set", dbObject);
                 BasicDBObject searchQuery = new BasicDBObject();
                 searchQuery.append("_id", new ObjectId(id));
+                logger.fasttrace("update gadget id %s", id);
                 collection.update(searchQuery, updateQuery);
             } else {
+                logger.fasttrace("insert gadget:%s by user:%s", gadget.getType(), gadget.getUser());
                 collection.insert(dbObject);
             }
         } catch (JsonProcessingException e) {
@@ -79,23 +86,27 @@ public class GadgetUtility extends DatabaseUtility {
     }
 
     public static void main(String[] args) throws APIException {
-        StoryVsTestExecution gadget = new StoryVsTestExecution();
-        Map<String, Set<String>> stories = new HashMap<>();
-        
-//        new JQLIssueVO
-        stories.put("FNMS-96",Arrays.asList("FNMS-1483", "FNMS-1484", "FNMS-1490", "FNMS-650").stream().collect(Collectors.toSet()));
-        gadget.setId("58609eec8dbec753e43964fd");
-        gadget.setSelectAll(true);
-        gadget.setStories(stories);
-        gadget.setProjectName("FNMS-557x");
-        gadget.setEpic(Arrays.asList("FNMS-96").stream().collect(Collectors.toSet()));
+        AssigneeVsTestExecution gadget = new AssigneeVsTestExecution();
+        Set<String> assignee = new HashSet<>();
+        assignee.add("vs023");
+        assignee.add("snsriniv");
+        gadget.setAssignee(assignee);
+        gadget.setProjectName("FNMS 557x");
+        Set<String> cyckes = new HashSet<>();
+        cyckes.add("PCC");
+        gadget.setCycles(cyckes);
         GadgetUtility.getInstance().insertOrUpdate(gadget);
     }
 
     public Gadget get(String gadgetId) throws APIException {
         Gadget gadget = null;
         BasicDBObject query = new BasicDBObject();
-        query.put("_id", new ObjectId(gadgetId));
+        try{
+            query.put("_id", new ObjectId(gadgetId));
+        } catch (java.lang.IllegalArgumentException e){
+            logger.fasttrace("gadget id %s not found", gadgetId);
+            return null;
+        }
         DBObject dbObj = collection.findOne(query);
         if (dbObj != null && Gadget.Type.valueOf(((String) dbObj.get("type"))) != null) {
             Gadget.Type type = Gadget.Type.valueOf(((String) dbObj.get("type")));
@@ -107,7 +118,10 @@ public class GadgetUtility extends DatabaseUtility {
                     gadget = epicGadget;
 
                 } else if (type == Gadget.Type.ASSIGNEE_TEST_EXECUTION) {
-
+                    AssigneeVsTestExecution assigneeGadget = mapper.readValue(dbObj.toString(),
+                            AssigneeVsTestExecution.class);
+                    assigneeGadget.setId(getObjectId(dbObj));
+                    gadget = assigneeGadget;
                 } else if (type == Gadget.Type.TEST_CYCLE_TEST_EXECUTION) {
 
                 } else if (type == Gadget.Type.STORY_TEST_EXECUTION) {
@@ -120,6 +134,8 @@ public class GadgetUtility extends DatabaseUtility {
                 logger.fastDebug("Error during loading gadget", e);
                 throw new APIException("Error during loading gadget", e);
             }
+        }else{
+            logger.fasttrace("gadget id %s not found", gadgetId);
         }
         return gadget;
     }
@@ -198,5 +214,17 @@ public class GadgetUtility extends DatabaseUtility {
             }
         }
         return searchResult.getIssues().get(0);
+    }
+    
+    public Set<String> getProjectList() throws APIException {
+        if (projectsCache.isEmpty()) {
+            String data = HTTPClientUtil.getInstance().getLegacyData(
+                    PropertiesUtil.getInstance().getString(Constant.RESOURCE_BUNLE_PROJECT_PATH),
+                    new HashMap<String, String>());
+            List<ProjectVO> projects = JSONUtil.getInstance().convertJSONtoListObject(data,
+                    ProjectVO.class);
+            projectsCache = projects.stream().map(p -> p.getName()).collect(Collectors.toSet());
+        }
+        return projectsCache;
     }
 }

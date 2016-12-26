@@ -6,7 +6,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 public class APIIssueVO {
     private String key;
     private String self;
-    private String parrent;
 
     public APIIssueVO(){
         
@@ -30,14 +29,6 @@ public class APIIssueVO {
 
     public void setSelf(String self) {
         this.self = self;
-    }
-
-    public String getParrent() {
-        return parrent;
-    }
-
-    public void setParrent(String parrent) {
-        this.parrent = parrent;
     }
 
 }
