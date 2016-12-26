@@ -9,8 +9,8 @@ public class JQLIssueVO {
 	private String self;
 	private String key;
 	private JQLIssuefields fields;
-
-	public String getExpand() {
+	
+    public String getExpand() {
 		return expand;
 	}
 

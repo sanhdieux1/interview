@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.concurrent.Callable;
 
 import manament.log.LoggerWapper;
+import models.APIIssueVO;
 import models.ExecutionIssueResultWapper;
 import models.ExecutionIssueVO;
 import models.JQLIssueVO;
@@ -25,7 +26,8 @@ public class ExecutionCallable implements Callable<ExecutionIssueResultWapper> {
     @Override
     public ExecutionIssueResultWapper call() throws Exception {
         ExecutionIssueResultWapper resultWapper = new ExecutionIssueResultWapper();
-        resultWapper.setTitle(issue.getKey());
+        resultWapper.setPlanned(issue.getFields().getCustomfield_14809());
+        resultWapper.setIssue(new APIIssueVO(issue.getKey(), issue.getSelf()));
         if (type.equals(Type.TEST)) {
             List<ExecutionIssueVO> executionIssues = EpicUtility.getInstance()
                     .findTestExecutionInIsuee(issue.getKey()).getExecutions();

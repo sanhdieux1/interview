@@ -75,12 +75,14 @@ public class GadgetHandlerImpl extends GadgetHandler {
 
     @Override
     public Result getDataGadget(String id) throws APIException {
-        List<GadgetData> gadgetsData = null;
+        Map<String, List<GadgetData>> gadgetsData = null;
         Gadget gadget = gadgetService.get(id);
         if(gadget != null){
             if(Gadget.Type.EPIC_US_TEST_EXECUTION.equals(gadget.getType())){
                 EpicVsTestExecution epicGadget = (EpicVsTestExecution) gadget;
-                gadgetsData = epicService.getDataEPic(epicGadget);
+                List<GadgetData> epicData = epicService.getDataEPic(epicGadget);
+                gadgetsData = new HashMap<>();
+                gadgetsData.put(epicGadget.getProjectName(), epicData);
             } else if(Gadget.Type.TEST_CYCLE_TEST_EXECUTION.equals(gadget.getType())){
 
             } else if(Gadget.Type.ASSIGNEE_TEST_EXECUTION.equals(gadget.getType())){
@@ -99,11 +101,11 @@ public class GadgetHandlerImpl extends GadgetHandler {
 
     @Override
     public Result getStoryInEpic(List<String> epics) throws APIException {
-        Map<String, List<JQLIssueVO>> storiesIssues = storyService.findStoryInEpic(epics);
+        Map<String, Set<JQLIssueVO>> storiesIssues = storyService.findStoryInEpic(epics);
         Map<String, Set<String>> storiesInEpic = new HashMap<>();
-        storiesIssues.forEach(new BiConsumer<String, List<JQLIssueVO>>() {
+        storiesIssues.forEach(new BiConsumer<String, Set<JQLIssueVO>>() {
             @Override
-            public void accept(String epic, List<JQLIssueVO> storiesIssue) {
+            public void accept(String epic, Set<JQLIssueVO> storiesIssue) {
                 //Filter issueKey
                 storiesInEpic.put(epic, storiesIssue.stream().map(i -> i.getKey()).collect(Collectors.toSet()));
             }

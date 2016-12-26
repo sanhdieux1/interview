@@ -3,7 +3,7 @@ package models.exception;
 public class APIException extends Exception {
     private static final long serialVersionUID = -4530140103715612384L;
     private String message;
-    private MErrorCode errorCode = MErrorCode.GENERIC;
+    private APIErrorCode errorCode = APIErrorCode.GENERIC;
     public APIException() {
         super();
         
@@ -16,12 +16,12 @@ public class APIException extends Exception {
         super(message, t);
         this.message = message;
     }
-    public APIException(String message, MErrorCode errorCode) {
+    public APIException(String message, APIErrorCode errorCode) {
         super();
         this.message = message;
         this.errorCode = errorCode;
     }
-    public APIException(String message, MErrorCode errorCode, Throwable t) {
+    public APIException(String message, APIErrorCode errorCode, Throwable t) {
         super(t);
         this.message = message;
         this.errorCode = errorCode;
@@ -32,10 +32,10 @@ public class APIException extends Exception {
     public void setMessage(String message) {
         this.message = message;
     }
-    public MErrorCode getErrorCode() {
+    public APIErrorCode getErrorCode() {
         return errorCode;
     }
-    public void setErrorCode(MErrorCode errorCode) {
+    public void setErrorCode(APIErrorCode errorCode) {
         this.errorCode = errorCode;
     }
     

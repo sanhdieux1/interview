@@ -10,10 +10,12 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import handle.ExecutionCallable;
 import manament.log.LoggerWapper;
+import models.APIIssueVO;
 import models.ExecutionIssueResultWapper;
 import models.GadgetData;
 import models.JQLIssueVO;
@@ -43,7 +45,7 @@ public class EpicUtility {
 
     public List<GadgetData> getDataEPic(EpicVsTestExecution epicGadget) throws APIException {
         List<GadgetData> result = new ArrayList<>();
-        Set<String> epics = epicGadget.getEpic();
+        Set<APIIssueVO> epics = epicGadget.getEpic();
         if (epicGadget.isSelectAll()) {
             epics = getEpicLinks(epicGadget.getProjectName(), epicGadget.getRelease().toString());
         }
@@ -51,11 +53,12 @@ public class EpicUtility {
             return result;
         }
         List<String> metrics = epicGadget.getMetrics();
-        for (String epic : epics) {
-            ExecutionIssueResultWapper executionIssues = findAllExecutionIssueInEpic(epic);
+        
+        for (APIIssueVO epic : epics) {
+            ExecutionIssueResultWapper executionIssues = findAllExecutionIssueInEpic(epic.getKey());
             GadgetData gadgetData = GadgetUtility.getInstance()
                     .convertToGadgetData(executionIssues);
-            gadgetData.setTitle(epic);
+            gadgetData.setKey(epic);
             result.add(gadgetData);
             gadgetData.setUnplanned(gadgetData.getBlocked() + gadgetData.getFailed()
                     + gadgetData.getPassed() + gadgetData.getUnexecuted() + gadgetData.getWip());
@@ -136,8 +139,8 @@ public class EpicUtility {
         return searchResult.getIssues();
     }
 
-    public Set<String> getEpicLinks(String project, String release) throws APIException {
-        Set<String> result = null;
+    public Set<APIIssueVO> getEpicLinks(String project, String release) throws APIException {
+        Set<APIIssueVO> result = null;
         logger.fasttrace("getEpicLinks(%s,%s)", project, release);
         if (project == null) {
             throw new APIException("project param cannot be null");
@@ -162,7 +165,13 @@ public class EpicUtility {
         JQLSearchResult searchResult = JSONUtil.getInstance().convertJSONtoObject(data,
                 JQLSearchResult.class);
         if (searchResult != null && searchResult.getIssues() != null) {
-            result = searchResult.getIssues().stream().map(t -> t.getKey())
+            result = searchResult.getIssues().stream().map(new Function<JQLIssueVO, APIIssueVO>() {
+                @Override
+                public APIIssueVO apply(JQLIssueVO jQLIssue) {
+                    APIIssueVO apiIssue = new APIIssueVO(jQLIssue.getKey(), jQLIssue.getSelf());
+                    return apiIssue;
+                }
+            })
                     .collect(Collectors.toSet());
         } else {
             throw new APIException(data);

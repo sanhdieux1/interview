@@ -1,6 +1,7 @@
 package models.gadget;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -15,8 +16,8 @@ public class StoryVsTestExecution implements Gadget {
     // fixVersion
     private Release release;
     private List<String> metrics;
-    private String epic;
-    private Set<String> stories;
+    private Set<String> epic;
+    private Map<String, Set<String>> stories;
     private boolean selectAll;
     private String user;
 
@@ -71,19 +72,19 @@ public class StoryVsTestExecution implements Gadget {
         this.metrics = metrics;
     }
 
-    public String getEpic() {
+    public Set<String> getEpic() {
         return epic;
     }
 
-    public void setEpic(String epic) {
+    public void setEpic(Set<String> epic) {
         this.epic = epic;
-    }
-
-    public Set<String> getStories() {
+    }   
+    
+    public Map<String, Set<String>> getStories() {
         return stories;
     }
 
-    public void setStories(Set<String> stories) {
+    public void setStories(Map<String, Set<String>> stories) {
         this.stories = stories;
     }
 

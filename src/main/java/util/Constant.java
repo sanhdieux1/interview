@@ -6,7 +6,7 @@ public class Constant {
 
 	public static final int MAX_AGE = 30 * 24 * 60 * 60 * 1000;
 	
-	public static final String PROXY_IP = "192.168.1.105";
+	public static final String PROXY_IP = "192.168.72.212";
 	public static final int PROXY_PORT = 9797;
 	public static final String PROXY_TYPE = "http";
 	public static final String TOKEN = "Y3J1YWRtaW46Y3J1YWRtaW4=";

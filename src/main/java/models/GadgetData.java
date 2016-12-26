@@ -1,7 +1,7 @@
 package models;
 
 public class GadgetData {
-    private String title;
+    private APIIssueVO key;
     private int unexecuted;
     private int failed;
     private int wip;
@@ -38,12 +38,12 @@ public class GadgetData {
         unplanned += number;
     }
 
-    public String getTitle() {
-        return title;
+    public APIIssueVO getKey() {
+        return key;
     }
 
-    public void setTitle(String title) {
-        this.title = title;
+    public void setKey(APIIssueVO key) {
+        this.key = key;
     }
 
     public int getUnexecuted() {

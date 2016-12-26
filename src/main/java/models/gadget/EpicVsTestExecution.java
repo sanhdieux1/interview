@@ -5,6 +5,7 @@ import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import models.APIIssueVO;
 import models.main.Release;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -17,7 +18,7 @@ public class EpicVsTestExecution implements Gadget {
     // fixVersion
     private Release release;
     private List<String> metrics;
-    private Set<String> epic;
+    private Set<APIIssueVO> epic;
 
     public String getId() {
         return id;
@@ -66,12 +67,12 @@ public class EpicVsTestExecution implements Gadget {
     public void setMetrics(List<String> metrics) {
         this.metrics = metrics;
     }
-
-    public Set<String> getEpic() {
+    
+    public Set<APIIssueVO> getEpic() {
         return epic;
     }
 
-    public void setEpic(Set<String> epic) {
+    public void setEpic(Set<APIIssueVO> epic) {
         this.epic = epic;
     }
 

@@ -7,7 +7,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import org.bson.types.ObjectId;
 
@@ -18,11 +20,13 @@ import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.util.JSON;
 
+import ch.qos.logback.classic.spi.ThrowableProxyVO;
 import manament.log.LoggerWapper;
 import models.ExecutionIssueResultWapper;
 import models.ExecutionIssueVO;
 import models.GadgetData;
 import models.JQLIssueVO;
+import models.exception.APIErrorCode;
 import models.exception.APIException;
 import models.gadget.EpicVsTestExecution;
 import models.gadget.Gadget;
@@ -76,12 +80,15 @@ public class GadgetUtility extends DatabaseUtility {
 
     public static void main(String[] args) throws APIException {
         StoryVsTestExecution gadget = new StoryVsTestExecution();
-        HashSet<String> stories = new HashSet<>();
-        stories.addAll(Arrays.asList("FNMS-1483", "FNMS-1484", "FNMS-1490", "FNMS-650"));
-        gadget.setId("585f8e9e2cc68770506ddc4b");
+        Map<String, Set<String>> stories = new HashMap<>();
+        
+//        new JQLIssueVO
+        stories.put("FNMS-96",Arrays.asList("FNMS-1483", "FNMS-1484", "FNMS-1490", "FNMS-650").stream().collect(Collectors.toSet()));
+        gadget.setId("58609eec8dbec753e43964fd");
+        gadget.setSelectAll(true);
         gadget.setStories(stories);
         gadget.setProjectName("FNMS-557x");
-        gadget.setEpic("FNMS-96");
+        gadget.setEpic(Arrays.asList("FNMS-96").stream().collect(Collectors.toSet()));
         GadgetUtility.getInstance().insertOrUpdate(gadget);
     }
 
@@ -171,6 +178,7 @@ public class GadgetUtility extends DatabaseUtility {
     }
 
     public JQLIssueVO findIssue(String issueKey) throws APIException {
+        JQLSearchResult searchResult = null;
         String query = "issue=%s";
         Map<String, String> parameters = new HashMap<String, String>();
         parameters.put(Constant.PARAMERTER_JQL_QUERY, String.format(query, issueKey));
@@ -179,8 +187,16 @@ public class GadgetUtility extends DatabaseUtility {
         String data = HTTPClientUtil.getInstance().getLegacyData(
                 PropertiesUtil.getInstance().getString(Constant.RESOURCE_BUNLE_SEARCH_PATH),
                 parameters);
-        JQLSearchResult searchResult = JSONUtil.getInstance().convertJSONtoObject(data,
-                JQLSearchResult.class);
+        try{
+            searchResult = JSONUtil.getInstance().convertJSONtoObject(data, JQLSearchResult.class);
+        } catch (APIException e){
+            //ignore exception, issue not found.
+            if(!APIErrorCode.PARSE_JSON.equals(e.getErrorCode())){
+                return null;
+            } else{
+                throw e;
+            }
+        }
         return searchResult.getIssues().get(0);
     }
 }
