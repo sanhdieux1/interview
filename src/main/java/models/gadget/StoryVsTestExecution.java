@@ -16,7 +16,7 @@ public class StoryVsTestExecution implements Gadget {
     private Release release; // fixVersion
     private List<String> metrics;
     private Set<String> epic;
-    private Map<String, Set<String>> stories;
+    private Set<String> stories;
     private boolean selectAll;
     private String user;
 
@@ -79,11 +79,11 @@ public class StoryVsTestExecution implements Gadget {
         this.epic = epic;
     }   
     
-    public Map<String, Set<String>> getStories() {
+    public Set<String> getStories() {
         return stories;
     }
 
-    public void setStories(Map<String, Set<String>> stories) {
+    public void setStories(Set<String> stories) {
         this.stories = stories;
     }
 

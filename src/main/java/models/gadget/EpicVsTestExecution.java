@@ -18,7 +18,7 @@ public class EpicVsTestExecution implements Gadget {
     // fixVersion
     private Release release;
     private List<String> metrics;
-    private Set<APIIssueVO> epic;
+    private Set<String> epic;
 
     public String getId() {
         return id;
@@ -68,11 +68,11 @@ public class EpicVsTestExecution implements Gadget {
         this.metrics = metrics;
     }
     
-    public Set<APIIssueVO> getEpic() {
+    public Set<String> getEpic() {
         return epic;
     }
 
-    public void setEpic(Set<APIIssueVO> epic) {
+    public void setEpic(Set<String> epic) {
         this.epic = epic;
     }
 

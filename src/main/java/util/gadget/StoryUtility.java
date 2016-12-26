@@ -14,6 +14,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import handle.ExecutionCallable;
@@ -26,6 +27,7 @@ import models.ExecutionIssueVO;
 import models.GadgetData;
 import models.JQLIssueLinkVO;
 import models.JQLIssueVO;
+import models.JQLIssuefields;
 import models.JQLIssuetypeVO;
 import models.JQLIssuetypeVO.Type;
 import models.StoryResultWapper;
@@ -101,32 +103,20 @@ public class StoryUtility {
 
     public Map<String, List<GadgetData>> getDataStory(StoryVsTestExecution storyGadget) throws APIException {
         Map<String, List<GadgetData>> returnData = new HashMap<>();
-
         Map<String, Set<JQLIssueVO>> epicMap = null;
         if(storyGadget.isSelectAll()){
-            epicMap = findStoryInEpic(new ArrayList(storyGadget.getEpic()));
+            epicMap = findStoryInEpic(new ArrayList<String>(storyGadget.getEpic()));
         } else{
-            epicMap = new HashMap<>();
-            Map<String, List<FindIssueCallable>> taskMap = new HashMap<>();
-            Map<String, Set<String>> epicM = storyGadget.getStories();
-
-            for (String epic : epicM.keySet()){
-                Set<String> stories = epicM.get(epic);
+            Set<JQLIssueVO> storyIssues = new HashSet<>();
+            Set<String> stories = storyGadget.getStories();
                 List<FindIssueCallable> tasks = new ArrayList<FindIssueCallable>();
                 stories.forEach(s -> tasks.add(new FindIssueCallable(s)));
-                taskMap.put(epic, tasks);
-            }
-
+                
             ExecutorService taskExecutor = Executors.newCachedThreadPool();
             try{
-                for (String epic : taskMap.keySet()){
-                    List<FindIssueCallable> tasks = taskMap.get(epic);
-                    List<Future<JQLIssueVO>> result = taskExecutor.invokeAll(tasks);
-                    Set<JQLIssueVO> storyIssues = new HashSet<>();
-                    for (Future<JQLIssueVO> re : result){
-                        storyIssues.add(re.get());
-                    }
-                    epicMap.put(epic, storyIssues);
+                List<Future<JQLIssueVO>> result = taskExecutor.invokeAll(tasks);
+                for (Future<JQLIssueVO> re : result){
+                    storyIssues.add(re.get());
                 }
                 taskExecutor.shutdown();
             } catch (ExecutionException e){
@@ -138,6 +128,7 @@ public class StoryUtility {
                 logger.fastDebug("error during invoke", e);
                 throw new APIException("error during invoke", e);
             }
+            epicMap = storyIssues.stream().collect(Collectors.groupingBy(s -> s.getFields().getEpicLink(), Collectors.toSet()));
         }
         
         if(epicMap == null || epicMap.isEmpty()){

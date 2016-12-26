@@ -145,7 +145,6 @@ public class HTTPClientUtil {
         try {
             Response re = connection.execute();
             data = re.body();
-            logger.fasttrace("data retrieved: %s",data);
         } catch (IOException e) {
             logger.fastDebug("Cannot connect to %s", e, url);
             throw new APIException("Cannot connect to " + host, e);
