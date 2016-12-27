@@ -78,5 +78,10 @@ public class JSONUtil {
             e.printStackTrace();
             
         }
+        
+        CycleVsTestExecution cyc = new CycleVsTestExecution();
+        cyc.setId("id-12445");
+        cyc.setUser("abc");
+//        mapper.t
     }
 }

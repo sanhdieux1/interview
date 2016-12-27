@@ -10,12 +10,8 @@ import models.main.Release;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CycleVsTestExecution implements Gadget{
     private Type type = Type.TEST_CYCLE_TEST_EXECUTION;
-    
-    @JsonProperty(value ="_id", access = Access.READ_ONLY)
     private String id;
-    
     @JsonProperty(required=true)
-    
     private String projectName;
     private Set<String> metrics;
     private Set<String> cycles;

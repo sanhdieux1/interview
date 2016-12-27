@@ -151,15 +151,19 @@ public class GadgetUtility extends DatabaseUtility {
             DBObject dbObject = dbCursor.next();
             if(Gadget.Type.ASSIGNEE_TEST_EXECUTION.equals(Gadget.Type.valueOf((String) dbObject.get(TYPE)))){
                 AssigneeVsTestExecution assigneeGadget = JSONUtil.getInstance().convertJSONtoObject(dbObject.toString(), AssigneeVsTestExecution.class);
+                assigneeGadget.setId(getObjectId(dbObject));
                 gadgets.add(assigneeGadget);
             } else if(Gadget.Type.EPIC_US_TEST_EXECUTION.equals(Gadget.Type.valueOf((String) dbObject.get(TYPE)))){
                 EpicVsTestExecution epicGadget = JSONUtil.getInstance().convertJSONtoObject(dbObject.toString(), EpicVsTestExecution.class);
+                epicGadget.setId(getObjectId(dbObject));
                 gadgets.add(epicGadget);
             } else if(Gadget.Type.TEST_CYCLE_TEST_EXECUTION.equals(Gadget.Type.valueOf((String) dbObject.get(TYPE)))){
                 CycleVsTestExecution cyclGadget = JSONUtil.getInstance().convertJSONtoObject(dbObject.toString(), CycleVsTestExecution.class);
+                cyclGadget.setId(getObjectId(dbObject));
                 gadgets.add(cyclGadget);
             } else if(Gadget.Type.STORY_TEST_EXECUTION.equals(Gadget.Type.valueOf((String) dbObject.get(TYPE)))){
                 StoryVsTestExecution storyGadget = JSONUtil.getInstance().convertJSONtoObject(dbObject.toString(), StoryVsTestExecution.class);
+                storyGadget.setId(getObjectId(dbObject));
                 gadgets.add(storyGadget);
             } else{
                 logger.fastDebug("type %s is not available", dbObject.get(TYPE));

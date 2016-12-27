@@ -2,6 +2,8 @@ package models.gadget;
 
 import java.util.Set;
 
+import javax.persistence.Id;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -14,7 +16,6 @@ public class AssigneeVsTestExecution implements Gadget {
     private final Gadget.Type type = Gadget.Type.ASSIGNEE_TEST_EXECUTION;
 
     private String user;
-    @JsonProperty(value="_id" , access = Access.READ_ONLY)
     private String id;
     @JsonProperty(required=true)
     private String projectName;
