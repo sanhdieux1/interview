@@ -95,7 +95,7 @@ public class AssigneeUtility {
         if(projectName == null || projectName.isEmpty()){
             return null;
         }
-        query.append(String.format("project = %s", projectName));
+        query.append(String.format("project = \"%s\"", projectName));
         if(release != null){
             query.append(Constant.AND);
             query.append(String.format("fixVersion = %s", release.toString()));

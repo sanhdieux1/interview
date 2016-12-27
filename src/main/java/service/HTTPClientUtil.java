@@ -51,6 +51,7 @@ public class HTTPClientUtil {
             loginJsoup();
         } catch (IOException e) {
             logger.fastDebug("cannot login to %s", e, loginURL);
+            cookies = null;
         }
         // try {
         //// login(httpclient);
@@ -129,6 +130,8 @@ public class HTTPClientUtil {
                 .method(Connection.Method.GET);
         if (cookies != null) {
             connection.cookies(cookies);
+        } else{
+            throw new APIException("Login session not available, need re-login to greenhopper");
         }
         parameters.forEach(new BiConsumer<String, String>() {
             @Override
