@@ -1,15 +1,6 @@
 package models;
 
-public enum IssueLinkType {
-    TEST_BY;
-    static{
-        TEST_BY.setId("10534");
-        TEST_BY.setInward("Is a test by");
-        TEST_BY.setName("Is a test for");
-        TEST_BY.setOutward("Is a test for");
-        TEST_BY.setSelf("https://greenhopper.app.alcatel-lucent.com/rest/api/2/issueLinkType/10534");
-    }
-    
+public class IssueLinkType {
     private String id;
     private String name;
     private String inward;
@@ -55,5 +46,4 @@ public enum IssueLinkType {
     public void setSelf(String self) {
         this.self = self;
     }
-
 }

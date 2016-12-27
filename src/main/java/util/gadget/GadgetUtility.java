@@ -202,6 +202,7 @@ public class GadgetUtility extends DatabaseUtility {
                 }
             });
         }
+        gadgetData.setUnplanned(gadgetData.getBlocked()+gadgetData.getFailed()+gadgetData.getPassed()+gadgetData.getWip()+gadgetData.getUnexecuted());
         return gadgetData;
     }
 

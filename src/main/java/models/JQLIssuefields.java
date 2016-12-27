@@ -14,7 +14,7 @@ public class JQLIssuefields {
     // Epic Parrent
     @JsonProperty("customfield_11209")
     private String epicLink;
-
+    
     public JQLIssuetypeVO getIssuetype() {
         return issuetype;
     }

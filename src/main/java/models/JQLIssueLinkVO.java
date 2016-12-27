@@ -7,6 +7,14 @@ public class JQLIssueLinkVO {
     private String id;
     private String self;
     private InwardIssue inwardIssue;
+    private IssueLinkType type;
+    
+    public IssueLinkType getType() {
+        return type;
+    }
+    public void setType(IssueLinkType type) {
+        this.type = type;
+    }
     public String getId() {
         return id;
     }

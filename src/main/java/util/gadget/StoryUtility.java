@@ -39,7 +39,8 @@ import util.PropertiesUtil;
 
 public class StoryUtility {
     private static StoryUtility INSTANCE = new StoryUtility();
-    final static LoggerWapper logger = LoggerWapper.getLogger(StoryUtility.class);
+    private static final LoggerWapper logger = LoggerWapper.getLogger(StoryUtility.class);
+    private static final String INWARD_TEST_BY = "Is a test by";
     private ConcurrentMap<String, Set<JQLIssueVO>> storyInEpic = new ConcurrentHashMap<>();
 
     private StoryUtility() {
@@ -94,16 +95,30 @@ public class StoryUtility {
     public List<ExecutionIssueVO> findAllTestExecutionInStory(JQLIssueVO issue) throws APIException {
         List<ExecutionIssueVO> result = new ArrayList<>();
         if(JQLIssuetypeVO.Type.STORY.toString().equalsIgnoreCase(issue.getFields().getIssuetype().getName())){
-            for (JQLIssueLinkVO issueLink : issue.getFields().getIssuelinks()){
-                List<ExecutionIssueVO> executionIssues = EpicUtility.getInstance().findTestExecutionInIsuee(issueLink.getId()).getExecutions();
-                if(executionIssues != null && !executionIssues.isEmpty()){
-                    result.addAll(executionIssues);
+            List<JQLIssueLinkVO> issueLinks = findAllTestIssueForStory(issue);
+            if(issueLinks != null && !issueLinks.isEmpty()){
+                for (JQLIssueLinkVO issueLink : issue.getFields().getIssuelinks()){
+                    List<ExecutionIssueVO> executionIssues = EpicUtility.getInstance().findTestExecutionInIsuee(issueLink.getInwardIssue().getKey()).getExecutions();
+                    if(executionIssues != null && !executionIssues.isEmpty()){
+                        result.addAll(executionIssues);
+                    }
                 }
             }
         }
         return result;
     }
-
+    
+    public List<JQLIssueLinkVO> findAllTestIssueForStory(JQLIssueVO issue){
+        List<JQLIssueLinkVO> testIssue = null;
+        if(issue!=null && issue.getFields()!=null && issue.getFields().getIssuelinks()!=null){
+            List<JQLIssueLinkVO> issueLinks = issue.getFields().getIssuelinks();
+            testIssue = issueLinks.stream().filter(i -> INWARD_TEST_BY.equals(i.getType().getInward())).collect(Collectors.toList());
+        }else{
+            logger.fasttrace("cannot findout issuelinks of %s",issue);
+        }
+        return testIssue;
+    }
+    
     public Map<String, List<GadgetData>> getDataStory(StoryVsTestExecution storyGadget) throws APIException {
         Map<String, List<GadgetData>> returnData = new HashMap<>();
         Map<String, Set<JQLIssueVO>> epicMap = null;
@@ -156,7 +171,7 @@ public class StoryUtility {
                 for (Future<ExecutionIssueResultWapper> result : results){
                     ExecutionIssueResultWapper wapper = result.get();
                     GadgetData data = GadgetUtility.getInstance().convertToGadgetData(wapper.getExecutionsVO());
-                    data.setUnplanned(wapper.getPlanned());
+                    data.setPlanned(wapper.getPlanned());
                     data.setKey(wapper.getIssue());
                     storyDatas.add(data);
                 }
