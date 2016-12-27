@@ -30,10 +30,12 @@ import models.ProjectVO;
 import models.exception.APIErrorCode;
 import models.exception.APIException;
 import models.gadget.AssigneeVsTestExecution;
+import models.gadget.CycleVsTestExecution;
 import models.gadget.EpicVsTestExecution;
 import models.gadget.Gadget;
 import models.gadget.StoryVsTestExecution;
 import models.main.JQLSearchResult;
+import models.main.Release;
 import ninja.Result;
 import ninja.Results;
 import service.DatabaseUtility;
@@ -44,9 +46,10 @@ import util.PropertiesUtil;
 
 public class GadgetUtility extends DatabaseUtility {
     final static LoggerWapper logger = LoggerWapper.getLogger(GadgetUtility.class);
+    private static final String TYPE = "type";
     private static Set<String> projectsCache = new HashSet<>();
     private static GadgetUtility INSTANCE = new GadgetUtility();
-
+    
     protected DBCollection collection;
 
     private GadgetUtility() {
@@ -73,7 +76,7 @@ public class GadgetUtility extends DatabaseUtility {
                 updateQuery.append("$set", dbObject);
                 BasicDBObject searchQuery = new BasicDBObject();
                 searchQuery.append("_id", new ObjectId(id));
-                logger.fasttrace("update gadget id %s", id);
+                logger.fasttrace("update gadget id %s by user:%s", id,  gadget.getUser());
                 collection.update(searchQuery, updateQuery);
             } else {
                 logger.fasttrace("insert gadget:%s by user:%s", gadget.getType(), gadget.getUser());
@@ -86,15 +89,13 @@ public class GadgetUtility extends DatabaseUtility {
     }
 
     public static void main(String[] args) throws APIException {
-        AssigneeVsTestExecution gadget = new AssigneeVsTestExecution();
-        Set<String> assignee = new HashSet<>();
-        assignee.add("vs023");
-        assignee.add("snsriniv");
-        gadget.setAssignee(assignee);
+        CycleVsTestExecution gadget = new CycleVsTestExecution();
         gadget.setProjectName("FNMS 557x");
         Set<String> cyckes = new HashSet<>();
-        cyckes.add("PCC");
+        cyckes.add("UTC 1.2.01 Sprint Iteration 5");
+        cyckes.add("TS Sprint Iteration 7");
         gadget.setCycles(cyckes);
+        gadget.setRelease(Release.R1_2_0);
         GadgetUtility.getInstance().insertOrUpdate(gadget);
     }
 
@@ -123,13 +124,16 @@ public class GadgetUtility extends DatabaseUtility {
                     assigneeGadget.setId(getObjectId(dbObj));
                     gadget = assigneeGadget;
                 } else if (type == Gadget.Type.TEST_CYCLE_TEST_EXECUTION) {
-
+                    CycleVsTestExecution cycleGadget = mapper.readValue(dbObj.toString(),CycleVsTestExecution.class);
+                    cycleGadget.setId(getObjectId(dbObj));
+                    gadget = cycleGadget;
                 } else if (type == Gadget.Type.STORY_TEST_EXECUTION) {
                     StoryVsTestExecution storyGadget = mapper.readValue(dbObj.toString(),
                             StoryVsTestExecution.class);
                     storyGadget.setId(getObjectId(dbObj));
                     gadget = storyGadget;
                 }
+                
             } catch (IOException e) {
                 logger.fastDebug("Error during loading gadget", e);
                 throw new APIException("Error during loading gadget", e);
@@ -143,29 +147,31 @@ public class GadgetUtility extends DatabaseUtility {
     public List<Gadget> getAll() throws APIException {
         DBCursor dbCursor = collection.find();
         List<Gadget> gadgets = new ArrayList<Gadget>();
-        while (dbCursor.hasNext()) {
+        while (dbCursor.hasNext()){
             DBObject dbObject = dbCursor.next();
-            if (Gadget.Type.ASSIGNEE_TEST_EXECUTION
-                    .equals(Gadget.Type.valueOf((String) dbObject.get("type")))) {
-
-            } else if (Gadget.Type.EPIC_US_TEST_EXECUTION
-                    .equals(Gadget.Type.valueOf((String) dbObject.get("type")))) {
-                EpicVsTestExecution epicGadget = JSONUtil.getInstance()
-                        .convertJSONtoObject(dbObject.toString(), EpicVsTestExecution.class);
-                epicGadget.setId(getObjectId(dbObject));
+            if(Gadget.Type.ASSIGNEE_TEST_EXECUTION.equals(Gadget.Type.valueOf((String) dbObject.get(TYPE)))){
+                AssigneeVsTestExecution assigneeGadget = JSONUtil.getInstance().convertJSONtoObject(dbObject.toString(), AssigneeVsTestExecution.class);
+                gadgets.add(assigneeGadget);
+            } else if(Gadget.Type.EPIC_US_TEST_EXECUTION.equals(Gadget.Type.valueOf((String) dbObject.get(TYPE)))){
+                EpicVsTestExecution epicGadget = JSONUtil.getInstance().convertJSONtoObject(dbObject.toString(), EpicVsTestExecution.class);
                 gadgets.add(epicGadget);
-            } else if (Gadget.Type.TEST_CYCLE_TEST_EXECUTION
-                    .equals(Gadget.Type.valueOf((String) dbObject.get("type")))) {
-
+            } else if(Gadget.Type.TEST_CYCLE_TEST_EXECUTION.equals(Gadget.Type.valueOf((String) dbObject.get(TYPE)))){
+                CycleVsTestExecution cyclGadget = JSONUtil.getInstance().convertJSONtoObject(dbObject.toString(), CycleVsTestExecution.class);
+                gadgets.add(cyclGadget);
+            } else if(Gadget.Type.STORY_TEST_EXECUTION.equals(Gadget.Type.valueOf((String) dbObject.get(TYPE)))){
+                StoryVsTestExecution storyGadget = JSONUtil.getInstance().convertJSONtoObject(dbObject.toString(), StoryVsTestExecution.class);
+                gadgets.add(storyGadget);
+            } else{
+                logger.fastDebug("type %s is not available", dbObject.get(TYPE));
             }
         }
         return gadgets;
     }
 
-    public GadgetData convertToGadgetData(ExecutionIssueResultWapper wapper) {
+    public GadgetData convertToGadgetData(List<ExecutionIssueVO> testExecution) {
         GadgetData gadgetData = new GadgetData();
-        if (wapper != null && wapper.getExecutionsVO() != null) {
-            wapper.getExecutionsVO().forEach(new Consumer<ExecutionIssueVO>() {
+        if (testExecution != null) {
+            testExecution.forEach(new Consumer<ExecutionIssueVO>() {
                 @Override
                 public void accept(ExecutionIssueVO issue) {
                     switch (issue.getStatus().getName()) {

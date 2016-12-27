@@ -13,6 +13,7 @@ import models.JQLIssueVO;
 import models.UserVO;
 import models.exception.APIException;
 import models.gadget.AssigneeVsTestExecution;
+import models.gadget.CycleVsTestExecution;
 import models.gadget.EpicVsTestExecution;
 import models.gadget.Gadget;
 import models.gadget.Gadget.Type;
@@ -53,7 +54,9 @@ public class GadgetHandlerImpl extends GadgetHandler {
             assigneeGadget.setUser(userVO.getUsername());
             gadget = assigneeGadget;
         } else if(Gadget.Type.TEST_CYCLE_TEST_EXECUTION.equals(gadgetType)){
-
+            CycleVsTestExecution cycleGadget = JSONUtil.getInstance().convertJSONtoObject(data, CycleVsTestExecution.class);
+            cycleGadget.setUser(userVO.getUsername());
+            gadget = cycleGadget;
         } else if(Gadget.Type.STORY_TEST_EXECUTION.equals(gadgetType)){
             StoryVsTestExecution storyGadget = JSONUtil.getInstance().convertJSONtoObject(data, StoryVsTestExecution.class);
             storyGadget.setUser(userVO.getUsername());
@@ -76,16 +79,17 @@ public class GadgetHandlerImpl extends GadgetHandler {
 
     @Override
     public Result getDataGadget(String id) throws APIException {
-        Map<String, List<GadgetData>> gadgetsData = null;
+        Map<String, List<GadgetData>> gadgetsData = new HashMap<>();;
         Gadget gadget = gadgetService.get(id);
         if(gadget != null){
             if(Gadget.Type.EPIC_US_TEST_EXECUTION.equals(gadget.getType())){
                 EpicVsTestExecution epicGadget = (EpicVsTestExecution) gadget;
                 List<GadgetData> epicData = epicService.getDataEPic(epicGadget);
-                gadgetsData = new HashMap<>();
                 gadgetsData.put(epicGadget.getProjectName(), epicData);
             } else if(Gadget.Type.TEST_CYCLE_TEST_EXECUTION.equals(gadget.getType())){
-                
+                CycleVsTestExecution cycleGadget = (CycleVsTestExecution) gadget;
+                List<GadgetData> cycleData = cycleService.getDataCycle(cycleGadget);
+                gadgetsData.put(cycleGadget.getProjectName(), cycleData);
             } else if(Gadget.Type.ASSIGNEE_TEST_EXECUTION.equals(gadget.getType())){
                 AssigneeVsTestExecution assigneeGadget = (AssigneeVsTestExecution) gadget;
                 gadgetsData = assigneeService.getDataAssignee(assigneeGadget);
@@ -93,6 +97,8 @@ public class GadgetHandlerImpl extends GadgetHandler {
                 StoryVsTestExecution storyGadget = (StoryVsTestExecution) gadget;
                 gadgetsData = storyService.getDataStory(storyGadget);
             }
+        }else {
+            throw new APIException(String.format("gadget id=%s not found", id));
         }
         Result result = Results.json();
         result.render("type", "success");

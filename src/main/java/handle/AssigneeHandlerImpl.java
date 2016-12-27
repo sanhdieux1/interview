@@ -9,17 +9,13 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import manament.log.LoggerWapper;
 import models.AssigneeVO;
 import models.ExecutionIssueVO;
 import models.JQLIssueVO;
-import models.ProjectVO;
 import models.exception.APIException;
-import models.gadget.Gadget;
 import models.main.ExecutionsVO;
-import ninja.Context;
+import models.main.Release;
 import ninja.Result;
 import ninja.Results;
 import service.HTTPClientUtil;
@@ -30,24 +26,24 @@ import util.gadget.AssigneeUtility;
 
 public class AssigneeHandlerImpl implements AssigneeHandler {
     final static LoggerWapper logger = LoggerWapper.getLogger(AssigneeHandlerImpl.class);
-   
+    private static final String PLUS = "+";
 
     private static Map<String, Set<AssigneeVO>> assigneesCache = new HashMap<String, Set<AssigneeVO>>();
 
     public AssigneeHandlerImpl() {
     }
 
-    public Result getListCycleName(String projectName, String release) throws APIException {
+    public Result getListCycleName(String projectName, Release release) throws APIException {
         return Results.json().render(AssigneeUtility.getInstance().getListCycleName(projectName, release));
     }
 
-    public Result getAssigneeList(String projectName) throws APIException {
-        if(assigneesCache.get(projectName) == null || assigneesCache.get(projectName).isEmpty()){
-            ExecutionsVO executions = AssigneeUtility.getInstance().findAllExecutionIsueeInProject(projectName);
+    public Result getAssigneeList(String projectName, Release release) throws APIException {
+        if(assigneesCache.get(projectName+PLUS+release) == null || assigneesCache.get(projectName+PLUS+release).isEmpty()){
+            ExecutionsVO executions = AssigneeUtility.getInstance().findAllExecutionIsueeInProject(projectName, release);
             if(executions != null && executions.getExecutions() != null){
                 List<ExecutionIssueVO> excutions = executions.getExecutions();
                 Stream<ExecutionIssueVO> excutionsStream = excutions.stream();
-                assigneesCache.put(projectName, excutionsStream.filter(e -> (e.getAssigneeUserName()!=null && !e.getAssigneeUserName().isEmpty())).map(new Function<ExecutionIssueVO, AssigneeVO>() {
+                assigneesCache.put(projectName+PLUS+release, excutionsStream.filter(e -> (e.getAssigneeUserName()!=null && !e.getAssigneeUserName().isEmpty())).map(new Function<ExecutionIssueVO, AssigneeVO>() {
                     @Override
                     public AssigneeVO apply(ExecutionIssueVO issueVO) {
                         AssigneeVO assigneeVO = new AssigneeVO(issueVO.getAssignee(), issueVO.getAssigneeUserName(), issueVO.getAssigneeDisplay());
@@ -61,7 +57,7 @@ public class AssigneeHandlerImpl implements AssigneeHandler {
     }
 
     public JQLIssueVO findIssues(String id) throws APIException {
-        String data = HTTPClientUtil.getInstance().getLegacyData(PropertiesUtil.getInstance().getString(Constant.RESOURCE_BUNLE_ISSUE_PATH) + "/" + id,
+        String data = HTTPClientUtil.getInstance().getLegacyData(PropertiesUtil.getString(Constant.RESOURCE_BUNLE_ISSUE_PATH) + "/" + id,
                 new HashMap<>());
         JQLIssueVO issueVO = JSONUtil.getInstance().convertJSONtoObject(data, JQLIssueVO.class);
         return issueVO;

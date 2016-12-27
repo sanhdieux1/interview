@@ -14,7 +14,7 @@ public enum Release {
         value = str;
     }
     @JsonCreator
-    public Release fromString(String str){
+    public static Release fromString(String str){
             if(str.contains("1.3.0") || str.contains("130")){
                 return R1_3_0;
             }else if(str.contains("1.2.0") || str.contains("120")){

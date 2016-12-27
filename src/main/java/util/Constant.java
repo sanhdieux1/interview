@@ -46,4 +46,7 @@ public class Constant {
     public static final String OR = " OR ";
     //database
     public static final String DATABASE_SCHEMA = "DATABASE_SCHEMA";
+    
+    //internal conf
+    public static final String CONCURRENT_THREAD = "internal.conf.concurrent_thread";
 }

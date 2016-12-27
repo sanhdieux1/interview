@@ -3,10 +3,13 @@ package util;
 import java.io.IOException;
 import java.util.List;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import manament.log.LoggerWapper;
 import models.exception.APIException;
+import models.gadget.AssigneeVsTestExecution;
+import models.gadget.CycleVsTestExecution;
 import util.gadget.GadgetUtility;
 
 public class JSONUtil {
@@ -37,14 +40,43 @@ public class JSONUtil {
         if(json == null){
             return null;
         }
+        
         T result = null;
         try {
-            ObjectMapper mapper = new ObjectMapper();
+            JsonNode tree = mapper.readTree(json);
+            JsonNode errors = tree.get("errorMessages");
+            if(errors!=null){
+                StringBuilder message = new StringBuilder();
+                if(errors.isArray()){
+                    boolean first =true;
+                    for(JsonNode error : errors){
+                        if(!first){
+                            message.append(", ");
+                        }
+                        message.append(error.asText());
+                        first = false;
+                    }
+                }else{
+                    message.append(errors.asText());
+                }
+                throw new APIException(message.toString());
+            }
+            
             result = mapper.readValue(json, type);
         } catch (IOException e) {
             logger.fasttrace("cannot parse json: %s", e, json);
             throw new APIException("cannot parse json", e);
         }
         return result;
+    }
+    public static void main(String[] args) {
+        String str ="{\"errorMessages2\":\"An issue with key 'FNMS-5' does not exist for field 'issue'.\",\"errors\":{}}";
+        try{
+            JSONUtil.getInstance().convertJSONtoObject(str, CycleVsTestExecution.class);
+        } catch (APIException e){
+            System.out.println(e.getMessage());
+            e.printStackTrace();
+            
+        }
     }
 }

@@ -2,7 +2,6 @@ package util.gadget;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -16,6 +15,7 @@ import models.GadgetData;
 import models.exception.APIException;
 import models.gadget.AssigneeVsTestExecution;
 import models.main.ExecutionsVO;
+import models.main.Release;
 import service.HTTPClientUtil;
 import util.Constant;
 import util.JSONUtil;
@@ -23,7 +23,8 @@ import util.PropertiesUtil;
 
 public class AssigneeUtility {
     private static AssigneeUtility INSTANCE = new AssigneeUtility();
-    private static Set<String> cycleNameCache = new HashSet<>();
+    private static Map<String, Set<String>> cycleNameCache = new HashMap<String, Set<String>>();;
+    private static final String PLUS = "+";
 
     private AssigneeUtility() {
     }
@@ -39,17 +40,16 @@ public class AssigneeUtility {
         Set<String> assignees = assigneeGadget.getAssignee();
         for (String cycle : cycles){
             ExecutionsVO executions = findExecution(projectName, cycle, assignees);
-            if(executions!=null && executions.getExecutions()!=null){
-                Map<String, List<ExecutionIssueVO>> assigneeMap = executions.getExecutions().stream().collect(Collectors.groupingBy(ExecutionIssueVO::getAssigneeDisplay));
+            if(executions != null && executions.getExecutions() != null){
+                Map<String, List<ExecutionIssueVO>> assigneeMap = executions.getExecutions().stream()
+                        .collect(Collectors.groupingBy(ExecutionIssueVO::getAssigneeDisplay));
                 List<GadgetData> gadgetDatas = new ArrayList<GadgetData>();
-                for(String assignee : assigneeMap.keySet()){
-                    ExecutionIssueResultWapper issueWapper = new ExecutionIssueResultWapper();
-                    issueWapper.setExecutionsVO(assigneeMap.get(assignee));
-                    GadgetData gadgetData = GadgetUtility.getInstance().convertToGadgetData(issueWapper);
-                    gadgetData.setKey(new APIIssueVO(assignee,null));
+                for (String assignee : assigneeMap.keySet()){
+                    GadgetData gadgetData = GadgetUtility.getInstance().convertToGadgetData(assigneeMap.get(assignee));
+                    gadgetData.setKey(new APIIssueVO(assignee, null));
                     gadgetDatas.add(gadgetData);
                 }
-                //init empty for assignees that have no test
+                // init empty for assignees that have no test
                 for (String assignee : assignees){
                     if(!assigneeMap.containsKey(assignee)){
                         GadgetData gadgetData = new GadgetData();
@@ -64,8 +64,6 @@ public class AssigneeUtility {
     }
 
     public ExecutionsVO findExecution(String project, String cyclename, Set<String> assignees) throws APIException {
-
-        // String QUERY = "project in ('%s') and assignee='%s' and executionStatus in (PASS) and cycleName in ('%s')";
         StringBuilder query = new StringBuilder();
         query.append(String.format("project = \"%s\"", project));
         if(assignees != null && !assignees.isEmpty()){
@@ -87,32 +85,42 @@ public class AssigneeUtility {
         }
         Map<String, String> parameters = new HashMap<String, String>();
         parameters.put(Constant.PARAMERTER_ZQL_QUERY, query.toString());
-        String data = HTTPClientUtil.getInstance().getLegacyData(PropertiesUtil.getInstance().getString(Constant.RESOURCE_BUNLE_PATH), parameters);
+        String data = HTTPClientUtil.getInstance().getLegacyData(PropertiesUtil.getString(Constant.RESOURCE_BUNLE_PATH), parameters);
         ExecutionsVO executions = JSONUtil.getInstance().convertJSONtoObject(data, ExecutionsVO.class);
         return executions;
     }
 
-    public ExecutionsVO findAllExecutionIsueeInProject(String projectName) throws APIException {
-        String query = "project = %s";
+    public ExecutionsVO findAllExecutionIsueeInProject(String projectName, Release release) throws APIException {
+        StringBuilder query = new StringBuilder();
+        if(projectName == null || projectName.isEmpty()){
+            return null;
+        }
+        query.append(String.format("project = %s", projectName));
+        if(release != null){
+            query.append(Constant.AND);
+            query.append(release.toString());
+        }
+
         Map<String, String> parameters = new HashMap<String, String>();
-        parameters.put(Constant.PARAMERTER_ZQL_QUERY, String.format(query, projectName));
+        parameters.put(Constant.PARAMERTER_ZQL_QUERY, query.toString());
         parameters.put(Constant.PARAMERTER_MAXRECORDS, "10000");
         parameters.put(Constant.PARAMERTER_OFFSET, "0");
-        String result = HTTPClientUtil.getInstance().getLegacyData(PropertiesUtil.getInstance().getString(Constant.RESOURCE_BUNLE_PATH), parameters);
+        String result = HTTPClientUtil.getInstance().getLegacyData(PropertiesUtil.getString(Constant.RESOURCE_BUNLE_PATH), parameters);
         ExecutionsVO executions = JSONUtil.getInstance().convertJSONtoObject(result, ExecutionsVO.class);
         return executions;
     }
 
-    public Set<String> getListCycleName(String projectName, String release) throws APIException {
-        if(cycleNameCache.isEmpty()){
-            ExecutionsVO executions = AssigneeUtility.getInstance().findAllExecutionIsueeInProject(projectName);
+    public Set<String> getListCycleName(String projectName, Release release) throws APIException {
+        String keyProvisional = projectName + PLUS + release.toString();
+        if(cycleNameCache.get(keyProvisional) == null || cycleNameCache.get(keyProvisional).isEmpty()){
+            ExecutionsVO executions = AssigneeUtility.getInstance().findAllExecutionIsueeInProject(projectName, release);
             if(executions != null){
                 List<ExecutionIssueVO> excutions = executions.getExecutions();
                 Stream<ExecutionIssueVO> excutionsStream = excutions.stream();
-                cycleNameCache = excutionsStream.map(i -> i.getCycleName()).collect(Collectors.toSet());
+                cycleNameCache.put(projectName + PLUS + release.toString(), excutionsStream.map(i -> i.getCycleName()).collect(Collectors.toSet()));
             }
         }
-        return cycleNameCache;
+        return cycleNameCache.get(keyProvisional);
     }
 
     public void clearSession() {

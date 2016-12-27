@@ -2,32 +2,26 @@ package models.gadget;
 
 import java.util.Set;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonProperty.Access;
 
 import models.main.Release;
-
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class AssigneeVsTestExecution implements Gadget {
-    private final Gadget.Type type = Gadget.Type.ASSIGNEE_TEST_EXECUTION;
-
-    private String user;
-    @JsonProperty(value="_id" , access = Access.READ_ONLY)
+public class CycleVsTestExecution implements Gadget{
+    private Type type = Type.TEST_CYCLE_TEST_EXECUTION;
+    
+    @JsonProperty(value ="_id", access = Access.READ_ONLY)
     private String id;
+    
     @JsonProperty(required=true)
+    
     private String projectName;
-    private boolean selectAll;
-    @JsonProperty(required=true)
-    private Set<String> cycles;
-    @JsonProperty(required=true)
-    private Set<String> assignee;
-    @JsonProperty(required=true)
     private Set<String> metrics;
-    @JsonProperty(required=true)
+    private Set<String> cycles;
     private Release release; // fixVersion
-
+    private String user;
+    private boolean selectAll;
     @Override
     public String getId() {
         return id;
@@ -38,50 +32,38 @@ public class AssigneeVsTestExecution implements Gadget {
         return type;
     }
 
-    public String getProjectName() {
-        return projectName;
-    }
-
-    @JsonIgnore
-    public void setProjectName(String projectName) {
-        this.projectName = projectName;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
+    @Override
     public String getUser() {
         return user;
-    }
-
-    public void setUser(String user) {
-        this.user = user;
     }
 
     @Override
     public boolean isSelectAll() {
         return selectAll;
     }
+    
+    public void setType(Type type) {
+        this.type = type;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public void setUser(String user) {
+        this.user = user;
+    }
 
     public void setSelectAll(boolean selectAll) {
         this.selectAll = selectAll;
     }
 
-    public Set<String> getCycles() {
-        return cycles;
+    public String getProjectName() {
+        return projectName;
     }
 
-    public void setCycles(Set<String> cycles) {
-        this.cycles = cycles;
-    }
-
-    public Set<String> getAssignee() {
-        return assignee;
-    }
-
-    public void setAssignee(Set<String> assignee) {
-        this.assignee = assignee;
+    public void setProjectName(String projectName) {
+        this.projectName = projectName;
     }
 
     public Set<String> getMetrics() {
@@ -90,6 +72,14 @@ public class AssigneeVsTestExecution implements Gadget {
 
     public void setMetrics(Set<String> metrics) {
         this.metrics = metrics;
+    }
+
+    public Set<String> getCycles() {
+        return cycles;
+    }
+
+    public void setCycles(Set<String> cycles) {
+        this.cycles = cycles;
     }
 
     public Release getRelease() {

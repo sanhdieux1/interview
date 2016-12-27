@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -17,9 +18,9 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import handle.ExecutionCallable;
-import handle.FindIssueCallable;
 import handle.StoryCallable;
+import handle.executors.TestExecutionCallable;
+import handle.executors.FindIssueCallable;
 import manament.log.LoggerWapper;
 import models.APIIssueVO;
 import models.ExecutionIssueResultWapper;
@@ -33,6 +34,8 @@ import models.JQLIssuetypeVO.Type;
 import models.StoryResultWapper;
 import models.exception.APIException;
 import models.gadget.StoryVsTestExecution;
+import util.Constant;
+import util.PropertiesUtil;
 
 public class StoryUtility {
     private static StoryUtility INSTANCE = new StoryUtility();
@@ -109,16 +112,16 @@ public class StoryUtility {
         } else{
             Set<JQLIssueVO> storyIssues = new HashSet<>();
             Set<String> stories = storyGadget.getStories();
-                List<FindIssueCallable> tasks = new ArrayList<FindIssueCallable>();
-                stories.forEach(s -> tasks.add(new FindIssueCallable(s)));
-                
-            ExecutorService taskExecutor = Executors.newCachedThreadPool();
+            List<FindIssueCallable> tasks = new ArrayList<FindIssueCallable>();
+            stories.forEach(s -> tasks.add(new FindIssueCallable(s)));
+
+            ExecutorService taskExecutor = Executors.newFixedThreadPool(PropertiesUtil.getInt(Constant.CONCURRENT_THREAD));
             try{
                 List<Future<JQLIssueVO>> result = taskExecutor.invokeAll(tasks);
                 for (Future<JQLIssueVO> re : result){
                     storyIssues.add(re.get());
                 }
-                taskExecutor.shutdown();
+
             } catch (ExecutionException e){
                 if(e.getCause() instanceof APIException){
                     throw (APIException) e.getCause();
@@ -127,31 +130,32 @@ public class StoryUtility {
             } catch (InterruptedException e){
                 logger.fastDebug("error during invoke", e);
                 throw new APIException("error during invoke", e);
+            } finally{
+                taskExecutor.shutdown();
             }
             epicMap = storyIssues.stream().collect(Collectors.groupingBy(s -> s.getFields().getEpicLink(), Collectors.toSet()));
         }
-        
+
         if(epicMap == null || epicMap.isEmpty()){
             return returnData;
         }
-        ExecutorService taskExecutor = Executors.newCachedThreadPool();
+        ExecutorService taskExecutor = Executors.newFixedThreadPool(PropertiesUtil.getInt(Constant.CONCURRENT_THREAD));
         Type type = JQLIssuetypeVO.Type.STORY;
-        Map<String, List<ExecutionCallable>> taskMap = new HashMap<>();
+        Map<String, List<TestExecutionCallable>> taskMap = new HashMap<>();
         for (String epic : epicMap.keySet()){
-            List<ExecutionCallable> tasks = new ArrayList<ExecutionCallable>();
+            List<TestExecutionCallable> tasks = new ArrayList<TestExecutionCallable>();
             Set<JQLIssueVO> story = epicMap.get(epic);
-            story.forEach(s -> tasks.add(new ExecutionCallable(s, type)));
+            story.forEach(s -> tasks.add(new TestExecutionCallable(s, type)));
             taskMap.put(epic, tasks);
         }
         for (String epic : taskMap.keySet()){
             List<GadgetData> storyDatas = new ArrayList<>();
-            List<ExecutionCallable> tasks = taskMap.get(epic);
+            List<TestExecutionCallable> tasks = taskMap.get(epic);
             try{
                 List<Future<ExecutionIssueResultWapper>> results = taskExecutor.invokeAll(tasks);
-                taskExecutor.shutdown();
                 for (Future<ExecutionIssueResultWapper> result : results){
                     ExecutionIssueResultWapper wapper = result.get();
-                    GadgetData data = GadgetUtility.getInstance().convertToGadgetData(wapper);
+                    GadgetData data = GadgetUtility.getInstance().convertToGadgetData(wapper.getExecutionsVO());
                     data.setUnplanned(wapper.getPlanned());
                     data.setKey(wapper.getIssue());
                     storyDatas.add(data);
@@ -167,6 +171,7 @@ public class StoryUtility {
                 throw new APIException("error during invoke", e);
             }
         }
+        taskExecutor.shutdown();
         return returnData;
     }
 

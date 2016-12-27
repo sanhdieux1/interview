@@ -1,4 +1,4 @@
-package handle;
+package handle.executors;
 
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -12,12 +12,12 @@ import models.JQLIssuetypeVO.Type;
 import util.gadget.EpicUtility;
 import util.gadget.StoryUtility;
 
-public class ExecutionCallable implements Callable<ExecutionIssueResultWapper> {
-    final static LoggerWapper logger = LoggerWapper.getLogger(ExecutionCallable.class);
+public class TestExecutionCallable implements Callable<ExecutionIssueResultWapper> {
+    final static LoggerWapper logger = LoggerWapper.getLogger(TestExecutionCallable.class);
     private JQLIssueVO issue;
     private Type type;
 
-    public ExecutionCallable(JQLIssueVO issue, Type type) {
+    public TestExecutionCallable(JQLIssueVO issue, Type type) {
         super();
         this.issue = issue;
         this.type = type;

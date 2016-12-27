@@ -5,11 +5,14 @@ import java.util.Map;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonProperty.Access;
 
 import models.main.Release;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class StoryVsTestExecution implements Gadget {
+    @JsonProperty(value="_id" , access = Access.READ_ONLY)
     private String id;
     private Type type = Type.STORY_TEST_EXECUTION;
     private String projectName;

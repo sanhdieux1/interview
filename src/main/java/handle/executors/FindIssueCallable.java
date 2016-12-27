@@ -1,4 +1,4 @@
-package handle;
+package handle.executors;
 
 import java.util.concurrent.Callable;
 
@@ -13,8 +13,6 @@ public class FindIssueCallable implements Callable<JQLIssueVO> {
 
     @Override
     public JQLIssueVO call() throws Exception {
-        // TODO Auto-generated method stub
-//        return null;
         return GadgetUtility.getInstance().findIssue(issueKey);
     }
 

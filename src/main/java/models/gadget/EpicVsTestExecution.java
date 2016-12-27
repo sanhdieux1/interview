@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonProperty.Access;
 
 import models.APIIssueVO;
 import models.main.Release;
@@ -12,6 +14,7 @@ import models.main.Release;
 public class EpicVsTestExecution implements Gadget {
     private boolean selectAll;
     private String user;
+    @JsonProperty(value="_id" , access = Access.READ_ONLY)
     private String id;
     private Gadget.Type type = Gadget.Type.EPIC_US_TEST_EXECUTION;
     private String projectName;

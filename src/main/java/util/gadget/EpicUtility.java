@@ -13,7 +13,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import handle.ExecutionCallable;
+import handle.executors.TestExecutionCallable;
 import manament.log.LoggerWapper;
 import models.APIIssueVO;
 import models.ExecutionIssueResultWapper;
@@ -59,13 +59,12 @@ public class EpicUtility {
 
         for (String epic : epics){
             ExecutionIssueResultWapper executionIssues = findAllExecutionIssueInEpic(epic);
-            GadgetData gadgetData = GadgetUtility.getInstance().convertToGadgetData(executionIssues);
+            GadgetData gadgetData = GadgetUtility.getInstance().convertToGadgetData(executionIssues.getExecutionsVO());
             gadgetData.setKey(new APIIssueVO(epic, null));
-            result.add(gadgetData);
             gadgetData
                     .setUnplanned(gadgetData.getBlocked() + gadgetData.getFailed() + gadgetData.getPassed() + gadgetData.getUnexecuted() + gadgetData.getWip());
             gadgetData.setPlanned(executionIssues.getPlanned());
-
+            result.add(gadgetData);
         }
 
         return result;
@@ -77,8 +76,8 @@ public class EpicUtility {
         if(issues == null || issues.isEmpty()){
             return resultWapper;
         }
-        ExecutorService taskExecutor = Executors.newFixedThreadPool(issues.size());
-        List<ExecutionCallable> tasks = new ArrayList<ExecutionCallable>();
+        ExecutorService taskExecutor = Executors.newFixedThreadPool(PropertiesUtil.getInt(Constant.CONCURRENT_THREAD));
+        List<TestExecutionCallable> tasks = new ArrayList<TestExecutionCallable>();
 
         issues.stream().forEach(new Consumer<JQLIssueVO>() {
             @Override
@@ -86,7 +85,7 @@ public class EpicUtility {
                 Type type = JQLIssuetypeVO.Type.fromString(issue.getFields().getIssuetype().getName());
                 // ignore other
                 if(type == Type.TEST || type == Type.STORY){
-                    tasks.add(new ExecutionCallable(issue, type));
+                    tasks.add(new TestExecutionCallable(issue, type));
                 }
             }
         });
@@ -116,7 +115,7 @@ public class EpicUtility {
         parameters.put(Constant.PARAMERTER_ZQL_QUERY, String.format(query, issueKey));
         parameters.put(Constant.PARAMERTER_MAXRECORDS, "1000");
         parameters.put(Constant.PARAMERTER_OFFSET, "0");
-        String result = HTTPClientUtil.getInstance().getLegacyData(PropertiesUtil.getInstance().getString(Constant.RESOURCE_BUNLE_PATH), parameters);
+        String result = HTTPClientUtil.getInstance().getLegacyData(PropertiesUtil.getString(Constant.RESOURCE_BUNLE_PATH), parameters);
         ExecutionsVO executions = JSONUtil.getInstance().convertJSONtoObject(result, ExecutionsVO.class);
         return executions;
     }
@@ -127,7 +126,7 @@ public class EpicUtility {
         parameters.put(Constant.PARAMERTER_JQL_QUERY, String.format(query, epic));
         parameters.put(Constant.PARAMERTER_MAXRESULTS, "10000");
         parameters.put(Constant.PARAMERTER_OFFSET, "0");
-        String data = HTTPClientUtil.getInstance().getLegacyData(PropertiesUtil.getInstance().getString(Constant.RESOURCE_BUNLE_SEARCH_PATH), parameters);
+        String data = HTTPClientUtil.getInstance().getLegacyData(PropertiesUtil.getString(Constant.RESOURCE_BUNLE_SEARCH_PATH), parameters);
         if(data == null){
             return null;
         }
@@ -155,7 +154,7 @@ public class EpicUtility {
         parameters.put(Constant.PARAMERTER_JQL_QUERY, query.toString());
         parameters.put(Constant.PARAMERTER_MAXRESULTS, "10000");
         parameters.put(Constant.PARAMERTER_OFFSET, "0");
-        String data = HTTPClientUtil.getInstance().getLegacyData(PropertiesUtil.getInstance().getString(Constant.RESOURCE_BUNLE_SEARCH_PATH), parameters);
+        String data = HTTPClientUtil.getInstance().getLegacyData(PropertiesUtil.getString(Constant.RESOURCE_BUNLE_SEARCH_PATH), parameters);
         JQLSearchResult searchResult = JSONUtil.getInstance().convertJSONtoObject(data, JQLSearchResult.class);
         if(searchResult != null && searchResult.getIssues() != null){
             result = searchResult.getIssues().stream().map(new Function<JQLIssueVO, APIIssueVO>() {
