@@ -98,7 +98,7 @@ public class AssigneeUtility {
         query.append(String.format("project = %s", projectName));
         if(release != null){
             query.append(Constant.AND);
-            query.append(release.toString());
+            query.append(String.format("fixVersion = %s", release.toString()));
         }
 
         Map<String, String> parameters = new HashMap<String, String>();
@@ -114,7 +114,7 @@ public class AssigneeUtility {
         String keyProvisional = projectName + PLUS + release.toString();
         if(cycleNameCache.get(keyProvisional) == null || cycleNameCache.get(keyProvisional).isEmpty()){
             ExecutionsVO executions = AssigneeUtility.getInstance().findAllExecutionIsueeInProject(projectName, release);
-            if(executions != null){
+            if(executions != null && executions.getExecutions()!=null){
                 List<ExecutionIssueVO> excutions = executions.getExecutions();
                 Stream<ExecutionIssueVO> excutionsStream = excutions.stream();
                 cycleNameCache.put(projectName + PLUS + release.toString(), excutionsStream.map(i -> i.getCycleName()).collect(Collectors.toSet()));
