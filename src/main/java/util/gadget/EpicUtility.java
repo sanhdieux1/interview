@@ -1,13 +1,13 @@
 package util.gadget;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -32,7 +32,6 @@ import models.exception.APIException;
 import models.gadget.EpicVsTestExecution;
 import models.main.ExecutionsVO;
 import models.main.JQLSearchResult;
-import ninja.Results;
 import service.HTTPClientUtil;
 import util.Constant;
 import util.JSONUtil;
@@ -54,7 +53,7 @@ public class EpicUtility {
     public List<GadgetData> getDataEPic(EpicVsTestExecution epicGadget) throws APIException {
         List<GadgetData> result = new ArrayList<>();
         Set<String> epics = epicGadget.getEpic();
-        if(epicGadget.isSelectAll()){
+        if(epicGadget.isSelectAllStory()){
             Set<APIIssueVO> epicLinks = getEpicLinks(epicGadget.getProjectName(), epicGadget.getRelease().toString());
             if(epicLinks != null){
                 epics = epicLinks.stream().map(e -> e.getKey()).collect(Collectors.toSet());
@@ -63,8 +62,6 @@ public class EpicUtility {
         if(epics == null){
             return result;
         }
-        List<String> metrics = epicGadget.getMetrics();
-
         for (String epic : epics){
             ExecutionIssueResultWapper executionIssues = findAllExecutionIssueInEpic(epic);
             GadgetData gadgetData = GadgetUtility.getInstance().convertToGadgetData(executionIssues.getExecutionsVO());
@@ -132,24 +129,44 @@ public class EpicUtility {
         ExecutionsVO executions = JSONUtil.getInstance().convertJSONtoObject(result, ExecutionsVO.class);
         if(executions != null){
             if(executions.getExecutions() != null){
-                if(executions.getExecutions().size()>1){
-                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MMM/yy");
-                    executions.getExecutions().stream().sorted(new Comparator<ExecutionIssueVO>() {
+                if(executions.getExecutions().size() > 1){
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d/MMM/yy");
+                    /*
+                     * Fetch only the most recent execution
+                     * In case that date cannot be parse or date is empty -> take the first test execution
+                     * In case that existing an empty date -> take the test which have date.
+                     */
+                    Optional<ExecutionIssueVO> execution = executions.getExecutions().stream().sorted(new Comparator<ExecutionIssueVO>() {
                         @Override
                         public int compare(ExecutionIssueVO o1, ExecutionIssueVO o2) {
                             LocalDate o1Time = null;
                             LocalDate o2Time = null;
+                            int i = 0;
+                            boolean cannotParse = false;
                             try{
                                 o1Time = LocalDate.parse(o1.getExecutedOn(), formatter);
+                            } catch (Exception e){
+                                logger.fastDebug("cannot parse date %s:%s", o1.getExecutedOn(), o1.getIssueKey());
+                                cannotParse = true;
+                                i = 1;
+                            }
+                            try{
                                 o2Time = LocalDate.parse(o2.getExecutedOn(), formatter);
                             } catch (Exception e){
-                                logger.fastDebug("cannot compare date %s and %s",o1.getExecutedOn() , o2.getExecutedOn());
-                                return 0;
+                                logger.fastDebug("cannot parse date %s:%s", o2.getExecutedOn(), o2.getIssueKey());
+                                cannotParse = true;
+                                i -= 1;
+                            }
+                            if(cannotParse){
+                                return i;
                             }
                             return o2Time.compareTo(o1Time);
                         }
                     }).findFirst();
-                }else{
+                    if(execution.isPresent() && execution.get() != null){
+                        testExecution.add(execution.get());
+                    }
+                } else{
                     testExecution.addAll(executions.getExecutions());
                 }
             }

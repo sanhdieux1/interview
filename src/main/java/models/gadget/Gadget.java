@@ -7,8 +7,6 @@ public interface Gadget {
 
     public String getUser();
     
-    public boolean isSelectAll();
-    
     public enum Type {
         ASSIGNEE_TEST_EXECUTION, TEST_CYCLE_TEST_EXECUTION, EPIC_US_TEST_EXECUTION, STORY_TEST_EXECUTION;
     }

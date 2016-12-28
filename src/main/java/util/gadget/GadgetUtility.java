@@ -89,7 +89,7 @@ public class GadgetUtility extends DatabaseUtility {
     }
 
     public static void main(String[] args) throws APIException {
-        EpicVsTestExecution gadget = new EpicVsTestExecution();
+        AssigneeVsTestExecution gadget = new AssigneeVsTestExecution();
         gadget.setProjectName("FNMS 557x");
         Set<String> cyckes = new HashSet<>();
         cyckes.add("FNMS-5949");
@@ -97,8 +97,7 @@ public class GadgetUtility extends DatabaseUtility {
         Set<String> epic = new HashSet<>();
         epic.add("FNMS-1895");
         
-        gadget.setEpic(epic);
-        
+        gadget.setSelectAllTestCycle(true);
         gadget.setRelease(Release.R1_2_01);
         GadgetUtility.getInstance().insertOrUpdate(gadget);
     }

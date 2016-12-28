@@ -2,12 +2,9 @@ package models.gadget;
 
 import java.util.Set;
 
-import javax.persistence.Id;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonProperty.Access;
 
 import models.main.Release;
 
@@ -17,16 +14,14 @@ public class AssigneeVsTestExecution implements Gadget {
 
     private String user;
     private String id;
-    @JsonProperty(required=true)
+    @JsonProperty(required = true)
     private String projectName;
-    private boolean selectAll;
-    @JsonProperty(required=true)
+    private boolean selectAllTestCycle;
+    @JsonProperty(required = true)
     private Set<String> cycles;
-    @JsonProperty(required=true)
-    private Set<String> assignee;
-    @JsonProperty(required=true)
+    @JsonProperty(required = true)
     private Set<String> metrics;
-    @JsonProperty(required=true)
+    @JsonProperty(required = true)
     private Release release; // fixVersion
 
     @Override
@@ -48,6 +43,14 @@ public class AssigneeVsTestExecution implements Gadget {
         this.projectName = projectName;
     }
 
+    public boolean isSelectAllTestCycle() {
+        return selectAllTestCycle;
+    }
+
+    public void setSelectAllTestCycle(boolean selectAllTestCycle) {
+        this.selectAllTestCycle = selectAllTestCycle;
+    }
+
     public void setId(String id) {
         this.id = id;
     }
@@ -60,29 +63,12 @@ public class AssigneeVsTestExecution implements Gadget {
         this.user = user;
     }
 
-    @Override
-    public boolean isSelectAll() {
-        return selectAll;
-    }
-
-    public void setSelectAll(boolean selectAll) {
-        this.selectAll = selectAll;
-    }
-
     public Set<String> getCycles() {
         return cycles;
     }
 
     public void setCycles(Set<String> cycles) {
         this.cycles = cycles;
-    }
-
-    public Set<String> getAssignee() {
-        return assignee;
-    }
-
-    public void setAssignee(Set<String> assignee) {
-        this.assignee = assignee;
     }
 
     public Set<String> getMetrics() {

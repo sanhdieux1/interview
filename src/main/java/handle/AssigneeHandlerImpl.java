@@ -26,9 +26,6 @@ import util.gadget.AssigneeUtility;
 
 public class AssigneeHandlerImpl implements AssigneeHandler {
     final static LoggerWapper logger = LoggerWapper.getLogger(AssigneeHandlerImpl.class);
-    private static final String PLUS = "+";
-
-    private static Map<String, Set<AssigneeVO>> assigneesCache = new HashMap<String, Set<AssigneeVO>>();
 
     public AssigneeHandlerImpl() {
     }
@@ -38,22 +35,8 @@ public class AssigneeHandlerImpl implements AssigneeHandler {
     }
 
     public Result getAssigneeList(String projectName, Release release) throws APIException {
-        if(assigneesCache.get(projectName+PLUS+release) == null || assigneesCache.get(projectName+PLUS+release).isEmpty()){
-            ExecutionsVO executions = AssigneeUtility.getInstance().findAllExecutionIsueeInProject(projectName, release);
-            if(executions != null && executions.getExecutions() != null){
-                List<ExecutionIssueVO> excutions = executions.getExecutions();
-                Stream<ExecutionIssueVO> excutionsStream = excutions.stream();
-                assigneesCache.put(projectName+PLUS+release, excutionsStream.filter(e -> (e.getAssigneeUserName()!=null && !e.getAssigneeUserName().isEmpty())).map(new Function<ExecutionIssueVO, AssigneeVO>() {
-                    @Override
-                    public AssigneeVO apply(ExecutionIssueVO issueVO) {
-                        AssigneeVO assigneeVO = new AssigneeVO(issueVO.getAssignee(), issueVO.getAssigneeUserName(), issueVO.getAssigneeDisplay());
-                        return assigneeVO;
-                    }
-                }).collect(Collectors.toSet()));
-            }
-        }
-        Set<AssigneeVO> assignees = assigneesCache.get(projectName+PLUS+release);
-        return Results.json().render(assignees != null ? assignees : new HashSet<>());
+        Set<AssigneeVO> assignees = AssigneeUtility.getInstance().findAssigneeList(projectName, release);
+        return Results.json().render(assignees);
     }
 
     public JQLIssueVO findIssues(String id) throws APIException {

@@ -18,11 +18,11 @@ public enum Release {
     @JsonCreator
     public static Release fromString(String str) {
         if(str != null){
-            if(str.contains("1.3.0") || str.contains("130")){
+            if("1.3.0".equals(str) || "130".equals(str)){
                 return R1_3_0;
-            } else if(str.contains("1.2.0") || str.contains("120")){
+            } else if("1.2.0".equals(str) || "120".equals(str)){
                 return R1_2_0;
-            } else if(str.contains("1.2.01") || str.contains("1201") || str.contains("1.2.0.1")){
+            } else if("1.2.01".equals(str) || "1201".equals(str)){
                 return R1_2_01;
             }
         }else{

@@ -80,8 +80,7 @@ public class EpicVsTestExecution implements Gadget {
         this.epic = epic;
     }
 
-    @Override
-    public boolean isSelectAll() {
+    public boolean isSelectAllStory() {
         return selectAll;
     }
 

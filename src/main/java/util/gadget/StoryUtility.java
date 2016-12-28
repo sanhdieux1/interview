@@ -34,6 +34,7 @@ import models.JQLIssuetypeVO.Type;
 import models.StoryResultWapper;
 import models.exception.APIException;
 import models.gadget.StoryVsTestExecution;
+import models.main.Release;
 import util.Constant;
 import util.PropertiesUtil;
 
@@ -96,8 +97,12 @@ public class StoryUtility {
         List<ExecutionIssueVO> result = new ArrayList<>();
         if(JQLIssuetypeVO.Type.STORY.toString().equalsIgnoreCase(issue.getFields().getIssuetype().getName())){
             List<JQLIssueLinkVO> issueLinks = findAllTestIssueForStory(issue);
+            String test = "";
+            for (JQLIssueLinkVO t : issueLinks){
+                test = test + (t.getInwardIssue().getKey()) + ",";
+            }
             if(issueLinks != null && !issueLinks.isEmpty()){
-                for (JQLIssueLinkVO issueLink : issue.getFields().getIssuelinks()){
+                for (JQLIssueLinkVO issueLink : issueLinks){
                     List<ExecutionIssueVO> executionIssues = EpicUtility.getInstance().findTestExecutionInIsuee(issueLink.getInwardIssue().getKey());
                     if(executionIssues != null && !executionIssues.isEmpty()){
                         result.addAll(executionIssues);
@@ -107,22 +112,28 @@ public class StoryUtility {
         }
         return result;
     }
-    
-    public List<JQLIssueLinkVO> findAllTestIssueForStory(JQLIssueVO issue){
+
+    public List<JQLIssueLinkVO> findAllTestIssueForStory(JQLIssueVO issue) {
         List<JQLIssueLinkVO> testIssue = null;
-        if(issue!=null && issue.getFields()!=null && issue.getFields().getIssuelinks()!=null){
+        if(issue != null && issue.getFields() != null && issue.getFields().getIssuelinks() != null){
             List<JQLIssueLinkVO> issueLinks = issue.getFields().getIssuelinks();
             testIssue = issueLinks.stream().filter(i -> INWARD_TEST_BY.equals(i.getType().getInward())).collect(Collectors.toList());
-        }else{
-            logger.fasttrace("cannot findout issuelinks of %s",issue);
+        } else{
+            logger.fasttrace("cannot findout issuelinks of %s", issue);
         }
         return testIssue;
     }
-    
+
     public Map<String, List<GadgetData>> getDataStory(StoryVsTestExecution storyGadget) throws APIException {
         Map<String, List<GadgetData>> returnData = new HashMap<>();
         Map<String, Set<JQLIssueVO>> epicMap = null;
-        if(storyGadget.isSelectAll()){
+        if(storyGadget.isSelectAllEpic() && storyGadget.isSelectAllStory()){
+            String project = storyGadget.getProjectName();
+            Release release = storyGadget.getRelease();
+            Set<APIIssueVO> epicIssues = EpicUtility.getInstance().getEpicLinks(project, release.toString());
+            Set<String> epics = epicIssues.stream().map(e -> e.getKey()).collect(Collectors.toSet());
+            epicMap = findStoryInEpic(new ArrayList<String>(epics));
+        } else if(storyGadget.isSelectAllStory()){
             epicMap = findStoryInEpic(new ArrayList<String>(storyGadget.getEpic()));
         } else{
             Set<JQLIssueVO> storyIssues = new HashSet<>();

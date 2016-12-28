@@ -2,14 +2,17 @@ package util.gadget;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import manament.log.LoggerWapper;
 import models.APIIssueVO;
+import models.AssigneeVO;
 import models.ExecutionIssueResultWapper;
 import models.ExecutionIssueVO;
 import models.GadgetData;
@@ -17,6 +20,7 @@ import models.exception.APIException;
 import models.gadget.AssigneeVsTestExecution;
 import models.main.ExecutionsVO;
 import models.main.Release;
+import ninja.Results;
 import service.HTTPClientUtil;
 import util.Constant;
 import util.JSONUtil;
@@ -26,6 +30,7 @@ public class AssigneeUtility {
     final static LoggerWapper logger = LoggerWapper.getLogger(AssigneeUtility.class);
     private static AssigneeUtility INSTANCE = new AssigneeUtility();
     private static Map<String, Set<String>> cycleNameCache = new HashMap<String, Set<String>>();;
+    private static Map<String, Set<AssigneeVO>> assigneesCache = new HashMap<String, Set<AssigneeVO>>();
     private static final String PLUS = "+";
 
     private AssigneeUtility() {
@@ -37,34 +42,63 @@ public class AssigneeUtility {
 
     public Map<String, List<GadgetData>> getDataAssignee(AssigneeVsTestExecution assigneeGadget) throws APIException {
         Map<String, List<GadgetData>> returnData = new HashMap<>();
+
         String projectName = assigneeGadget.getProjectName();
+        Set<AssigneeVO> assigneeVOs = findAssigneeList(projectName, assigneeGadget.getRelease());
+        Set<String> assignees = assigneeVOs.stream().map(a -> a.getDisplay()).collect(Collectors.toSet());
         Set<String> cycles = assigneeGadget.getCycles();
-        Set<String> assignees = assigneeGadget.getAssignee();
-        for (String cycle : cycles){
-            ExecutionsVO executions = findExecution(projectName, cycle, assignees);
-            if(executions != null && executions.getExecutions() != null){
-                Map<String, List<ExecutionIssueVO>> assigneeMap = executions.getExecutions().stream()
-                        .collect(Collectors.groupingBy(ExecutionIssueVO::getAssigneeDisplay));
-                List<GadgetData> gadgetDatas = new ArrayList<GadgetData>();
-                for (String assignee : assigneeMap.keySet()){
-                    GadgetData gadgetData = GadgetUtility.getInstance().convertToGadgetData(assigneeMap.get(assignee));
-                    gadgetData.setKey(new APIIssueVO(assignee, null));
-                    gadgetDatas.add(gadgetData);
-                }
-                // init empty for assignees that have no test
-                for (String assignee : assignees){
-                    if(!assigneeMap.containsKey(assignee)){
-                        GadgetData gadgetData = new GadgetData();
+
+        if(assigneeGadget.isSelectAllTestCycle()){
+            cycles = getListCycleName(projectName, assigneeGadget.getRelease());
+        }
+        if(cycles != null && !cycles.isEmpty()){
+            for (String cycle : cycles){
+                ExecutionsVO executions = findExecution(projectName, cycle, assignees);
+                if(executions != null && executions.getExecutions() != null){
+                    Map<String, List<ExecutionIssueVO>> assigneeMap = executions.getExecutions().stream()
+                            .collect(Collectors.groupingBy(ExecutionIssueVO::getAssigneeDisplay));
+                    List<GadgetData> gadgetDatas = new ArrayList<GadgetData>();
+                    for (String assignee : assigneeMap.keySet()){
+                        GadgetData gadgetData = GadgetUtility.getInstance().convertToGadgetData(assigneeMap.get(assignee));
                         gadgetData.setKey(new APIIssueVO(assignee, null));
                         gadgetDatas.add(gadgetData);
                     }
+                    // init empty for assignees that have no test
+                    for (String assignee : assignees){
+                        if(!assigneeMap.containsKey(assignee)){
+                            GadgetData gadgetData = new GadgetData();
+                            gadgetData.setKey(new APIIssueVO(assignee, null));
+                            gadgetDatas.add(gadgetData);
+                        }
+                    }
+                    returnData.put(cycle, gadgetDatas);
                 }
-                returnData.put(cycle, gadgetDatas);
             }
+        }else{
+            logger.fastDebug("No Test Cycle in gadget %s",assigneeGadget.getId());
         }
         return returnData;
     }
 
+    public Set<AssigneeVO> findAssigneeList(String projectName, Release release) throws APIException{
+        if(assigneesCache.get(projectName+PLUS+release) == null || assigneesCache.get(projectName+PLUS+release).isEmpty()){
+            ExecutionsVO executions = findAllExecutionIsueeInProject(projectName, release);
+            if(executions != null && executions.getExecutions() != null){
+                List<ExecutionIssueVO> excutions = executions.getExecutions();
+                Stream<ExecutionIssueVO> excutionsStream = excutions.stream();
+                assigneesCache.put(projectName+PLUS+release, excutionsStream.filter(e -> (e.getAssigneeUserName()!=null && !e.getAssigneeUserName().isEmpty())).map(new Function<ExecutionIssueVO, AssigneeVO>() {
+                    @Override
+                    public AssigneeVO apply(ExecutionIssueVO issueVO) {
+                        AssigneeVO assigneeVO = new AssigneeVO(issueVO.getAssignee(), issueVO.getAssigneeUserName(), issueVO.getAssigneeDisplay());
+                        return assigneeVO;
+                    }
+                }).collect(Collectors.toSet()));
+            }
+        }
+        Set<AssigneeVO> assignees = assigneesCache.get(projectName+PLUS+release);
+        return assignees != null ? assignees : new HashSet<>();
+    
+    }
     public ExecutionsVO findExecution(String project, String cyclename, Set<String> assignees) throws APIException {
         StringBuilder query = new StringBuilder();
         query.append(String.format("project = \"%s\"", project));

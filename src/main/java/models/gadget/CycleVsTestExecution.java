@@ -17,7 +17,7 @@ public class CycleVsTestExecution implements Gadget{
     private Set<String> cycles;
     private Release release; // fixVersion
     private String user;
-    private boolean selectAll;
+    private boolean selectAllCycle;
     @Override
     public String getId() {
         return id;
@@ -33,9 +33,8 @@ public class CycleVsTestExecution implements Gadget{
         return user;
     }
 
-    @Override
-    public boolean isSelectAll() {
-        return selectAll;
+    public boolean isSelectAllCycle() {
+        return selectAllCycle;
     }
     
     public void setType(Type type) {
@@ -50,8 +49,8 @@ public class CycleVsTestExecution implements Gadget{
         this.user = user;
     }
 
-    public void setSelectAll(boolean selectAll) {
-        this.selectAll = selectAll;
+    public void setSelectAllCycle(boolean selectAll) {
+        this.selectAllCycle = selectAll;
     }
 
     public String getProjectName() {

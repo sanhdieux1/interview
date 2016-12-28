@@ -16,8 +16,17 @@ public class StoryVsTestExecution implements Gadget {
     private List<String> metrics;
     private Set<String> epic;
     private Set<String> stories;
-    private boolean selectAll;
+    private boolean selectAllStory;
+    private boolean selectAllEpic;
     private String user;
+    
+    public boolean isSelectAllEpic() {
+        return selectAllEpic;
+    }
+
+    public void setSelectAllEpic(boolean selectAllEpic) {
+        this.selectAllEpic = selectAllEpic;
+    }
 
     @Override
     public String getId() {
@@ -86,13 +95,12 @@ public class StoryVsTestExecution implements Gadget {
         this.stories = stories;
     }
 
-    @Override
-    public boolean isSelectAll() {
-        return selectAll;
+    public boolean isSelectAllStory() {
+        return selectAllStory;
     }
 
-    public void setSelectAll(boolean selectAll) {
-        this.selectAll = selectAll;
+    public void setSelectAllStory(boolean selectAll) {
+        this.selectAllStory = selectAll;
     }
 
 }
