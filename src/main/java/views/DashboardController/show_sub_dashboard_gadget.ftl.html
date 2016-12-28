@@ -1,3 +1,11 @@
+<div id="dashboard-alert"
+	class="warning alert-warning alert-dismissable">
+	<a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+	<div id="warning-message">
+		<strong>Warning!</strong> Indicates a warning that might need
+		attention.
+	</div>
+</div>
 <div id="epic-test-execution-div" class="col-md-12"
 	style="min-height: 20px;">
 	<div class="panel panel-info">
@@ -19,37 +27,51 @@
 								<!-- Project Row -->
 								<tr>
 									<td class="col-md-6"><label>Project</label></td>
-										<td class="col-md-6"><select class="form-control"
-											id="epicProject">
+									<td class="col-md-6"><select class="form-control"
+										id="epicProject">
 											<option selected disabled>-Select Project-</option>
-										</select></td>
+									</select></td>
 								</tr>
 								<!-- Release Row -->
 								<tr>
 									<td class="col-md-6"><label>Release</label></td>
 									<td class="col-md-6"><select class="form-control"
 										id="epicRelease">
-										<option selected disabled>-Select Version-</option>
-										<option value="1.2.0">R1.2.0</option>
-										<option value="1.2.01">R1.2.01</option>
-										<option value="1.3.0">R1.3.0</option>
+											<option selected disabled>-Select Version-</option>
+											<option value="1.2.0">R1.2.0</option>
+											<option value="1.2.01">R1.2.01</option>
+											<option value="1.3.0">R1.3.0</option>
 									</select></td>
 								</tr>
 								<!-- Product Row -->
 								<tr>
 									<td class="col-md-6"><label>Product</label></td>
-									<td class="col-md-6"><select multiple id="epicProduct" class="form-control">
-									<option selected disabled>-Select Product-</option>
+									<td class="col-md-6"><select multiple id="epicProduct"
+										class="form-control">
+											<option selected disabled>-Select Product-</option>
+											<option value="ANV">ANV</option>
+											<option value="PCC">PCC</option>
+											<option value="UTC">UTC</option>
+											<option value="557x Infrastructure">557x
+												Infrastructure</option>
 									</select></td>
 								</tr>
 								<!-- Epic Link Row -->
 								<tr>
 									<td class="col-md-6"><label>Epic Link</label></td>
-									<td class="col-md-6"><select multiple class="form-control"
-										id="epicMultiSelect">
-									</select>
-										<div id="epic-link-loader" style="display:none">
-											<div class="loader"></div>
+									<td class="col-md-6">
+										<div id="epic-link-container">
+											<div id="epic-link-loader" align="center"
+												style="display: none">
+												<div class="loader"></div>
+											</div>
+											<select multiple class="form-control" id="epicMultiSelect">
+											</select>
+										</div>
+										<div class="col-md-12" align="center"
+											style="padding-top: 10px;">
+											<label><input type="checkbox" id="epicCheckAll">Select
+												All</label>
 										</div>
 									</td>
 
@@ -57,8 +79,7 @@
 								<!-- Metrics row -->
 								<tr>
 									<td class="col-md-6"><label>Metrics</label></td>
-									<td class="col-md-6">
-									<select multiple class="form-control"
+									<td class="col-md-6"><select multiple class="form-control"
 										id="epicMetricMultiSelect">
 											<option value="UNEXECUTED">UNEXECUTED</option>
 											<option value="FAILED">FAILED</option>
@@ -67,25 +88,26 @@
 											<option value="PASSED">PASSED</option>
 											<option value="PLANNED">PLANNED</option>
 											<option value="UNPLANNED">UNPLANNED</option>
-									</select>
-									</td>
+									</select></td>
 								</tr>
 							</tbody>
 						</table>
 					</div>
 					<#if dashboard.owner == alias>
-						<button type="button" id="epic-add-gadget" class="btn btn-success">Add Gadget To Database</button>
-						<button type="button" id="epic-get-data" class="btn btn-success">Draw Table</button>
+					<button type="button" id="epic-add-gadget" class="btn btn-success">Add
+						Gadget To Database</button>
+					<button type="button" id="epic-get-data" class="btn btn-success">Draw
+						Table</button>
 					</#if>
 				</form>
 			</div>
 			<br>
-			<div id="epic-table-container">
-				<table id="epic-table" class="table table-striped table-bordered table-hover table-condensed">
+			<div id="epic-table-container" class="col-md-12" align="center">
+				<table id="epic-table" class="display">
 					<thead>
 						<tr>
 							<th>Title</th>
-							<th>UNEXECUTED</th>
+							<th class="column-executed">UNEXECUTED</th>
 							<th>FAILED</th>
 							<th>WIP</th>
 							<th>BLOCKED</th>
@@ -108,7 +130,8 @@
 					</tfoot>
 				</table>
 			</div>
-			<div id="epic-table-loader" style="display:none" align="center">
+			<div id="epic-table-loader" class="col-md-12" style="display: none"
+				align="center">
 				<div class="loader"></div>
 				<h2>Data is loading...</h2>
 			</div>
@@ -128,64 +151,83 @@
 				<a id="us-config-toggle">Show Configuration</a>
 			</div>
 			<div id="us-config">
-				<form
-					class="form-horizontal" role="form">
+				<form class="form-horizontal" role="form">
 					<div class="md-padding" ng-cloak>
 						<table class="table table-bordered">
 							<tbody>
 								<!-- US Project Row -->
 								<tr>
 									<td class="col-md-6"><label>Project</label></td>
-										<td class="col-md-6"><select class="form-control"
-											id="usProject"> 
+									<td class="col-md-6"><select class="form-control"
+										id="usProject">
 											<option selected disabled>-Select Project-</option>
-										</select></td>
+									</select></td>
 								</tr>
 								<!-- US Release Row -->
 								<tr>
 									<td class="col-md-6"><label>Release</label></td>
-										<td class="col-md-6"><select class="form-control"
-											id="usRelease">
+									<td class="col-md-6"><select class="form-control"
+										id="usRelease">
 											<option selected disabled>-Select Version-</option>
 											<option value="1.2.0">R1.2.0</option>
 											<option value="1.2.01">R1.2.01</option>
 											<option value="1.3.0">R1.3.0</option>
-										</select></td>
+									</select></td>
 								</tr>
 								<!-- Product Row -->
 								<tr>
 									<td class="col-md-6"><label>Product</label></td>
-									<td class="col-md-6"><select multiple id="usProduct" class="form-control">
-									<option selected disabled>-Select Product-</option>
-									<option value="ANV">ANV</option>
-									<option value="PCC">PCC</option>
-									<option value="UTC">UTC</option>
-									<option value="557x Infrastructure">557x Infrastructure</option>
+									<td class="col-md-6"><select multiple id="usProduct"
+										class="form-control">
+											<option selected disabled>-Select Product-</option>
+											<option value="ANV">ANV</option>
+											<option value="PCC">PCC</option>
+											<option value="UTC">UTC</option>
+											<option value="557x Infrastructure">557x
+												Infrastructure</option>
 									</select></td>
 								</tr>
 								<!-- US EPIC LINK Row -->
 								<tr>
 									<td class="col-md-6"><label>Epic Link</label></td>
 									<td class="col-md-6">
-										<div id="us-epic-loader" style="display: none;">
+										<div id="us-epic-loader" align="center" style="display: none;">
 											<div class="loader"></div>
 										</div>
-										
-										<div id="us-epic-available-div" class="col-md-12">
-										<div align="center">
-											<div class="col-md-6" align="center">
-												<label>Available</label> <select class="form-control"
-													multiple id="usEpicAvailable">
-												</select>
-												
-												<button id="us-add-epic-btn" class="btn btn-success">Add</button>
+										<div id="us-epic-available-div">
+											<label>Available</label> <select class="form-control"
+												multiple id="usEpicAvailable">
+											</select>
+											<div align="center" style="padding-top: 20px;">
+												<button id="us-add-epic-btn" style="width: 35px;"
+													class="btn btn-primary btn-sm">
+													<i style="font-size: 20px" class="fa fa-angle-down"></i>
+												</button>
+
+												<button id="us-remove-epic-btn" style="width: 35px;"
+													class="btn btn-primary btn-sm">
+													<i style="font-size: 20px" class="fa fa-angle-up"></i>
+												</button>
+
+												<button id="us-add-all-epic-btn" style="width: 35px;"
+													class="btn btn-primary btn-sm">
+													<i style="font-size: 20px" class="fa fa-angle-double-down"></i>
+												</button>
+
+												<button id="us-remove-all-epic-btn" style="width: 35px;"
+													class="btn btn-primary btn-sm">
+													<i style="font-size: 20px" class="fa fa-angle-double-up"></i>
+												</button>
+
 											</div>
-											<div class="col-md-6" align="center">
-												<label>To be fetched</label> <select class="form-control"
-													multiple id="usEpic">
-												</select>
-												<button id="us-remove-epic-btn" class="btn btn-success">Remove</button>
-											</div>
+											<label>To be fetched</label> <select class="form-control"
+												multiple id="usEpic">
+											</select>
+										</div>
+										<div class="col-md-12" align="center"
+											style="padding-top: 10px;">
+											<label><input type="checkbox" id="usCheckAllEpic">Select
+												All</label>
 										</div>
 									</td>
 								</tr>
@@ -193,15 +235,22 @@
 								<!-- Us story row -->
 								<tr>
 									<td class="col-md-6"><label>User Story</label></td>
-										<td class="col-md-6">
-										<select multiple
-											class="form-control" id="usMultiSelect">
-										</select>
-										<div id="us-us-loader" style="display: none">
+									<td class="col-md-6">
+										<div id="us-container">
+											<select multiple class="form-control" id="usMultiSelect">
+											</select>
+
+											<div id="us-us-loader" style="display: none">
 												<div class="loader"></div>
+											</div>
 										</div>
-										</td>
-										
+										<div class="col-md-12" align="center"
+											style="padding-top: 10px;">
+											<label><input type="checkbox" id="usCheckAllStory">Select
+												All</label>
+										</div>
+									</td>
+
 								</tr>
 								<!-- US Metrics row -->
 								<tr>
@@ -221,42 +270,18 @@
 						</table>
 					</div>
 					<#if dashboard.owner == alias>
-					<button type="button" id="us-update" class="btn btn-success">Update</button>
+					<button type="button" id="us-update-btn" class="btn btn-success">Update</button>
+					<button type="button" id="us-draw-table-btn"
+						class="btn btn-success">Draw Table</button>
 					</#if>
 				</form>
 			</div>
 			<br>
-			<div id="us-table-container">
-				<table id="us-table"
-					class="table table-striped table-bordered table-hover table-condensed">
-					<thead>
-						<tr>
-							<th>Epic Url</th>
-							<th>UNEXECUTED</th>
-							<th>FAILED</th>
-							<th>WIP</th>
-							<th>BLOCKED</th>
-							<th>PASSED</th>
-							<th>PLANNED</th>
-							<th>UNPLANNED</th>
-						</tr>
-					</thead>
-					<tfoot>
-						<tr>
-							<th>Epic Url</th>
-							<th>UNEXECUTED</th>
-							<th>FAILED</th>
-							<th>WIP</th>
-							<th>BLOCKED</th>
-							<th>PASSED</th>
-							<th>PLANNED</th>
-							<th>UNPLANNED</th>
-						</tr>
-					</tfoot>
-				</table>
-			</div>
-			<div id="us-table-loader" style="display: none">
+			<div id="us-table-container" align="center"></div>
+			<div id="us-table-loader" class="col-md-12" style="display: none"
+				align="center">
 				<div class="loader"></div>
+				<h2>Data is loading...</h2>
 			</div>
 		</div>
 	</div>
@@ -274,96 +299,142 @@
 				<a id="assignee-config-toggle">Show Configuration</a>
 			</div>
 			<div id="assignee-config">
-				<form action="/dashboard/${id}/update" method="post"
-					class="form-horizontal" role="form">
+				<form class="form-horizontal" role="form">
 					<div class="md-padding" ng-cloak>
 						<table class="table table-bordered">
 							<tbody>
 								<!-- Assignee Project Row -->
 								<tr>
 									<td class="col-md-6"><label>Project</label></td>
-									<div class="project-search">
-										<td class="col-md-6"><select class="form-control"
-											id="assigneeProjectKey"> <#list epicTable?keys as
-												project>
-												<option>${project}</option> </#list>
-										</select></td>
-									</div>
+									<td class="col-md-6"><select class="form-control"
+										id="assigneeProject">
+											<option selected disabled>-Select Project-</option>
+									</select></td>
 								</tr>
 								<!-- Assignee Release Row -->
 								<tr>
 									<td class="col-md-6"><label>Release</label></td>
-									<div class="">
-										<td class="col-md-6"><select class="form-control"
-											id="assigneeReleaseKey"> <#list epicRelease as
-												release>
-												<option>${release}</option> </#list>
-										</select></td>
-									</div>
+
+									<td class="col-md-6"><select class="form-control"
+										id="assigneeRelease">
+											<option selected disabled>-Select Version-</option>
+											<option value="1.2.0">R1.2.0</option>
+											<option value="1.2.01">R1.2.01</option>
+											<option value="1.3.0">R1.3.0</option>
+									</select></td>
 								</tr>
-								<!-- Assignee Test Cycle Row -->
+								<!-- Assignee Product -->
+								<tr>
+									<td class="col-md-6"><label>Product</label></td>
+
+									<td class="col-md-6"><select multiple class="form-control"
+										id="assigneeProduct">
+											<option selected disabled>-Select Product-</option>
+											<option value="ANV">ANV</option>
+											<option value="PCC">PCC</option>
+											<option value="UTC">UTC</option>
+											<option value="557x Infrastructure">557x
+												Infrastructure</option>
+									</select></td>
+								</tr>
+								<!-- Assignee Cycle Row -->
 								<tr>
 									<td class="col-md-6"><label>Test Cycle</label></td>
-									<div class="epic-search">
-										<td class="col-md-6"><select multiple
-											class="form-control" id="assigneeCycleKey"> <#list
-												cycleList as cycle>
-												<option>${cycle}</option> </#list>
-										</select></td>
-									</div>
+									<td class="col-md-6">
+										<div id="assignee-cycle-loader" class="col-md-12"
+											style="display: none" align="center">
+											<div class="loader"></div>
+										</div>
+										<div id="assignee-cycle-available-div">
+											<label>Available</label> <select class="form-control"
+												multiple id="assigneeCycleAvailable">
+											</select>
+											<div align="center" style="padding-top: 20px;">
+												<button id="assignee-add-cycle-btn" style="width: 35px;"
+													class="btn btn-primary btn-sm">
+													<i style="font-size: 20px" class="fa fa-angle-down"></i>
+												</button>
+
+												<button id="assignee-remove-cycle-btn" style="width: 35px;"
+													class="btn btn-primary btn-sm">
+													<i style="font-size: 20px" class="fa fa-angle-up"></i>
+												</button>
+
+												<button id="assignee-add-all-cycle-btn" style="width: 35px;"
+													class="btn btn-primary btn-sm">
+													<i style="font-size: 20px" class="fa fa-angle-double-down"></i>
+												</button>
+
+												<button id="assignee-remove-all-cycle-btn"
+													style="width: 35px;" class="btn btn-primary btn-sm">
+													<i style="font-size: 20px" class="fa fa-angle-double-up"></i>
+												</button>
+
+											</div>
+											<div>
+												<label>To be fetched</label> <select class="form-control"
+													multiple id="assigneeCycle">
+												</select>
+											</div>
+										</div>
+										<div class="col-md-12" align="center"
+											style="padding-top: 10px;">
+											<label><input type="checkbox"
+												id="assigneeCheckAllCycle">Select All</label>
+										</div>
 								</tr>
 
-								<!-- Assignee story row -->
+								<!-- Assignee row -->
 								<tr>
 									<td class="col-md-6"><label>Assignee</label></td>
-									<div class="story-search">
-										<td class="col-md-6"><select multiple
-											class="form-control" id="usMultiSelect"> <#list
-												assigneeList as assignee>
-												<option>${assignee}</option> </#list>
-										</select></td>
-									</div>
+									<td class="col-md-6">
+										<div id="assignee-container">
+											<div id="assignee-loader" class="col-md-12"
+												style="display: none" align="center">
+												<div class="loader"></div>
+											</div>
+											<select multiple class="form-control"
+												id="assigneeMultiSelect">
+											</select>
+										</div>
+										<div class="col-md-12" align="center"
+											style="padding-top: 10px;">
+											<label><input type="checkbox" id="assigneeCheckAll">Select
+												All</label>
+										</div>
+									</td>
 								</tr>
 								<!-- Assignee Metrics row -->
 								<tr>
 									<td class="col-md-6"><label>Metrics</label></td>
-									<div class="">
-										<td class="col-md-6"><select multiple
-											class="form-control" id="epicMetricMultiSelect">
-												<#list epicTestMetric as metric>
-												<option>${metric}</option> </#list>
-										</select></td>
-									</div>
+									<td class="col-md-6"><select multiple class="form-control"
+										id="assigneeMetricMultiSelect">
+											<option value="UNEXECUTED">UNEXECUTED</option>
+											<option value="FAILED">FAILED</option>
+											<option value="WIP">WIP</option>
+											<option value="BLOCKED">BLOCKED</option>
+											<option value="PASSED">PASSED</option>
+									</select></td>
 								</tr>
 							</tbody>
 						</table>
 					</div>
 					<#if dashboard.owner == alias>
-					<button type="submit" class="btn btn-success">Update</button>
+					<button id="assignee-update-btn" class="btn btn-success">Update</button>
+					<button id="assignee-draw-table-btn" class="btn btn-success">Draw
+						Table</button>
 					</#if>
 				</form>
 			</div>
 			<br>
 			<!-- Assignee Table -->
-			<#list cycleTable?keys as k> <label><b><a>${k}</a></b></label>
-			<table
-				class="table table-striped table-bordered table-hover table-condensed">
-				<thead>
-					<tr>
-						<th>Assignee</th> <#list cycleMetricList as metric>
-						<th><b>${metric}</b></th> </#list>
-					</tr>
-				</thead>
-				<tbody>
-					<#list cycleTable[k]?keys as k1>
-					<tr>
-						<td>${k1}</td> <#list cycleTable[k][k1]?keys as k2>
-						<td>${cycleTable[k][k1][k2]}</td> </#list>
-					</tr>
-					</#list>
-				</tbody>
-			</table>
-			</#list>
+			<div id="assignee-table-container" align="center"></div>
+			<div id="assignee-table-loader" class="col-md-12"
+				style="display: none" align="center">
+				<div class="loader"></div>
+				<h2>Data is loading...</h2>
+			</div>
+
 		</div>
 	</div>
 </div>
@@ -380,84 +451,115 @@
 				<a id="cycle-config-toggle">Show Configuration</a>
 			</div>
 			<div id="cycle-config">
-				<form action="/dashboard/${id}/update" method="post"
-					class="form-horizontal" role="form">
+				<form class="form-horizontal" role="form">
 					<div class="md-padding" ng-cloak>
 						<table class="table table-bordered">
 							<tbody>
 								<!-- Cycle Project Row -->
 								<tr>
 									<td class="col-md-6"><label>Project</label></td>
-									<div class="project-search">
-										<td class="col-md-6"><select class="form-control"
-											id="assigneeProjectKey"> <#list epicTable?keys as
-												project>
-												<option>${project}</option> </#list>
-										</select></td>
-									</div>
+									<td class="col-md-6"><select class="form-control"
+										id="cycleProject">
+											<option selected disabled>-Select Project-</option>
+									</select></td>
 								</tr>
 								<!-- Cycle Release Row -->
 								<tr>
 									<td class="col-md-6"><label>Release</label></td>
-									<div class="">
-										<td class="col-md-6"><select class="form-control"
-											id="epicReleaseKey"> <#list epicRelease as release>
-												<option>${release}</option> </#list>
-										</select></td>
-									</div>
+									<td class="col-md-6"><select class="form-control"
+										id="cycleRelease">
+											<option selected disabled>-Select Release-</option>
+											<option value="1.2.0">R1.2.0</option>
+											<option value="1.2.01">R1.2.01</option>
+											<option value="1.3.0">R1.3.0</option>
+									</select></td>
+								</tr>
+
+								<!-- Cycle Product Row -->
+								<tr>
+									<td class="col-md-6"><label>Product</label></td>
+									<td class="col-md-6"><select multiple class="form-control"
+										id="cycleProduct">
+											<option selected disabled>-Select Product-</option>
+											<option value="ANV">ANV</option>
+											<option value="PCC">PCC</option>
+											<option value="UTC">UTC</option>
+											<option value="557x Infrastructure">557x
+												Infrastructure</option>
+									</select></td>
 								</tr>
 
 								<!-- Cycle Multiple Select -->
 								<tr>
 									<td class="col-md-6"><label>Cycle</label></td>
-									<div class="cycle-list">
-										<td class="col-md-6"><select multiple
-											class="form-control" id="cycleMultiSelect"> <#list
-												cycleList as cycle>
-												<option>${cycle}</option> </#list>
-										</select></td>
-									</div>
+									<td class="col-md-6">
+										<div id="cycle-container">
+											<div id="cycle-loader" style="display: none;">
+												<div class="loader"></div>
+											</div>
+											<select multiple class="form-control" id="cycleMultiSelect">
+											</select>
+										</div>
+										<div class="col-md-12" align="center"
+											style="padding-top: 10px;">
+											<label><input type="checkbox" id="cycleCheckAll">Select
+												All</label>
+										</div>
+									</td>
+									</td>
 								</tr>
 								<!-- Cycle Metrics row -->
 								<tr>
 									<td class="col-md-6"><label>Metrics</label></td>
-									<div class="">
-										<td class="col-md-6"><select multiple
-											class="form-control" id="epicMetricMultiSelect">
-												<#list cycleMetricList as metric>
-												<option>${metric}</option> </#list>
-										</select></td>
-									</div>
+									<td class="col-md-6"><select multiple class="form-control"
+										id="cycleMetricMultiSelect">
+											<option value="UNEXECUTED">UNEXECUTED</option>
+											<option value="FAILED">FAILED</option>
+											<option value="WIP">WIP</option>
+											<option value="BLOCKED">BLOCKED</option>
+											<option value="PASSED">PASSED</option>
+									</select></td>
 								</tr>
 							</tbody>
 						</table>
 					</div>
 					<#if dashboard.owner == alias>
-					<button type="submit" class="btn btn-success">Update</button>
+					<button id="cycle-update-btn" class="btn btn-success">Update</button>
+					<button id="cycle-draw-table-btn" class="btn btn-success">Draw
+						Table</button>
 					</#if>
 				</form>
 			</div>
-			<br> <#list cycleTable?keys as k> <label><b><a>${k}</a></b></label>
-			<table
-				class="table table-striped table-bordered table-hover table-condensed">
-				<thead>
-					<tr>
-						<th>Cycle</th> <#list cycleMetricList as metric>
-						<td><b>${metric}</b></td> </#list>
-					</tr>
-				</thead>
-				<tbody>
-					<#list cycleTable[k]?keys as k1>
-					<tr>
-						<td>${k1}</td> <#list cycleTable[k][k1]?keys as k2>
-						<td>${cycleTable[k][k1][k2]}</td> </#list>
-					</tr>
-					</#list>
-				</tbody>
-			</table>
-			<#break> </#list>
-
-
+			<div id="cycle-table-container" align="center" class="col-md-12">
+				<table id="cycle-table">
+					<thead>
+						<tr>
+							<th>Cycle</th>
+							<th>UNEXECUTED</th>
+							<th>FAILED</th>
+							<th>WIP</th>
+							<th>BLOCKED</th>
+							<th>PASSED</th>
+						</tr>
+					</thead>
+					<tfoot>
+						<tr>
+							<th>Cycle</th>
+							<th>UNEXECUTED</th>
+							<th>FAILED</th>
+							<th>WIP</th>
+							<th>BLOCKED</th>
+							<th>PASSED</th>
+						</tr>
+					</tfoot>
+				</table>
+			</div>
+			<div id="cycle-table-loader" class="col-md-12" style="display: none"
+				align="center">
+				<div class="loader"></div>
+				<h2>Data is loading...</h2>
+			</div>
 		</div>
 	</div>
+</div>
 </div>
