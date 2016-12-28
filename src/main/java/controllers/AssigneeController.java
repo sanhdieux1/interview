@@ -28,7 +28,7 @@ public class AssigneeController {
     }
     
     public Result getAssigneeList(@Param("project") String projectName, @Param("release") String release){
-    	logger.fasttrace("getAssigneeList(%s)", projectName);
+    	logger.fasttrace("getAssigneeList(%s,%s)", projectName, release);
     	try{
             return handler.getAssigneeList(projectName, Release.fromString(release));
         } catch (APIException e){

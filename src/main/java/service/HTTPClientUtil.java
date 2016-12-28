@@ -43,8 +43,8 @@ public class HTTPClientUtil {
     private Map<String, String> cookies;
 
     private HTTPClientUtil() {
-        loginURL = PropertiesUtil.getInstance().getString(Constant.RESOURCE_BUNLE_HOST_TYPE) + "://"
-                + (PropertiesUtil.getInstance().getString(Constant.RESOURCE_BUNLE_HOST)
+        loginURL = PropertiesUtil.getString(Constant.RESOURCE_BUNLE_HOST_TYPE) + "://"
+                + (PropertiesUtil.getString(Constant.RESOURCE_BUNLE_HOST)
                         + "/login.jps");
         // httpclient = HttpClients.custom().setDefaultCookieStore(cookieStore).build();
         try {
@@ -118,14 +118,14 @@ public class HTTPClientUtil {
 
     public String getLegacyData(String path, Map<String, String> parameters) throws APIException {
         String data = null;
-        String host = PropertiesUtil.getInstance().getString(Constant.RESOURCE_BUNLE_HOST);
-        String scheme = PropertiesUtil.getInstance().getString(Constant.RESOURCE_BUNLE_HOST_TYPE);
+        String host = PropertiesUtil.getString(Constant.RESOURCE_BUNLE_HOST);
+        String scheme = PropertiesUtil.getString(Constant.RESOURCE_BUNLE_HOST_TYPE);
 
         String url = scheme + ":" + SLASH + SLASH + host + path;
         Connection connection = Jsoup.connect(url)
                 .ignoreHttpErrors(true)
                 .ignoreContentType(true)
-                .timeout(70000)
+                .timeout(50000)
                 .maxBodySize(0)
                 .method(Connection.Method.GET);
         if (cookies != null) {
@@ -156,8 +156,8 @@ public class HTTPClientUtil {
     }
 
     public String getLegacyData_HTTPClient(String path, Map<String, String> parameters) {
-        String host = PropertiesUtil.getInstance().getString(Constant.RESOURCE_BUNLE_HOST);
-        String scheme = PropertiesUtil.getInstance().getString(Constant.RESOURCE_BUNLE_HOST_TYPE);
+        String host = PropertiesUtil.getString(Constant.RESOURCE_BUNLE_HOST);
+        String scheme = PropertiesUtil.getString(Constant.RESOURCE_BUNLE_HOST_TYPE);
         URIBuilder builder = new URIBuilder();
         builder.setCharset(StandardCharsets.UTF_8);
         builder.setScheme(scheme).setHost(host).setPath(path);
@@ -206,10 +206,10 @@ public class HTTPClientUtil {
 
     public RequestConfig getProxyConfig() {
         RequestConfig config = null;
-        String proxyIP = PropertiesUtil.getInstance().getString(Constant.RESOURCE_BUNLE_PROXY_IP);
-        String proxyPortStr = PropertiesUtil.getInstance()
+        String proxyIP = PropertiesUtil.getString(Constant.RESOURCE_BUNLE_PROXY_IP);
+        String proxyPortStr = PropertiesUtil
                 .getString(Constant.RESOURCE_BUNLE_PROXY_PORT);
-        String proxyType = PropertiesUtil.getInstance()
+        String proxyType = PropertiesUtil
                 .getString(Constant.RESOURCE_BUNLE_PROXY_TYPE);
         int proxyPort = 0;
         try {
@@ -228,8 +228,8 @@ public class HTTPClientUtil {
     }
 
     public Proxy getProxy() {
-        String proxyIP = PropertiesUtil.getInstance().getString(Constant.RESOURCE_BUNLE_PROXY_IP);
-        String proxyPortStr = PropertiesUtil.getInstance()
+        String proxyIP = PropertiesUtil.getString(Constant.RESOURCE_BUNLE_PROXY_IP);
+        String proxyPortStr = PropertiesUtil
                 .getString(Constant.RESOURCE_BUNLE_PROXY_PORT);
         int proxyPort = 0;
         if (proxyIP == null || proxyPortStr == null) {

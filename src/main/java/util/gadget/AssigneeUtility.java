@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import manament.log.LoggerWapper;
 import models.APIIssueVO;
 import models.ExecutionIssueResultWapper;
 import models.ExecutionIssueVO;
@@ -22,6 +23,7 @@ import util.JSONUtil;
 import util.PropertiesUtil;
 
 public class AssigneeUtility {
+    final static LoggerWapper logger = LoggerWapper.getLogger(AssigneeUtility.class);
     private static AssigneeUtility INSTANCE = new AssigneeUtility();
     private static Map<String, Set<String>> cycleNameCache = new HashMap<String, Set<String>>();;
     private static final String PLUS = "+";
@@ -91,16 +93,15 @@ public class AssigneeUtility {
     }
 
     public ExecutionsVO findAllExecutionIsueeInProject(String projectName, Release release) throws APIException {
-        StringBuilder query = new StringBuilder();
+        StringBuffer query = new StringBuffer();
         if(projectName == null || projectName.isEmpty()){
             return null;
         }
-        query.append(String.format("project = \"%s\"", projectName));
+        query.append("project = \""+projectName+"\"");
         if(release != null){
             query.append(Constant.AND);
             query.append(String.format("fixVersion = %s", release.toString()));
         }
-
         Map<String, String> parameters = new HashMap<String, String>();
         parameters.put(Constant.PARAMERTER_ZQL_QUERY, query.toString());
         parameters.put(Constant.PARAMERTER_MAXRECORDS, "10000");

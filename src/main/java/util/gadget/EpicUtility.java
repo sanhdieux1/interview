@@ -76,6 +76,7 @@ public class EpicUtility {
         if(issues == null || issues.isEmpty()){
             return resultWapper;
         }
+        logger.fasttrace("Total issue in epic %s:%d", epic, issues.size());
         ExecutorService taskExecutor = Executors.newFixedThreadPool(PropertiesUtil.getInt(Constant.CONCURRENT_THREAD));
         List<TestExecutionCallable> tasks = new ArrayList<TestExecutionCallable>();
 
@@ -90,6 +91,7 @@ public class EpicUtility {
             }
         });
         try{
+            logger.fasttrace("Total Test and Story in epic %s:%d",epic,tasks.size());
             List<Future<ExecutionIssueResultWapper>> results = taskExecutor.invokeAll(tasks);
             taskExecutor.shutdown();
             for (Future<ExecutionIssueResultWapper> result : results){

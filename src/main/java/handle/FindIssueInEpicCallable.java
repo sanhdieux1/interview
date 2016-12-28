@@ -10,11 +10,11 @@ import models.JQLIssueVO;
 import models.StoryResultWapper;
 import util.gadget.EpicUtility;
 
-public class StoryCallable implements Callable<StoryResultWapper> {
-    final static LoggerWapper logger = LoggerWapper.getLogger(StoryCallable.class);
+public class FindIssueInEpicCallable implements Callable<StoryResultWapper> {
+    final static LoggerWapper logger = LoggerWapper.getLogger(FindIssueInEpicCallable.class);
     private String epic;
     
-    public StoryCallable(String epic) {
+    public FindIssueInEpicCallable(String epic) {
         this.epic = epic;
     }
 

@@ -89,16 +89,18 @@ public class GadgetUtility extends DatabaseUtility {
     }
 
     public static void main(String[] args) throws APIException {
-//        CycleVsTestExecution gadget = new CycleVsTestExecution();
-//        gadget.setProjectName("FNMS 557x");
-//        Set<String> cyckes = new HashSet<>();
-//        cyckes.add("UTC 1.2.01 Sprint Iteration 5");
-//        cyckes.add("TS Sprint Iteration 7");
-//        gadget.setCycles(cyckes);
-//        gadget.setRelease(Release.R1_2_0);
-//        GadgetUtility.getInstance().insertOrUpdate(gadget);
-        Gadget gadget = GadgetUtility.getInstance().get("5861edf98dbec712f093cde2");
-        System.out.println(gadget);
+        EpicVsTestExecution gadget = new EpicVsTestExecution();
+        gadget.setProjectName("FNMS 557x");
+        Set<String> cyckes = new HashSet<>();
+        cyckes.add("FNMS-5949");
+        cyckes.add("FNMS-5948");
+        Set<String> epic = new HashSet<>();
+        epic.add("FNMS-1895");
+        
+        gadget.setEpic(epic);
+        
+        gadget.setRelease(Release.R1_2_01);
+        GadgetUtility.getInstance().insertOrUpdate(gadget);
     }
 
     public Gadget get(String gadgetId) throws APIException {

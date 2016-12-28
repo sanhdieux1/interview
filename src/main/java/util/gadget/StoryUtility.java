@@ -18,7 +18,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import handle.StoryCallable;
+import handle.FindIssueInEpicCallable;
 import handle.executors.TestExecutionCallable;
 import handle.executors.FindIssueCallable;
 import manament.log.LoggerWapper;
@@ -54,10 +54,10 @@ public class StoryUtility {
         Map<String, Set<JQLIssueVO>> storiesData = new HashMap<>();
 
         ExecutorService taskExecutor = Executors.newFixedThreadPool(epics.size());
-        List<StoryCallable> tasks = new ArrayList<StoryCallable>();
+        List<FindIssueInEpicCallable> tasks = new ArrayList<FindIssueInEpicCallable>();
         for (String epic : epics){
             if(storyInEpic.get(epic) == null || storyInEpic.get(epic).isEmpty()){
-                tasks.add(new StoryCallable(epic));
+                tasks.add(new FindIssueInEpicCallable(epic));
             } else{
                 storiesData.put(epic, storyInEpic.get(epic).stream().collect(Collectors.toSet()));
             }

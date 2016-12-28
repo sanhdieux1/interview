@@ -52,7 +52,7 @@ public class AssigneeHandlerImpl implements AssigneeHandler {
                 }).collect(Collectors.toSet()));
             }
         }
-        Set<AssigneeVO> assignees = assigneesCache.get(projectName);
+        Set<AssigneeVO> assignees = assigneesCache.get(projectName+PLUS+release);
         return Results.json().render(assignees != null ? assignees : new HashSet<>());
     }
 
