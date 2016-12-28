@@ -98,7 +98,7 @@ public class StoryUtility {
             List<JQLIssueLinkVO> issueLinks = findAllTestIssueForStory(issue);
             if(issueLinks != null && !issueLinks.isEmpty()){
                 for (JQLIssueLinkVO issueLink : issue.getFields().getIssuelinks()){
-                    List<ExecutionIssueVO> executionIssues = EpicUtility.getInstance().findTestExecutionInIsuee(issueLink.getInwardIssue().getKey()).getExecutions();
+                    List<ExecutionIssueVO> executionIssues = EpicUtility.getInstance().findTestExecutionInIsuee(issueLink.getInwardIssue().getKey());
                     if(executionIssues != null && !executionIssues.isEmpty()){
                         result.addAll(executionIssues);
                     }

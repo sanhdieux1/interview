@@ -30,7 +30,7 @@ public class TestExecutionCallable implements Callable<ExecutionIssueResultWappe
         resultWapper.setIssue(new APIIssueVO(issue.getKey(), issue.getSelf()));
         if (type.equals(Type.TEST)) {
             List<ExecutionIssueVO> executionIssues = EpicUtility.getInstance()
-                    .findTestExecutionInIsuee(issue.getKey()).getExecutions();
+                    .findTestExecutionInIsuee(issue.getKey());
             if (executionIssues != null && !executionIssues.isEmpty()) {
                 resultWapper.getExecutionsVO().addAll(executionIssues);
             }
