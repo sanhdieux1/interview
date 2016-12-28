@@ -1,5 +1,6 @@
 package util.gadget;
 
+import org.bson.Document;
 import org.bson.types.ObjectId;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -8,6 +9,9 @@ import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.WriteResult;
+import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.result.UpdateResult;
 import com.mongodb.util.JSON;
 
 import manament.log.LoggerWapper;
@@ -19,7 +23,7 @@ import util.JSONUtil;
 public class UserUtility extends DatabaseUtility {
     final static LoggerWapper logger = LoggerWapper.getLogger(GadgetUtility.class);
     public static UserUtility INSTANCE = new UserUtility();
-    protected DBCollection collection;
+    protected MongoCollection<Document> collection;
 
     private UserUtility() {
         super();
@@ -34,30 +38,29 @@ public class UserUtility extends DatabaseUtility {
         UserVO userVO = null;
         BasicDBObject whereQuery = new BasicDBObject();
         whereQuery.put("username", username);
-        DBCursor cursor = collection.find(whereQuery);
-        if (cursor.count() > 0 && cursor.hasNext()) {
-            DBObject dbObject = cursor.next();
-            userVO = JSONUtil.getInstance().convertJSONtoObject(dbObject.toString(), UserVO.class);
-            userVO.setId(getObjectId(dbObject));
+        FindIterable<Document> documents = collection.find(whereQuery);
+        Document document = documents.first(); 
+        if (document!=null) {
+            userVO = JSONUtil.getInstance().convertJSONtoObject(document.toJson(), UserVO.class);
+            userVO.setId(getObjectId(document));
         } else {
             userVO = new UserVO(username, friendlyName);
-            WriteResult result = insert(userVO);
-            if (result.getN() != 0) {
-                userVO.setId(((ObjectId) result.getUpsertedId()).toString());
+            UpdateResult result = insert(userVO);
+            if (result.getModifiedCount() != 0) {
+                userVO.setId((result.getUpsertedId()).asObjectId().toString());
             }
         }
         return userVO;
     }
-
-    public WriteResult insert(UserVO user) throws APIException {
+    public UpdateResult insert(UserVO user) throws APIException {
         try {
-            DBObject dbObject = (DBObject) JSON.parse(mapper.writeValueAsString(user));
-            dbObject.removeField("id");
+            Document dbObject =  Document.parse(mapper.writeValueAsString(user));
+            dbObject.remove("id");
 
             BasicDBObject searchQuery = new BasicDBObject();
             searchQuery.append("username", user.getUsername());
 
-            return collection.update(searchQuery, dbObject, true, false);
+            return collection.updateOne(searchQuery, dbObject);
         } catch (JsonProcessingException e) {
             logger.fastDebug("Error during parse JSON", e);
             throw new APIException("cannot insert gadget", e);

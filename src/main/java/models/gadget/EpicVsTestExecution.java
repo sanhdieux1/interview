@@ -3,13 +3,8 @@ package models.gadget;
 import java.util.List;
 import java.util.Set;
 
-import javax.persistence.Id;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonProperty.Access;
 
-import models.APIIssueVO;
 import models.main.Release;
 
 @JsonIgnoreProperties(ignoreUnknown = true)

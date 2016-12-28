@@ -11,6 +11,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import org.bson.Document;
 import org.bson.types.ObjectId;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -18,6 +19,9 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
+import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoCursor;
 import com.mongodb.util.JSON;
 
 import ch.qos.logback.classic.spi.ThrowableProxyVO;
@@ -50,7 +54,7 @@ public class GadgetUtility extends DatabaseUtility {
     private static Set<String> projectsCache = new HashSet<>();
     private static GadgetUtility INSTANCE = new GadgetUtility();
     
-    protected DBCollection collection;
+    protected MongoCollection<Document> collection;
 
     private GadgetUtility() {
         super();
@@ -63,24 +67,23 @@ public class GadgetUtility extends DatabaseUtility {
 
     public void insertOrUpdate(Gadget gadget) throws APIException {
         try {
-            DBObject dbObject = (DBObject) JSON.parse(mapper.writeValueAsString(gadget));
-            dbObject.removeField("id");
-
             String id = gadget.getId();
             Gadget existingGadget = null;
             if (id != null) {
                 existingGadget = get(id);
             }
+            Document dbObject = Document.parse(mapper.writeValueAsString(gadget));
+            dbObject.remove("id");
             if (existingGadget != null) {
                 BasicDBObject updateQuery = new BasicDBObject();
                 updateQuery.append("$set", dbObject);
                 BasicDBObject searchQuery = new BasicDBObject();
                 searchQuery.append("_id", new ObjectId(id));
                 logger.fasttrace("update gadget id %s by user:%s", id,  gadget.getUser());
-                collection.update(searchQuery, updateQuery);
+                collection.updateOne(searchQuery, updateQuery);
             } else {
                 logger.fasttrace("insert gadget:%s by user:%s", gadget.getType(), gadget.getUser());
-                collection.insert(dbObject);
+                collection.insertOne(dbObject);
             }
         } catch (JsonProcessingException e) {
             logger.fastDebug("error during mapper.writeValueAsString", e);
@@ -89,17 +92,18 @@ public class GadgetUtility extends DatabaseUtility {
     }
 
     public static void main(String[] args) throws APIException {
-        AssigneeVsTestExecution gadget = new AssigneeVsTestExecution();
+        StoryVsTestExecution gadget = new StoryVsTestExecution();
         gadget.setProjectName("FNMS 557x");
         Set<String> cyckes = new HashSet<>();
         cyckes.add("FNMS-5949");
         cyckes.add("FNMS-5948");
         Set<String> epic = new HashSet<>();
-        epic.add("FNMS-1895");
-        
-        gadget.setSelectAllTestCycle(true);
-        gadget.setRelease(Release.R1_2_01);
+        epic.add("FNMS-1507");
+        gadget.setRelease(Release.R1_2_0);
+        gadget.setStories(epic);
         GadgetUtility.getInstance().insertOrUpdate(gadget);
+        List<Gadget> list = GadgetUtility.getInstance().getAll();
+//        System.out.println(list.size());
     }
 
     public Gadget get(String gadgetId) throws APIException {
@@ -111,27 +115,29 @@ public class GadgetUtility extends DatabaseUtility {
             logger.fasttrace("gadget id %s not found", gadgetId);
             return null;
         }
-        DBObject dbObj = collection.findOne(query);
+        FindIterable<Document> document = collection.find(query);
+        Document dbObj = document.first();
+        
         if (dbObj != null && Gadget.Type.valueOf(((String) dbObj.get("type"))) != null) {
             Gadget.Type type = Gadget.Type.valueOf(((String) dbObj.get("type")));
             try {
                 if (type == Gadget.Type.EPIC_US_TEST_EXECUTION) {
-                    EpicVsTestExecution epicGadget = mapper.readValue(dbObj.toString(),
+                    EpicVsTestExecution epicGadget = mapper.readValue(dbObj.toJson(),
                             EpicVsTestExecution.class);
                     epicGadget.setId(getObjectId(dbObj));
                     gadget = epicGadget;
 
                 } else if (type == Gadget.Type.ASSIGNEE_TEST_EXECUTION) {
-                    AssigneeVsTestExecution assigneeGadget = mapper.readValue(dbObj.toString(),
+                    AssigneeVsTestExecution assigneeGadget = mapper.readValue(dbObj.toJson(),
                             AssigneeVsTestExecution.class);
                     assigneeGadget.setId(getObjectId(dbObj));
                     gadget = assigneeGadget;
                 } else if (type == Gadget.Type.TEST_CYCLE_TEST_EXECUTION) {
-                    CycleVsTestExecution cycleGadget = mapper.readValue(dbObj.toString(),CycleVsTestExecution.class);
+                    CycleVsTestExecution cycleGadget = mapper.readValue(dbObj.toJson(),CycleVsTestExecution.class);
                     cycleGadget.setId(getObjectId(dbObj));
                     gadget = cycleGadget;
                 } else if (type == Gadget.Type.STORY_TEST_EXECUTION) {
-                    StoryVsTestExecution storyGadget = mapper.readValue(dbObj.toString(),
+                    StoryVsTestExecution storyGadget = mapper.readValue(dbObj.toJson(),
                             StoryVsTestExecution.class);
                     storyGadget.setId(getObjectId(dbObj));
                     gadget = storyGadget;
@@ -148,28 +154,31 @@ public class GadgetUtility extends DatabaseUtility {
     }
 
     public List<Gadget> getAll() throws APIException {
-        DBCursor dbCursor = collection.find();
+        FindIterable<Document> documents = collection.find();
+        MongoCursor<Document> dbCursor = documents.iterator();
         List<Gadget> gadgets = new ArrayList<Gadget>();
         while (dbCursor.hasNext()){
-            DBObject dbObject = dbCursor.next();
-            if(Gadget.Type.ASSIGNEE_TEST_EXECUTION.equals(Gadget.Type.valueOf((String) dbObject.get(TYPE)))){
-                AssigneeVsTestExecution assigneeGadget = JSONUtil.getInstance().convertJSONtoObject(dbObject.toString(), AssigneeVsTestExecution.class);
-                assigneeGadget.setId(getObjectId(dbObject));
-                gadgets.add(assigneeGadget);
-            } else if(Gadget.Type.EPIC_US_TEST_EXECUTION.equals(Gadget.Type.valueOf((String) dbObject.get(TYPE)))){
-                EpicVsTestExecution epicGadget = JSONUtil.getInstance().convertJSONtoObject(dbObject.toString(), EpicVsTestExecution.class);
-                epicGadget.setId(getObjectId(dbObject));
-                gadgets.add(epicGadget);
-            } else if(Gadget.Type.TEST_CYCLE_TEST_EXECUTION.equals(Gadget.Type.valueOf((String) dbObject.get(TYPE)))){
-                CycleVsTestExecution cyclGadget = JSONUtil.getInstance().convertJSONtoObject(dbObject.toString(), CycleVsTestExecution.class);
-                cyclGadget.setId(getObjectId(dbObject));
-                gadgets.add(cyclGadget);
-            } else if(Gadget.Type.STORY_TEST_EXECUTION.equals(Gadget.Type.valueOf((String) dbObject.get(TYPE)))){
-                StoryVsTestExecution storyGadget = JSONUtil.getInstance().convertJSONtoObject(dbObject.toString(), StoryVsTestExecution.class);
-                storyGadget.setId(getObjectId(dbObject));
-                gadgets.add(storyGadget);
-            } else{
-                logger.fastDebug("type %s is not available", dbObject.get(TYPE));
+            Document document = dbCursor.next();
+            if(document != null){
+                if(Gadget.Type.ASSIGNEE_TEST_EXECUTION.equals(Gadget.Type.valueOf((String) document.get(TYPE)))){
+                    AssigneeVsTestExecution assigneeGadget = JSONUtil.getInstance().convertJSONtoObject(document.toJson(), AssigneeVsTestExecution.class);
+                    assigneeGadget.setId(getObjectId(document));
+                    gadgets.add(assigneeGadget);
+                } else if(Gadget.Type.EPIC_US_TEST_EXECUTION.equals(Gadget.Type.valueOf((String) document.get(TYPE)))){
+                    EpicVsTestExecution epicGadget = JSONUtil.getInstance().convertJSONtoObject(document.toJson(), EpicVsTestExecution.class);
+                    epicGadget.setId(getObjectId(document));
+                    gadgets.add(epicGadget);
+                } else if(Gadget.Type.TEST_CYCLE_TEST_EXECUTION.equals(Gadget.Type.valueOf((String) document.get(TYPE)))){
+                    CycleVsTestExecution cyclGadget = JSONUtil.getInstance().convertJSONtoObject(document.toJson(), CycleVsTestExecution.class);
+                    cyclGadget.setId(getObjectId(document));
+                    gadgets.add(cyclGadget);
+                } else if(Gadget.Type.STORY_TEST_EXECUTION.equals(Gadget.Type.valueOf((String) document.get(TYPE)))){
+                    StoryVsTestExecution storyGadget = JSONUtil.getInstance().convertJSONtoObject(document.toJson(), StoryVsTestExecution.class);
+                    storyGadget.setId(getObjectId(document));
+                    gadgets.add(storyGadget);
+                } else{
+                    logger.fastDebug("type %s is not available", document.get(TYPE));
+                }
             }
         }
         return gadgets;
