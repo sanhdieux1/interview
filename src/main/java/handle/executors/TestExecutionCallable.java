@@ -28,21 +28,19 @@ public class TestExecutionCallable implements Callable<ExecutionIssueResultWappe
         ExecutionIssueResultWapper resultWapper = new ExecutionIssueResultWapper();
         resultWapper.setPlanned(issue.getFields().getCustomfield_14809());
         resultWapper.setIssue(new APIIssueVO(issue.getKey(), issue.getSelf()));
-        if (Type.TEST.equals(type)) {
-            List<ExecutionIssueVO> executionIssues = EpicUtility.getInstance()
-                    .findTestExecutionInIsuee(issue.getKey());
-            if (executionIssues != null && !executionIssues.isEmpty()) {
+        if(Type.TEST.equals(type)){
+            List<ExecutionIssueVO> executionIssues = EpicUtility.getInstance().findTestExecutionInIsuee(issue.getKey());
+            if(executionIssues != null && !executionIssues.isEmpty()){
                 resultWapper.getExecutionsVO().addAll(executionIssues);
             }
-        } else if(Type.STORY.equals(type)) {
-            List<ExecutionIssueVO> executionIssues = StoryUtility.getInstance()
-                    .findAllTestExecutionInStory(issue);
+        } else if(Type.STORY.equals(type)){
+            List<ExecutionIssueVO> executionIssues = StoryUtility.getInstance().findAllTestExecutionInStory(issue);
             resultWapper.setPlanned(issue.getFields().getCustomfield_14809());
-            if (executionIssues != null && !executionIssues.isEmpty()) {
+            if(executionIssues != null && !executionIssues.isEmpty()){
                 resultWapper.getExecutionsVO().addAll(executionIssues);
             }
         }
-        logger.info(issue.getKey()+":"+resultWapper.getExecutionsVO().size());
+        logger.fasttrace("%s:%s:%d Test execution", issue.getKey(), type , resultWapper.getExecutionsVO().size());
         return resultWapper;
     }
 

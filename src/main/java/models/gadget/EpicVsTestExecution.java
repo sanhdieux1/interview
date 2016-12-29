@@ -85,11 +85,11 @@ public class EpicVsTestExecution implements Gadget {
         this.epic = epic;
     }
 
-    public boolean isSelectAllEpic() {
+    public boolean isSelectAll() {
         return selectAll;
     }
 
-    public void setSelectAllStory(boolean selectAll) {
+    public void setSelectAll(boolean selectAll) {
         this.selectAll = selectAll;
     }
 

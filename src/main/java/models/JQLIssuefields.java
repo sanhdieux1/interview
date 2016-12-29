@@ -12,14 +12,23 @@ public class JQLIssuefields {
     // Unpland
     private int customfield_14809;
     
+    private String summary;
     // Product
     @JsonProperty("customfield_12718")
     private ProductVO product;
-    
+
     // Epic Parrent
     @JsonProperty("customfield_11209")
     private String epicLink;
-    
+
+    public String getSummary() {
+        return summary;
+    }
+
+    public void setSummary(String summary) {
+        this.summary = summary;
+    }
+
     public ProductVO getProduct() {
         return product;
     }

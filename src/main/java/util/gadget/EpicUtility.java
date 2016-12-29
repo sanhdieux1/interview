@@ -5,6 +5,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -17,6 +18,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import handle.executors.ExecutorManagement;
 import handle.executors.FindIssueCallable;
 import handle.executors.TestExecutionCallable;
 import manament.log.LoggerWapper;
@@ -52,20 +54,33 @@ public class EpicUtility {
 
     public List<GadgetData> getDataEPic(EpicVsTestExecution epicGadget) throws APIException {
         List<GadgetData> result = new ArrayList<>();
-        Set<String> epics = epicGadget.getEpic();
-        if(epicGadget.isSelectAllEpic()){
-            Set<APIIssueVO> epicLinks = getEpicLinks(epicGadget.getProjectName(), epicGadget.getRelease().toString(), epicGadget.getProducts());
-            if(epicLinks != null){
-                epics = epicLinks.stream().map(e -> e.getKey()).collect(Collectors.toSet());
-            }
+        Set<APIIssueVO> epicLinks = null;
+        
+        if(epicGadget.isSelectAll()){
+            epicLinks = getEpicLinks(epicGadget.getProjectName(), epicGadget.getRelease().toString(), epicGadget.getProducts());
+        }else {
+            Set<String> epics = epicGadget.getEpic();
+            List<FindIssueCallable> tasks= new ArrayList<>();
+            epics.forEach(e -> tasks.add(new FindIssueCallable(e)));
+            List<Future<JQLIssueVO>> taskReulsts = ExecutorManagement.getInstance().invokeTask(tasks);
+            List<JQLIssueVO> epicIssues = ExecutorManagement.getInstance().getResult(taskReulsts);
+            epicLinks = epicIssues.stream().map(new Function<JQLIssueVO, APIIssueVO>() {
+                @Override
+                public APIIssueVO apply(JQLIssueVO jqlIssue) {
+                    if(jqlIssue != null){
+                        return new APIIssueVO(jqlIssue.getKey(), jqlIssue.getSelf(), jqlIssue.getFields().getSummary());
+                    }
+                    return new APIIssueVO();
+                }
+            }).collect(Collectors.toSet());
         }
-        if(epics == null){
+        if(epicLinks == null){
             return result;
         }
-        for (String epic : epics){
-            ExecutionIssueResultWapper executionIssues = findAllExecutionIssueInEpic(epic);
+        for (APIIssueVO epic : epicLinks){
+            ExecutionIssueResultWapper executionIssues = findAllExecutionIssueInEpic(epic.getKey());
             GadgetData gadgetData = GadgetUtility.getInstance().convertToGadgetData(executionIssues.getExecutionsVO());
-            gadgetData.setKey(new APIIssueVO(epic, null));
+            gadgetData.setKey(epic);
             gadgetData
                     .setUnplanned(gadgetData.getBlocked() + gadgetData.getFailed() + gadgetData.getPassed() + gadgetData.getUnexecuted() + gadgetData.getWip());
             gadgetData.setPlanned(executionIssues.getPlanned());
@@ -123,7 +138,7 @@ public class EpicUtility {
         String query = "issue=\"%s\"";
         Map<String, String> parameters = new HashMap<String, String>();
         parameters.put(Constant.PARAMERTER_ZQL_QUERY, String.format(query, issueKey));
-        parameters.put(Constant.PARAMERTER_MAXRECORDS, "1000");
+        parameters.put(Constant.PARAMERTER_MAXRECORDS, PropertiesUtil.getString(Constant.RESOURCE_BUNLE_SEARCH_MAXRECORDS, "10000"));
         parameters.put(Constant.PARAMERTER_OFFSET, "0");
         String result = HTTPClientUtil.getInstance().getLegacyData(PropertiesUtil.getString(Constant.RESOURCE_BUNLE_PATH), parameters);
         ExecutionsVO executions = JSONUtil.getInstance().convertJSONtoObject(result, ExecutionsVO.class);
@@ -244,7 +259,7 @@ public class EpicUtility {
                     if(!first){
                         query.append(Constant.OR);
                     }
-                    query.append("cf[12718] = \"%s\"");
+                    query.append(String.format("cf[12718] = \"%s\"",product));
                     first = false;
                 }
             }
@@ -260,7 +275,7 @@ public class EpicUtility {
             result = searchResult.getIssues().stream().map(new Function<JQLIssueVO, APIIssueVO>() {
                 @Override
                 public APIIssueVO apply(JQLIssueVO jQLIssue) {
-                    APIIssueVO apiIssue = new APIIssueVO(jQLIssue.getKey(), jQLIssue.getSelf());
+                    APIIssueVO apiIssue = new APIIssueVO(jQLIssue.getKey(), jQLIssue.getSelf(), jQLIssue.getFields().getSummary());
                     return apiIssue;
                 }
             }).collect(Collectors.toSet());

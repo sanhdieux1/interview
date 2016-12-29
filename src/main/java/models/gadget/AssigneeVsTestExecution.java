@@ -34,7 +34,6 @@ public class AssigneeVsTestExecution implements Gadget {
         return projectName;
     }
 
-    @JsonIgnore
     public void setProjectName(String projectName) {
         this.projectName = projectName;
     }
