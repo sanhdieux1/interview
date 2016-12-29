@@ -1,28 +1,30 @@
 package handle;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.Callable;
 
-import org.apache.log4j.Logger;
-
 import manament.log.LoggerWapper;
 import models.JQLIssueVO;
-import models.StoryResultWapper;
+import models.JQLIssueWapper;
 import util.gadget.EpicUtility;
 
-public class FindIssueInEpicCallable implements Callable<StoryResultWapper> {
+public class FindIssueInEpicCallable implements Callable<JQLIssueWapper> {
     final static LoggerWapper logger = LoggerWapper.getLogger(FindIssueInEpicCallable.class);
-    private String epic;
-    
-    public FindIssueInEpicCallable(String epic) {
+    private JQLIssueVO epic;
+
+    public FindIssueInEpicCallable(JQLIssueVO epic) {
         this.epic = epic;
     }
 
     @Override
-    public StoryResultWapper call() throws Exception {
-        StoryResultWapper resultWapper = new StoryResultWapper();
-        resultWapper.setEpic(epic);
-        resultWapper.setResult(EpicUtility.getInstance().findAllIssuesInEpicLink(epic));
+    public JQLIssueWapper call() throws Exception {
+        JQLIssueWapper resultWapper = new JQLIssueWapper();
+        resultWapper.setIssue(epic);
+        List<JQLIssueVO> issueInEpic = EpicUtility.getInstance().findAllIssuesInEpicLink(epic.getKey());
+        if(issueInEpic != null){
+            resultWapper.setChild(new HashSet<JQLIssueVO>(issueInEpic));
+        }
         return resultWapper;
     }
 

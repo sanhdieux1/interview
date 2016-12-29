@@ -27,7 +27,7 @@ public class TestExecutionCallable implements Callable<ExecutionIssueResultWappe
     public ExecutionIssueResultWapper call() throws Exception {
         ExecutionIssueResultWapper resultWapper = new ExecutionIssueResultWapper();
         resultWapper.setPlanned(issue.getFields().getCustomfield_14809());
-        resultWapper.setIssue(new APIIssueVO(issue.getKey(), issue.getSelf()));
+        resultWapper.setIssue(new APIIssueVO(issue.getKey(), issue.getSelf(), issue.getFields().getSummary()));
         if(Type.TEST.equals(type)){
             List<ExecutionIssueVO> executionIssues = EpicUtility.getInstance().findTestExecutionInIsuee(issue.getKey());
             if(executionIssues != null && !executionIssues.isEmpty()){

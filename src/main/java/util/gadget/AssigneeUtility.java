@@ -21,12 +21,13 @@ import models.APIIssueVO;
 import models.AssigneeVO;
 import models.ExecutionIssueResultWapper;
 import models.ExecutionIssueVO;
-import models.GadgetData;
 import models.JQLIssueVO;
 import models.JQLIssuetypeVO;
 import models.exception.APIException;
 import models.gadget.AssigneeVsTestExecution;
 import models.main.ExecutionsVO;
+import models.main.GadgetData;
+import models.main.GadgetDataWapper;
 import models.main.JQLSearchResult;
 import models.main.Release;
 import ninja.Results;
@@ -49,8 +50,8 @@ public class AssigneeUtility {
         return INSTANCE;
     }
 
-    public Map<String, List<GadgetData>> getDataAssignee(AssigneeVsTestExecution assigneeGadget) throws APIException {
-        Map<String, List<GadgetData>> returnData = new HashMap<>();
+    public Map<String, GadgetDataWapper> getDataAssignee(AssigneeVsTestExecution assigneeGadget) throws APIException {
+        Map<String, GadgetDataWapper> returnData = new HashMap<>();
 
         String projectName = assigneeGadget.getProjectName();
         Set<AssigneeVO> assigneeVOs = findAssigneeList(projectName, assigneeGadget.getRelease());
@@ -80,7 +81,9 @@ public class AssigneeUtility {
                             gadgetDatas.add(gadgetData);
                         }
                     }
-                    returnData.put(cycle, gadgetDatas);
+                    GadgetDataWapper gadgetDataWrapper = new GadgetDataWapper();
+                    gadgetDataWrapper.setIssueData(gadgetDatas);
+                    returnData.put(cycle, gadgetDataWrapper);
                 }
             }
         } else{

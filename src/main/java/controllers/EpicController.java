@@ -17,6 +17,7 @@ import ninja.Result;
 import ninja.Results;
 import ninja.params.Param;
 import ninja.params.Params;
+import util.JSONUtil;
 
 @Singleton
 @FilterWith(CrossOriginAccessControlFilter.class)
@@ -30,12 +31,9 @@ public class EpicController {
 //                new Class[] { EpicHandler.class }, new ExceptionHandler(handler));
     }
 
-    public Result getEpicLinks(@Param("project") String project, @Param("release") String release, @Params("product") String[] productArrays) {
+    public Result getEpicLinks(@Param("project") String project, @Param("release") String release, @Param("products") String productArrays) {
         try{
-            List<String> products = null;
-            if(productArrays!=null){
-                products = Arrays.asList(productArrays);
-            }
+            List<String> products = JSONUtil.getInstance().convertJSONtoListObject(productArrays, String.class);
             return handler.getEpicLinks(project, release, products);
         } catch (APIException e){
             return handleException(e);

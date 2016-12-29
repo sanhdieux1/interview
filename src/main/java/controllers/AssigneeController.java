@@ -21,37 +21,41 @@ import ninja.Result;
 import ninja.Results;
 import ninja.params.Param;
 import ninja.params.Params;
+import util.JSONUtil;
 
 @Singleton
 @FilterWith(CrossOriginAccessControlFilter.class)
 public class AssigneeController {
-	final static LoggerWapper logger = LoggerWapper.getLogger(AssigneeController.class);
+    final static LoggerWapper logger = LoggerWapper.getLogger(AssigneeController.class);
     private AssigneeHandler handler;
-    
+
     public AssigneeController() {
         handler = new AssigneeHandlerImpl();
     }
-    
-    public Result getAssigneeList(@Param("project") String projectName, @Param("release") String release){
-    	logger.fasttrace("getAssigneeList(%s,%s)", projectName, release);
-    	try{
+
+    public Result getAssigneeList(@Param("project") String projectName, @Param("release") String release) {
+        logger.fasttrace("getAssigneeList(%s,%s)", projectName, release);
+        try{
             return handler.getAssigneeList(projectName, Release.fromString(release));
         } catch (APIException e){
             return handleException(e);
         }
     }
-    public Result getListCycleName(@Param("project") String projectName, @Param("release") String release, @Params("products")String[] productArrays) {
+
+    public Result getListCycleName(@Param("project") String projectName, @Param("release") String release, @Param("products") String productArrays) {
         try{
-            Set<String> products =null;
-            if(productArrays != null){
-                products = new HashSet<String>(Arrays.asList(productArrays));
+            List<String> productList = JSONUtil.getInstance().convertJSONtoListObject(productArrays, String.class);
+            Set<String> products = null;
+            if(productList != null){
+                products = new HashSet<>(productList);
             }
             return handler.getListCycleName(projectName, Release.fromString(release), products);
         } catch (APIException e){
             return handleException(e);
         }
     }
-    public Result handleException(APIException e){
+
+    public Result handleException(APIException e) {
         Result result = Results.json();
         result.render("type", "error");
         result.render("data", e.getMessage());

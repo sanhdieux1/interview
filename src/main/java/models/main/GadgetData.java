@@ -1,4 +1,6 @@
-package models;
+package models.main;
+
+import models.APIIssueVO;
 
 public class GadgetData {
     private APIIssueVO key;

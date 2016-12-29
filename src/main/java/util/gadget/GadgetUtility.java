@@ -21,7 +21,6 @@ import com.mongodb.client.MongoCursor;
 
 import manament.log.LoggerWapper;
 import models.ExecutionIssueVO;
-import models.GadgetData;
 import models.JQLIssueVO;
 import models.ProjectVO;
 import models.exception.APIErrorCode;
@@ -31,6 +30,7 @@ import models.gadget.CycleVsTestExecution;
 import models.gadget.EpicVsTestExecution;
 import models.gadget.Gadget;
 import models.gadget.StoryVsTestExecution;
+import models.main.GadgetData;
 import models.main.JQLSearchResult;
 import models.main.Release;
 import service.DatabaseUtility;
@@ -83,15 +83,25 @@ public class GadgetUtility extends DatabaseUtility {
     }
 
     public static void main(String[] args) throws APIException {
-        StoryVsTestExecution gadget = new StoryVsTestExecution();
+        EpicVsTestExecution gadget = new EpicVsTestExecution();
         gadget.setProjectName("FNMS 557x");
+        
         Set<String> cyckes = new HashSet<>();
         cyckes.add("FNMS-5949");
         cyckes.add("FNMS-5948");
+        
         Set<String> epic = new HashSet<>();
-        epic.add("FNMS-1507");
+        epic.add("FNMS-96");
+        
+        Set<String> product = new HashSet<>();
+        product.add("ANV");
+        product.add("PCC");
+        
         gadget.setRelease(Release.R1_2_0);
-        gadget.setStories(epic);
+        gadget.setEpic(epic);
+        gadget.setProducts(product);
+        gadget.setSelectAll(true);
+        
         GadgetUtility.getInstance().insertOrUpdate(gadget);
         List<Gadget> list = GadgetUtility.getInstance().getAll();
 //        System.out.println(list.size());

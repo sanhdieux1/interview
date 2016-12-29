@@ -30,7 +30,7 @@ public class ExecutorManagement {
         return INSTANCE;
     }
 
-    public <T> List<Future<T>> invokeTask(List<? extends Callable<T>> tasks) throws APIException {
+    public synchronized <T> List<Future<T>> invokeTask(List<? extends Callable<T>> tasks) throws APIException {
         try{
             return executor.invokeAll(tasks);
         } catch (InterruptedException e){
@@ -60,5 +60,8 @@ public class ExecutorManagement {
             }
         }
         return returnData;
+    }
+    public <T> List<T> invokeAndGet(List<? extends Callable<T>> tasks) throws APIException{
+        return getResult(invokeTask(tasks));
     }
 }
