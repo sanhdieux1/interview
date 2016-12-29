@@ -20,13 +20,10 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.methods.RequestBuilder;
 import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
 import org.jsoup.Connection;
 import org.jsoup.Connection.Response;
 import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
 
 import manament.log.LoggerWapper;
 import models.exception.APIException;
@@ -36,7 +33,6 @@ import util.PropertiesUtil;
 public class HTTPClientUtil {
     private final static LoggerWapper logger = LoggerWapper.getLogger(HTTPClientUtil.class);
     private final static String SLASH = "/";
-    private BasicCookieStore cookieStore = new BasicCookieStore();
     private static HTTPClientUtil instance;
     private CloseableHttpClient httpclient;
     private String loginURL;
@@ -46,19 +42,12 @@ public class HTTPClientUtil {
         loginURL = PropertiesUtil.getString(Constant.RESOURCE_BUNLE_HOST_TYPE) + "://"
                 + (PropertiesUtil.getString(Constant.RESOURCE_BUNLE_HOST)
                         + "/login.jps");
-        // httpclient = HttpClients.custom().setDefaultCookieStore(cookieStore).build();
         try {
             loginJsoup();
         } catch (IOException e) {
             logger.fastDebug("cannot login to %s", e, loginURL);
             cookies = null;
         }
-        // try {
-        //// login(httpclient);
-        // } catch (URISyntaxException | IOException e) {
-        // logger.error("cannot login to server:", e);
-        // instance = null;
-        // }
     }
 
     public synchronized static HTTPClientUtil getInstance() {
@@ -72,7 +61,7 @@ public class HTTPClientUtil {
         try {
             return httpclient.execute(request);
         } catch (IOException e) {
-            logger.fastDebug("cannot execute request", e, null);
+            logger.fastDebug("cannot execute request", e, new Object());
             instance = null;
         }
         return null;

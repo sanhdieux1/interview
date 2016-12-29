@@ -6,15 +6,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import handle.executors.ExecutorManagement;
 import handle.executors.TestExecutionCallable;
 import manament.log.LoggerWapper;
 import models.APIIssueVO;
@@ -30,7 +26,6 @@ import models.main.GadgetData;
 import models.main.GadgetDataWapper;
 import models.main.JQLSearchResult;
 import models.main.Release;
-import ninja.Results;
 import service.HTTPClientUtil;
 import util.Constant;
 import util.JSONUtil;
@@ -160,25 +155,6 @@ public class AssigneeUtility {
         return executions;
     }
 
-    // public Set<String> getListCycleName(String projectName, Release release, Set<String> products) throws APIException {
-    // String keyProvisional="";
-    // if(release != null){
-    // keyProvisional = projectName + PLUS + release.toString();
-    // } else{
-    // keyProvisional = projectName;
-    // }
-    //
-    // if(cycleNameCache.get(keyProvisional) == null || cycleNameCache.get(keyProvisional).isEmpty()){
-    // ExecutionsVO executions = findAllExecutionIsueeInProject(projectName, release);
-    // if(executions != null && executions.getExecutions()!=null){
-    // List<ExecutionIssueVO> excutions = executions.getExecutions();
-    // Stream<ExecutionIssueVO> excutionsStream = excutions.stream();
-    //
-    // cycleNameCache.put(keyProvisional, excutionsStream.map(i -> i.getCycleName()).collect(Collectors.toSet()));
-    // }
-    // }
-    // return cycleNameCache.get(keyProvisional);
-    // }
     public Set<String> getListCycleName(String projectName, Release release, Set<String> products) throws APIException {
         Set<String> returnData = new HashSet<>();
         StringBuffer provisional = new StringBuffer();
@@ -197,30 +173,13 @@ public class AssigneeUtility {
                 List<TestExecutionCallable> tasks = new ArrayList<>();
                 issues.forEach(i -> tasks.add(new TestExecutionCallable(i, JQLIssuetypeVO.Type.fromString(i.getFields().getIssuetype().getName()))));
 
-                ExecutorService executor = Executors.newFixedThreadPool(PropertiesUtil.getInt(Constant.CONCURRENT_THREAD));
-                try{
-                    List<Future<ExecutionIssueResultWapper>> results = executor.invokeAll(tasks);
-                    for (Future<ExecutionIssueResultWapper> result : results){
-                        ExecutionIssueResultWapper wapper = result.get();
-                        List<ExecutionIssueVO> executionVO = wapper.getExecutionsVO();
-                        if(executionVO != null){
-                            executions.addAll(executionVO);
-                        }
+                List<ExecutionIssueResultWapper> taskResult = ExecutorManagement.getInstance().invokeAndGet(tasks);
+                for (ExecutionIssueResultWapper wapper : taskResult){
+                    List<ExecutionIssueVO> executionVO = wapper.getExecutionsVO();
+                    if(executionVO != null){
+                        executions.addAll(executionVO);
                     }
-                } catch(ExecutionException e){
-                    if(e.getCause() instanceof APIException){
-                        throw (APIException)e.getCause();
-                    }else{
-                        logger.fastDebug("Error during invoke tasks", e, new Object());
-                        throw new APIException("Error during invoke tasks");
-                    }
-                } catch (InterruptedException e){
-                    logger.fastDebug("Error during invoke tasks", e, new Object());
-                    throw new APIException("Error during invoke tasks");
-                } finally {
-                    executor.shutdown();
                 }
-
                 Set<String> cycleNames = executions.stream().map(i -> i.getCycleName()).collect(Collectors.toSet());
                 if(cycleNames != null && !cycleNames.isEmpty()){
                     returnData.addAll(cycleNames);

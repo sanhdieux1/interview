@@ -5,14 +5,10 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -55,12 +51,12 @@ public class EpicUtility {
     public List<GadgetData> getDataEPic(EpicVsTestExecution epicGadget) throws APIException {
         List<GadgetData> result = new ArrayList<>();
         Set<APIIssueVO> epicLinks = null;
-        
+
         if(epicGadget.isSelectAll()){
             epicLinks = getEpicLinks(epicGadget.getProjectName(), epicGadget.getRelease().toString(), epicGadget.getProducts());
-        }else {
+        } else{
             Set<String> epics = epicGadget.getEpic();
-            List<FindIssueCallable> tasks= new ArrayList<>();
+            List<FindIssueCallable> tasks = new ArrayList<>();
             epics.forEach(e -> tasks.add(new FindIssueCallable(e)));
             List<Future<JQLIssueVO>> taskReulsts = ExecutorManagement.getInstance().invokeTask(tasks);
             List<JQLIssueVO> epicIssues = ExecutorManagement.getInstance().getResult(taskReulsts);
@@ -80,9 +76,7 @@ public class EpicUtility {
             ExecutionIssueResultWapper executionIssues = findAllExecutionIssueInEpic(epic.getKey());
             GadgetData gadgetData = GadgetUtility.getInstance().convertToGadgetData(executionIssues.getExecutionsVO());
             gadgetData.setKey(epic);
-            gadgetData
-                    .setUnplanned(gadgetData.getBlocked() + gadgetData.getFailed() + gadgetData.getPassed() + gadgetData.getUnexecuted() + gadgetData.getWip());
-            gadgetData.setPlanned(executionIssues.getPlanned());
+            gadgetData.increasePlanned(executionIssues.getPlanned());
             result.add(gadgetData);
         }
 
@@ -97,9 +91,8 @@ public class EpicUtility {
         if(issues == null || issues.isEmpty()){
             return resultWapper;
         }
-        logger.fasttrace("Total issue in epic %s:%d",epic, issues.size());
-        
-        ExecutorService taskExecutor = Executors.newFixedThreadPool(PropertiesUtil.getInt(Constant.CONCURRENT_THREAD));
+        logger.fasttrace("Total issue in epic %s:%d", epic, issues.size());
+
         List<TestExecutionCallable> tasks = new ArrayList<TestExecutionCallable>();
         issues.stream().forEach(new Consumer<JQLIssueVO>() {
             @Override
@@ -111,23 +104,13 @@ public class EpicUtility {
                 }
             }
         });
-        try{
-            logger.fasttrace("Total Test and Story in epic %s:%d", epic, tasks.size());
-            List<Future<ExecutionIssueResultWapper>> results = taskExecutor.invokeAll(tasks);
-            taskExecutor.shutdown();
-            for (Future<ExecutionIssueResultWapper> result : results){
-                ExecutionIssueResultWapper wapper = result.get();
+        logger.fasttrace("Total Test and Story in epic %s:%d", epic, tasks.size());
+        List<ExecutionIssueResultWapper> resultTask = ExecutorManagement.getInstance().invokeAndGet(tasks);
+        for (ExecutionIssueResultWapper wapper : resultTask){
+            if(wapper != null){
                 resultWapper.getExecutionsVO().addAll(wapper.getExecutionsVO());
                 resultWapper.increasePland(wapper.getPlanned());
             }
-        } catch (ExecutionException e){
-            if(e.getCause() instanceof APIException){
-                throw (APIException) e.getCause();
-            }
-            throw new APIException("error during invoke");
-        } catch (InterruptedException e){
-            logger.fastDebug("error during invoke", e);
-            throw new APIException("error during invoke", e);
         }
         return resultWapper;
     }
@@ -184,7 +167,7 @@ public class EpicUtility {
                     testExecution.addAll(executions.getExecutions());
                 }
             }
-        }else{
+        } else{
             logger.fastDebug("data result is not map to ExecutionsVO :%s", result);
         }
         return testExecution;
@@ -194,7 +177,8 @@ public class EpicUtility {
         String query = "\"Epic Link\"=%s";
         Map<String, String> parameters = new HashMap<String, String>();
         parameters.put(Constant.PARAMERTER_JQL_QUERY, String.format(query, epic));
-        parameters.put(Constant.PARAMERTER_MAXRESULTS, PropertiesUtil.getString(Constant.RESOURCE_BUNLE_SEARCH_MAXRECORDS, Constant.RESOURCE_BUNLE_SEARCH_MAXRECORDS_DEFAULT));
+        parameters.put(Constant.PARAMERTER_MAXRESULTS,
+                PropertiesUtil.getString(Constant.RESOURCE_BUNLE_SEARCH_MAXRECORDS, Constant.RESOURCE_BUNLE_SEARCH_MAXRECORDS_DEFAULT));
         parameters.put(Constant.PARAMERTER_OFFSET, "0");
         String data = HTTPClientUtil.getInstance().getLegacyData(PropertiesUtil.getString(Constant.RESOURCE_BUNLE_SEARCH_PATH), parameters);
         if(data == null){
@@ -212,24 +196,9 @@ public class EpicUtility {
         List<FindIssueCallable> tasks = new ArrayList<FindIssueCallable>();
         testedByIssue.forEach(s -> tasks.add(new FindIssueCallable(s.getInwardIssue().getKey())));
         List<JQLIssueVO> testIssues = new ArrayList<>();
-        ExecutorService taskExecutor = Executors.newFixedThreadPool(PropertiesUtil.getInt(Constant.CONCURRENT_THREAD));
-        try{
-            List<Future<JQLIssueVO>> result = taskExecutor.invokeAll(tasks);
-            for (Future<JQLIssueVO> re : result){
-                testIssues.add(re.get());
-            }
-
-        } catch (ExecutionException e){
-            if(e.getCause() instanceof APIException){
-                throw (APIException) e.getCause();
-            }
-            throw new APIException("error during invoke", e);
-        } catch (InterruptedException e){
-            logger.fastDebug("error during invoke", e);
-            throw new APIException("error during invoke", e);
-        } finally{
-            taskExecutor.shutdown();
-        }
+        
+        List<JQLIssueVO> resultTask = ExecutorManagement.getInstance().invokeAndGet(tasks);
+        testIssues.addAll(resultTask);
         return testIssues;
     }
 
@@ -249,16 +218,16 @@ public class EpicUtility {
             query.append(Constant.AND);
             query.append(String.format(fixVersionParam, release));
         }
-        if(products!=null && !products.isEmpty()){
+        if(products != null && !products.isEmpty()){
             query.append(Constant.AND);
             query.append(Constant.OPEN_BRACKET);
             boolean first = true;
-            for(String product : products){
+            for (String product : products){
                 if(product != null && !product.isEmpty()){
                     if(!first){
                         query.append(Constant.OR);
                     }
-                    query.append(String.format("cf[12718] = \"%s\"",product));
+                    query.append(String.format("cf[12718] = \"%s\"", product));
                     first = false;
                 }
             }
@@ -266,7 +235,8 @@ public class EpicUtility {
         }
         Map<String, String> parameters = new HashMap<String, String>();
         parameters.put(Constant.PARAMERTER_JQL_QUERY, query.toString());
-        parameters.put(Constant.PARAMERTER_MAXRESULTS, PropertiesUtil.getString(Constant.RESOURCE_BUNLE_SEARCH_MAXRECORDS, Constant.RESOURCE_BUNLE_SEARCH_MAXRECORDS_DEFAULT));
+        parameters.put(Constant.PARAMERTER_MAXRESULTS,
+                PropertiesUtil.getString(Constant.RESOURCE_BUNLE_SEARCH_MAXRECORDS, Constant.RESOURCE_BUNLE_SEARCH_MAXRECORDS_DEFAULT));
         parameters.put(Constant.PARAMERTER_OFFSET, "0");
         String data = HTTPClientUtil.getInstance().getLegacyData(PropertiesUtil.getString(Constant.RESOURCE_BUNLE_SEARCH_PATH), parameters);
         JQLSearchResult searchResult = JSONUtil.getInstance().convertJSONtoObject(data, JQLSearchResult.class);

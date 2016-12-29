@@ -32,7 +32,6 @@ import models.gadget.Gadget;
 import models.gadget.StoryVsTestExecution;
 import models.main.GadgetData;
 import models.main.JQLSearchResult;
-import models.main.Release;
 import service.DatabaseUtility;
 import service.HTTPClientUtil;
 import util.Constant;
@@ -80,31 +79,6 @@ public class GadgetUtility extends DatabaseUtility {
             logger.fastDebug("error during mapper.writeValueAsString", e);
             throw new APIException("cannot insert gadget", e);
         }
-    }
-
-    public static void main(String[] args) throws APIException {
-        EpicVsTestExecution gadget = new EpicVsTestExecution();
-        gadget.setProjectName("FNMS 557x");
-        
-        Set<String> cyckes = new HashSet<>();
-        cyckes.add("FNMS-5949");
-        cyckes.add("FNMS-5948");
-        
-        Set<String> epic = new HashSet<>();
-        epic.add("FNMS-96");
-        
-        Set<String> product = new HashSet<>();
-        product.add("ANV");
-        product.add("PCC");
-        
-        gadget.setRelease(Release.R1_2_0);
-        gadget.setEpic(epic);
-        gadget.setProducts(product);
-        gadget.setSelectAll(true);
-        
-        GadgetUtility.getInstance().insertOrUpdate(gadget);
-        List<Gadget> list = GadgetUtility.getInstance().getAll();
-//        System.out.println(list.size());
     }
 
     public Gadget get(String gadgetId) throws APIException {
@@ -194,18 +168,23 @@ public class GadgetUtility extends DatabaseUtility {
                     switch (issue.getStatus().getName()) {
                     case "PASS":
                         gadgetData.increasePassed(1);
+                        gadgetData.getPassed().getIssues().add(issue.getIssueKey());
                         break;
                     case "FAIL":
                         gadgetData.increaseFailed(1);
+                        gadgetData.getFailed().getIssues().add(issue.getIssueKey());
                         break;
                     case "UNEXECUTED":
                         gadgetData.increaseUnexecuted(1);
+                        gadgetData.getUnexecuted().getIssues().add(issue.getIssueKey());
                         break;
                     case "WIP":
                         gadgetData.increaseWip(1);
+                        gadgetData.getWip().getIssues().add(issue.getIssueKey());
                         break;
                     case "BLOCKED":
                         gadgetData.increaseBlocked(1);
+                        gadgetData.getBlocked().getIssues().add(issue.getIssueKey());
                         break;
                     default:
                         break;
@@ -213,7 +192,12 @@ public class GadgetUtility extends DatabaseUtility {
                 }
             });
         }
-        gadgetData.setUnplanned(gadgetData.getBlocked()+gadgetData.getFailed()+gadgetData.getPassed()+gadgetData.getWip()+gadgetData.getUnexecuted());
+        gadgetData.increaseUnplanned(gadgetData.getBlocked().getTotal()+gadgetData.getFailed().getTotal()+gadgetData.getPassed().getTotal()+gadgetData.getWip().getTotal()+gadgetData.getUnexecuted().getTotal());
+        gadgetData.getUnplanned().getIssues().addAll(gadgetData.getBlocked().getIssues());
+        gadgetData.getUnplanned().getIssues().addAll(gadgetData.getFailed().getIssues());
+        gadgetData.getUnplanned().getIssues().addAll(gadgetData.getPassed().getIssues());
+        gadgetData.getUnplanned().getIssues().addAll(gadgetData.getWip().getIssues());
+        gadgetData.getUnplanned().getIssues().addAll(gadgetData.getUnexecuted().getIssues());
         return gadgetData;
     }
 

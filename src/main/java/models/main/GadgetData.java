@@ -4,40 +4,40 @@ import models.APIIssueVO;
 
 public class GadgetData {
     private APIIssueVO key;
-    private int unexecuted;
-    private int failed;
-    private int wip;
-    private int blocked;
-    private int passed;
-    private int planned;
-    private int unplanned;
+    private ElementGadGetData unexecuted = new ElementGadGetData();
+    private ElementGadGetData failed = new ElementGadGetData();
+    private ElementGadGetData wip = new ElementGadGetData();
+    private ElementGadGetData blocked = new ElementGadGetData();
+    private ElementGadGetData passed = new ElementGadGetData();
+    private ElementGadGetData planned = new ElementGadGetData();
+    private ElementGadGetData unplanned = new ElementGadGetData();
 
     public void increaseUnexecuted(int number) {
-        unexecuted += number;
+        unexecuted.increase(number);
     }
 
     public void increaseFailed(int number) {
-        failed += number;
+        failed.increase(number);
     }
 
     public void increaseWip(int number) {
-        wip += number;
+        wip.increase(number);
     }
 
     public void increaseBlocked(int number) {
-        blocked += number;
+        blocked.increase(number);
     }
 
     public void increasePassed(int number) {
-        passed += number;
+        passed.increase(number);
     }
 
-    public void increasePland(int number) {
-        planned += number;
+    public void increasePlanned(int number) {
+        planned.increase(number);
     }
 
-    public void increaseUnpland(int number) {
-        unplanned += number;
+    public void increaseUnplanned(int number) {
+        unplanned.increase(number);
     }
 
     public APIIssueVO getKey() {
@@ -48,59 +48,59 @@ public class GadgetData {
         this.key = key;
     }
 
-    public int getUnexecuted() {
+    public ElementGadGetData getUnexecuted() {
         return unexecuted;
     }
 
-    public void setUnexecuted(int unexecuted) {
+    public void setUnexecuted(ElementGadGetData unexecuted) {
         this.unexecuted = unexecuted;
     }
 
-    public int getFailed() {
+    public ElementGadGetData getFailed() {
         return failed;
     }
 
-    public void setFailed(int failed) {
+    public void setFailed(ElementGadGetData failed) {
         this.failed = failed;
     }
 
-    public int getWip() {
+    public ElementGadGetData getWip() {
         return wip;
     }
 
-    public void setWip(int wip) {
+    public void setWip(ElementGadGetData wip) {
         this.wip = wip;
     }
 
-    public int getBlocked() {
+    public ElementGadGetData getBlocked() {
         return blocked;
     }
 
-    public void setBlocked(int blocked) {
+    public void setBlocked(ElementGadGetData blocked) {
         this.blocked = blocked;
     }
 
-    public int getPassed() {
+    public ElementGadGetData getPassed() {
         return passed;
     }
 
-    public void setPassed(int passed) {
+    public void setPassed(ElementGadGetData passed) {
         this.passed = passed;
     }
 
-    public int getPlanned() {
+    public ElementGadGetData getPlanned() {
         return planned;
     }
 
-    public void setPlanned(int planned) {
+    public void setPlanned(ElementGadGetData planned) {
         this.planned = planned;
     }
 
-    public int getUnplanned() {
+    public ElementGadGetData getUnplanned() {
         return unplanned;
     }
 
-    public void setUnplanned(int unplanned) {
+    public void setUnplanned(ElementGadGetData unplanned) {
         this.unplanned = unplanned;
     }
 

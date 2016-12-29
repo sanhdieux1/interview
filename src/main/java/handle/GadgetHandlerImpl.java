@@ -8,7 +8,6 @@ import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 import manament.log.LoggerWapper;
-import models.JQLIssueVO;
 import models.JQLIssueWapper;
 import models.UserVO;
 import models.exception.APIException;
@@ -17,9 +16,9 @@ import models.gadget.CycleVsTestExecution;
 import models.gadget.EpicVsTestExecution;
 import models.gadget.Gadget;
 import models.gadget.Gadget.Type;
+import models.gadget.StoryVsTestExecution;
 import models.main.GadgetData;
 import models.main.GadgetDataWapper;
-import models.gadget.StoryVsTestExecution;
 import ninja.Context;
 import ninja.Result;
 import ninja.Results;

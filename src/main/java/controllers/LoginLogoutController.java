@@ -4,7 +4,6 @@ import static ninja.Results.redirect;
 
 import java.util.Set;
 
-import org.apache.log4j.Logger;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;

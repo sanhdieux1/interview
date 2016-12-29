@@ -8,9 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import manament.log.LoggerWapper;
 import models.exception.APIException;
-import models.gadget.AssigneeVsTestExecution;
 import models.gadget.CycleVsTestExecution;
-import util.gadget.GadgetUtility;
 
 public class JSONUtil {
     private static JSONUtil INSTANCE = new JSONUtil();

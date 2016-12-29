@@ -3,9 +3,6 @@ package util.gadget;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import handle.executors.CycleTestCallable;
@@ -16,8 +13,6 @@ import models.exception.APIException;
 import models.gadget.CycleVsTestExecution;
 import models.main.GadgetData;
 import models.main.Release;
-import util.Constant;
-import util.PropertiesUtil;
 
 public class CycleUtility {
     final static LoggerWapper logger = LoggerWapper.getLogger(CycleUtility.class);

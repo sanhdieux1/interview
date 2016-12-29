@@ -11,6 +11,7 @@ public class LoggerWapper extends Logger {
         super(name);
     }
 
+    @SuppressWarnings("rawtypes")
     public static LoggerWapper getLogger(Class origin) {
         return getLogger(origin.getName());
     }

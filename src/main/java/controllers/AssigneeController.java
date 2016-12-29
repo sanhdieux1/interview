@@ -1,12 +1,8 @@
 package controllers;
 
-import java.lang.reflect.Proxy;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import org.apache.log4j.Logger;
 
 import com.google.inject.Singleton;
 
@@ -20,7 +16,6 @@ import ninja.FilterWith;
 import ninja.Result;
 import ninja.Results;
 import ninja.params.Param;
-import ninja.params.Params;
 import util.JSONUtil;
 
 @Singleton

@@ -1,10 +1,5 @@
 package controllers;
 
-import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.InetSocketAddress;
-import java.net.Proxy;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -21,8 +16,6 @@ import com.mongodb.MongoClient;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 
-import filter.SecureFilter;
-import ninja.FilterWith;
 import ninja.Result;
 import ninja.Results;
 import ninja.params.PathParam;
@@ -32,7 +25,6 @@ import util.LinkUtil;
 public class ApplicationController {
 
 	final static Logger logger = Logger.getLogger(ApplicationController.class);
-	private String LINK_ASSIGNEE_API = "https://greenhopper.app.alcatel-lucent.com/rest/zapi/latest/zql/executeSearch";
 	public Result index(@PathParam("id") Integer id) {
 		if (id == null) {
 			id = 1;

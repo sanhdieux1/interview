@@ -1,27 +1,20 @@
 package util.gadget;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import handle.FindIssueInEpicCallable;
-import handle.executors.TestExecutionCallable;
 import handle.executors.ExecutorManagement;
 import handle.executors.FindIssueCallable;
+import handle.executors.TestExecutionCallable;
 import manament.log.LoggerWapper;
 import models.APIIssueVO;
 import models.ExecutionIssueResultWapper;
@@ -29,7 +22,6 @@ import models.ExecutionIssueVO;
 import models.JQLIssueLinkVO;
 import models.JQLIssueVO;
 import models.JQLIssueWapper;
-import models.JQLIssuefields;
 import models.JQLIssuetypeVO;
 import models.JQLIssuetypeVO.Type;
 import models.exception.APIException;
@@ -37,8 +29,6 @@ import models.gadget.StoryVsTestExecution;
 import models.main.GadgetData;
 import models.main.GadgetDataWapper;
 import models.main.Release;
-import util.Constant;
-import util.PropertiesUtil;
 
 public class StoryUtility {
     private static StoryUtility INSTANCE = new StoryUtility();
@@ -159,7 +149,7 @@ public class StoryUtility {
             List<GadgetData> storyDatas = new ArrayList<>();
             for (ExecutionIssueResultWapper wapper : results){
                 GadgetData data = GadgetUtility.getInstance().convertToGadgetData(wapper.getExecutionsVO());
-                data.setPlanned(wapper.getPlanned());
+                data.increasePlanned(wapper.getPlanned());
                 data.setKey(wapper.getIssue());
                 storyDatas.add(data);
             }
