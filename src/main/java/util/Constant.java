@@ -35,20 +35,27 @@ public class Constant {
 	
     public static final String RESOURCE_BUNLE_PROJECT_PATH = "resourcebundle.project.path";
     public static final String RESOURCE_BUNLE_SEARCH_PATH = "resourcebundle.search.path";
+    public static final String RESOURCE_BUNLE_SEARCH_MAXRECORDS = "resourcebundle.search.maxrecords";
+    public static final String RESOURCE_BUNLE_SEARCH_MAXRECORDS_DEFAULT = "10000";
     public static final String RESOURCE_BUNLE_ISSUE_PATH = "resourcebundle.issue.path";
+    
+    
     //constant query
     public static final String PARAMERTER_ZQL_QUERY = "zqlQuery";
     public static final String PARAMERTER_JQL_QUERY = "jql";
     public static final String PARAMERTER_MAXRECORDS = "maxRecords";
     public static final String PARAMERTER_MAXRESULTS = "maxResults";
+    public static final String PARAMERTER_TIMEOUT = "resourcebundle.project.timeout";
     public static final String PARAMERTER_OFFSET = "offset";
     public static final String AND = " AND ";
     public static final String OR = " OR ";
+    public static final String OPEN_BRACKET = "(";
+    public static final String CLOSE_BRACKET = ")";
     //database
     public static final String DATABASE_SCHEMA = "DATABASE_SCHEMA";
     public static final String DATABASE_HOST = "DATABASE_HOST";
     public static final String DATABASE_PORT = "DATABASE_PORT";
-    
     //internal conf
     public static final String CONCURRENT_THREAD = "internal.conf.concurrent_thread";
+    
 }

@@ -115,8 +115,11 @@ public class HTTPClientUtil {
         cookies = re.cookies();
         logger.fastDebug("cookies:" + cookies);
     }
-
     public String getLegacyData(String path, Map<String, String> parameters) throws APIException {
+        return getLegacyData(path, parameters, PropertiesUtil.getInt(Constant.PARAMERTER_TIMEOUT,60000));
+    }
+    
+    public String getLegacyData(String path, Map<String, String> parameters, int timeout) throws APIException {
         String data = null;
         String host = PropertiesUtil.getString(Constant.RESOURCE_BUNLE_HOST);
         String scheme = PropertiesUtil.getString(Constant.RESOURCE_BUNLE_HOST_TYPE);
@@ -125,7 +128,7 @@ public class HTTPClientUtil {
         Connection connection = Jsoup.connect(url)
                 .ignoreHttpErrors(true)
                 .ignoreContentType(true)
-                .timeout(50000)
+                .timeout(timeout)
                 .maxBodySize(0)
                 .method(Connection.Method.GET);
         if (cookies != null) {
@@ -149,8 +152,8 @@ public class HTTPClientUtil {
             Response re = connection.execute();
             data = re.body();
         } catch (IOException e) {
-            logger.fastDebug("Cannot connect to %s", e, url);
-            throw new APIException("Cannot connect to " + host, e);
+            logger.fastDebug("Cannot connect to %s, %s", e, url, e.getMessage());
+            throw new APIException("Cannot connect to " + host + ", "+e.getMessage(), e);
         }
         return data;
     }

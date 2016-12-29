@@ -35,7 +35,7 @@ public class CycleUtility {
         String project = cycleGadget.getProjectName();
         Release release = cycleGadget.getRelease();
         if(cycleGadget.isSelectAllCycle()){
-            cycles = AssigneeUtility.getInstance().getListCycleName(project, release);
+            cycles = AssigneeUtility.getInstance().getListCycleName(project, release, cycleGadget.getProducts());
         }
         List<CycleTestCallable> tasks = new ArrayList<>();
         if(cycles != null && !cycles.isEmpty()){

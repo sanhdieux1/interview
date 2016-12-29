@@ -1,6 +1,10 @@
 package controllers;
 
 import java.lang.reflect.Proxy;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 
@@ -16,6 +20,7 @@ import ninja.FilterWith;
 import ninja.Result;
 import ninja.Results;
 import ninja.params.Param;
+import ninja.params.Params;
 
 @Singleton
 @FilterWith(CrossOriginAccessControlFilter.class)
@@ -35,9 +40,13 @@ public class AssigneeController {
             return handleException(e);
         }
     }
-    public Result getListCycleName(@Param("project") String projectName, @Param("release") String release) {
+    public Result getListCycleName(@Param("project") String projectName, @Param("release") String release, @Params("products")String[] productArrays) {
         try{
-            return handler.getListCycleName(projectName, Release.fromString(release));
+            Set<String> products =null;
+            if(productArrays != null){
+                products = new HashSet<String>(Arrays.asList(productArrays));
+            }
+            return handler.getListCycleName(projectName, Release.fromString(release), products);
         } catch (APIException e){
             return handleException(e);
         }

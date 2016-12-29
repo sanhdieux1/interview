@@ -2,7 +2,6 @@ package util.gadget;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -16,17 +15,11 @@ import org.bson.types.ObjectId;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.mongodb.BasicDBObject;
-import com.mongodb.DBCollection;
-import com.mongodb.DBCursor;
-import com.mongodb.DBObject;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
-import com.mongodb.util.JSON;
 
-import ch.qos.logback.classic.spi.ThrowableProxyVO;
 import manament.log.LoggerWapper;
-import models.ExecutionIssueResultWapper;
 import models.ExecutionIssueVO;
 import models.GadgetData;
 import models.JQLIssueVO;
@@ -40,8 +33,6 @@ import models.gadget.Gadget;
 import models.gadget.StoryVsTestExecution;
 import models.main.JQLSearchResult;
 import models.main.Release;
-import ninja.Result;
-import ninja.Results;
 import service.DatabaseUtility;
 import service.HTTPClientUtil;
 import util.Constant;
@@ -221,10 +212,10 @@ public class GadgetUtility extends DatabaseUtility {
         String query = "issue=%s";
         Map<String, String> parameters = new HashMap<String, String>();
         parameters.put(Constant.PARAMERTER_JQL_QUERY, String.format(query, issueKey));
-        parameters.put(Constant.PARAMERTER_MAXRESULTS, "10000");
+        parameters.put(Constant.PARAMERTER_MAXRESULTS, PropertiesUtil.getString(Constant.RESOURCE_BUNLE_SEARCH_MAXRECORDS, Constant.RESOURCE_BUNLE_SEARCH_MAXRECORDS_DEFAULT));
         parameters.put(Constant.PARAMERTER_OFFSET, "0");
         String data = HTTPClientUtil.getInstance().getLegacyData(
-                PropertiesUtil.getInstance().getString(Constant.RESOURCE_BUNLE_SEARCH_PATH),
+                PropertiesUtil.getString(Constant.RESOURCE_BUNLE_SEARCH_PATH),
                 parameters);
         try{
             searchResult = JSONUtil.getInstance().convertJSONtoObject(data, JQLSearchResult.class);
@@ -242,12 +233,19 @@ public class GadgetUtility extends DatabaseUtility {
     public Set<String> getProjectList() throws APIException {
         if (projectsCache.isEmpty()) {
             String data = HTTPClientUtil.getInstance().getLegacyData(
-                    PropertiesUtil.getInstance().getString(Constant.RESOURCE_BUNLE_PROJECT_PATH),
+                    PropertiesUtil.getString(Constant.RESOURCE_BUNLE_PROJECT_PATH),
                     new HashMap<String, String>());
             List<ProjectVO> projects = JSONUtil.getInstance().convertJSONtoListObject(data,
                     ProjectVO.class);
             projectsCache = projects.stream().map(p -> p.getName()).collect(Collectors.toSet());
         }
         return projectsCache;
+    }
+
+    public List<JQLIssueVO> filterProduct(List<JQLIssueVO> issues, Set<String> product) {
+        if(issues != null && product != null){
+            return issues.stream().filter(i -> product.contains(i.getFields().getProduct().getValue())).collect(Collectors.toList());
+        }
+        return null;
     }
 }

@@ -130,7 +130,7 @@ public class StoryUtility {
         if(storyGadget.isSelectAllEpic() && storyGadget.isSelectAllStory()){
             String project = storyGadget.getProjectName();
             Release release = storyGadget.getRelease();
-            Set<APIIssueVO> epicIssues = EpicUtility.getInstance().getEpicLinks(project, release.toString());
+            Set<APIIssueVO> epicIssues = EpicUtility.getInstance().getEpicLinks(project, release.toString(), storyGadget.getProducts());
             Set<String> epics = epicIssues.stream().map(e -> e.getKey()).collect(Collectors.toSet());
             epicMap = findStoryInEpic(new ArrayList<String>(epics));
         } else if(storyGadget.isSelectAllStory()){
@@ -159,7 +159,7 @@ public class StoryUtility {
             } finally{
                 taskExecutor.shutdown();
             }
-            epicMap = storyIssues.stream().collect(Collectors.groupingBy(s -> s.getFields().getEpicLink(), Collectors.toSet()));
+            epicMap = storyIssues.stream().collect(Collectors.groupingBy(s -> s.getFields().getEpicLink()!=null?s.getFields().getEpicLink():"", Collectors.toSet()));
         }
 
         if(epicMap == null || epicMap.isEmpty()){

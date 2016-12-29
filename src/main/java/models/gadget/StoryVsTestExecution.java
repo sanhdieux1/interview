@@ -19,7 +19,8 @@ public class StoryVsTestExecution implements Gadget {
     private boolean selectAllStory;
     private boolean selectAllEpic;
     private String user;
-    
+    private Set<String> products;
+
     public boolean isSelectAllEpic() {
         return selectAllEpic;
     }
@@ -41,6 +42,14 @@ public class StoryVsTestExecution implements Gadget {
     @Override
     public String getUser() {
         return user;
+    }
+
+    public Set<String> getProducts() {
+        return products;
+    }
+
+    public void setProducts(Set<String> products) {
+        this.products = products;
     }
 
     public void setId(String id) {
@@ -85,8 +94,8 @@ public class StoryVsTestExecution implements Gadget {
 
     public void setEpic(Set<String> epic) {
         this.epic = epic;
-    }   
-    
+    }
+
     public Set<String> getStories() {
         return stories;
     }

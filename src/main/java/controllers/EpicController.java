@@ -1,5 +1,8 @@
 package controllers;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.apache.log4j.Logger;
 
 import com.google.inject.Singleton;
@@ -13,6 +16,7 @@ import ninja.FilterWith;
 import ninja.Result;
 import ninja.Results;
 import ninja.params.Param;
+import ninja.params.Params;
 
 @Singleton
 @FilterWith(CrossOriginAccessControlFilter.class)
@@ -26,9 +30,13 @@ public class EpicController {
 //                new Class[] { EpicHandler.class }, new ExceptionHandler(handler));
     }
 
-    public Result getEpicLinks(@Param("project") String project, @Param("release") String release) {
+    public Result getEpicLinks(@Param("project") String project, @Param("release") String release, @Params("product") String[] productArrays) {
         try{
-            return handler.getEpicLinks(project, release);
+            List<String> products = null;
+            if(productArrays!=null){
+                products = Arrays.asList(productArrays);
+            }
+            return handler.getEpicLinks(project, release, products);
         } catch (APIException e){
             return handleException(e);
         }

@@ -1,20 +1,12 @@
 package handle;
 
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import manament.log.LoggerWapper;
 import models.AssigneeVO;
-import models.ExecutionIssueVO;
 import models.JQLIssueVO;
 import models.exception.APIException;
-import models.main.ExecutionsVO;
 import models.main.Release;
 import ninja.Result;
 import ninja.Results;
@@ -30,8 +22,8 @@ public class AssigneeHandlerImpl implements AssigneeHandler {
     public AssigneeHandlerImpl() {
     }
 
-    public Result getListCycleName(String projectName, Release release) throws APIException {
-        return Results.json().render(AssigneeUtility.getInstance().getListCycleName(projectName, release));
+    public Result getListCycleName(String projectName, Release release, Set<String> products) throws APIException {
+        return Results.json().render(AssigneeUtility.getInstance().getListCycleName(projectName, release, products));
     }
 
     public Result getAssigneeList(String projectName, Release release) throws APIException {

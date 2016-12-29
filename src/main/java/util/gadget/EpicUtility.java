@@ -53,8 +53,8 @@ public class EpicUtility {
     public List<GadgetData> getDataEPic(EpicVsTestExecution epicGadget) throws APIException {
         List<GadgetData> result = new ArrayList<>();
         Set<String> epics = epicGadget.getEpic();
-        if(epicGadget.isSelectAllStory()){
-            Set<APIIssueVO> epicLinks = getEpicLinks(epicGadget.getProjectName(), epicGadget.getRelease().toString());
+        if(epicGadget.isSelectAllEpic()){
+            Set<APIIssueVO> epicLinks = getEpicLinks(epicGadget.getProjectName(), epicGadget.getRelease().toString(), epicGadget.getProducts());
             if(epicLinks != null){
                 epics = epicLinks.stream().map(e -> e.getKey()).collect(Collectors.toSet());
             }
@@ -83,10 +83,10 @@ public class EpicUtility {
         if(issues == null || issues.isEmpty()){
             return resultWapper;
         }
-        logger.fasttrace("Total issue in epic %s:%d", epic, issues.size());
+        logger.fasttrace("Total issue in epic %s:%d",epic, issues.size());
+        
         ExecutorService taskExecutor = Executors.newFixedThreadPool(PropertiesUtil.getInt(Constant.CONCURRENT_THREAD));
         List<TestExecutionCallable> tasks = new ArrayList<TestExecutionCallable>();
-
         issues.stream().forEach(new Consumer<JQLIssueVO>() {
             @Override
             public void accept(JQLIssueVO issue) {
@@ -180,7 +180,7 @@ public class EpicUtility {
         String query = "\"Epic Link\"=%s";
         Map<String, String> parameters = new HashMap<String, String>();
         parameters.put(Constant.PARAMERTER_JQL_QUERY, String.format(query, epic));
-        parameters.put(Constant.PARAMERTER_MAXRESULTS, "10000");
+        parameters.put(Constant.PARAMERTER_MAXRESULTS, PropertiesUtil.getString(Constant.RESOURCE_BUNLE_SEARCH_MAXRECORDS, Constant.RESOURCE_BUNLE_SEARCH_MAXRECORDS_DEFAULT));
         parameters.put(Constant.PARAMERTER_OFFSET, "0");
         String data = HTTPClientUtil.getInstance().getLegacyData(PropertiesUtil.getString(Constant.RESOURCE_BUNLE_SEARCH_PATH), parameters);
         if(data == null){
@@ -219,7 +219,7 @@ public class EpicUtility {
         return testIssues;
     }
 
-    public Set<APIIssueVO> getEpicLinks(String project, String release) throws APIException {
+    public Set<APIIssueVO> getEpicLinks(String project, String release, Set<String> products) throws APIException {
         Set<APIIssueVO> result = null;
         logger.fasttrace("getEpicLinks(%s,%s)", project, release);
         if(project == null){
@@ -235,9 +235,24 @@ public class EpicUtility {
             query.append(Constant.AND);
             query.append(String.format(fixVersionParam, release));
         }
+        if(products!=null && !products.isEmpty()){
+            query.append(Constant.AND);
+            query.append(Constant.OPEN_BRACKET);
+            boolean first = true;
+            for(String product : products){
+                if(product != null && !product.isEmpty()){
+                    if(!first){
+                        query.append(Constant.OR);
+                    }
+                    query.append("cf[12718] = \"%s\"");
+                    first = false;
+                }
+            }
+            query.append(Constant.CLOSE_BRACKET);
+        }
         Map<String, String> parameters = new HashMap<String, String>();
         parameters.put(Constant.PARAMERTER_JQL_QUERY, query.toString());
-        parameters.put(Constant.PARAMERTER_MAXRESULTS, "10000");
+        parameters.put(Constant.PARAMERTER_MAXRESULTS, PropertiesUtil.getString(Constant.RESOURCE_BUNLE_SEARCH_MAXRECORDS, Constant.RESOURCE_BUNLE_SEARCH_MAXRECORDS_DEFAULT));
         parameters.put(Constant.PARAMERTER_OFFSET, "0");
         String data = HTTPClientUtil.getInstance().getLegacyData(PropertiesUtil.getString(Constant.RESOURCE_BUNLE_SEARCH_PATH), parameters);
         JQLSearchResult searchResult = JSONUtil.getInstance().convertJSONtoObject(data, JQLSearchResult.class);

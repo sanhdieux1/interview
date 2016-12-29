@@ -20,7 +20,10 @@ public class PropertiesUtil {
         String result = prop.getProperty(name);
         return result;
     }
-
+    public static String getString(String name, String defaultValue) {
+        String result = prop.getProperty(name, defaultValue);
+        return result;
+    }
     public static PropertiesUtil getInstance() {
         return INSTANCE;
     }
@@ -48,5 +51,16 @@ public class PropertiesUtil {
         }
         return result;
     }
-
+    public static int getInt(String name, int defaultValue) {
+        String numberStr = getString(name, String.valueOf(defaultValue));
+        int result = 0;
+        if(numberStr != null){
+            try{
+                result = Integer.parseInt(numberStr);
+            } catch (NumberFormatException e){
+                logger.fastDebug("Cannot parse %s to integer", e, numberStr);
+            }
+        }
+        return result;
+    }
 }

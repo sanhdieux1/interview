@@ -28,13 +28,13 @@ public class TestExecutionCallable implements Callable<ExecutionIssueResultWappe
         ExecutionIssueResultWapper resultWapper = new ExecutionIssueResultWapper();
         resultWapper.setPlanned(issue.getFields().getCustomfield_14809());
         resultWapper.setIssue(new APIIssueVO(issue.getKey(), issue.getSelf()));
-        if (type.equals(Type.TEST)) {
+        if (Type.TEST.equals(type)) {
             List<ExecutionIssueVO> executionIssues = EpicUtility.getInstance()
                     .findTestExecutionInIsuee(issue.getKey());
             if (executionIssues != null && !executionIssues.isEmpty()) {
                 resultWapper.getExecutionsVO().addAll(executionIssues);
             }
-        } else {
+        } else if(Type.STORY.equals(type)) {
             List<ExecutionIssueVO> executionIssues = StoryUtility.getInstance()
                     .findAllTestExecutionInStory(issue);
             resultWapper.setPlanned(issue.getFields().getCustomfield_14809());
@@ -42,6 +42,7 @@ public class TestExecutionCallable implements Callable<ExecutionIssueResultWappe
                 resultWapper.getExecutionsVO().addAll(executionIssues);
             }
         }
+        logger.info(issue.getKey()+":"+resultWapper.getExecutionsVO().size());
         return resultWapper;
     }
 

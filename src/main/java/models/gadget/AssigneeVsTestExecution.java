@@ -4,7 +4,6 @@ import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 import models.main.Release;
 
@@ -14,15 +13,12 @@ public class AssigneeVsTestExecution implements Gadget {
 
     private String user;
     private String id;
-    @JsonProperty(required = true)
     private String projectName;
     private boolean selectAllTestCycle;
-    @JsonProperty(required = true)
     private Set<String> cycles;
-    @JsonProperty(required = true)
     private Set<String> metrics;
-    @JsonProperty(required = true)
     private Release release; // fixVersion
+    private Set<String> products;
 
     @Override
     public String getId() {
@@ -45,6 +41,14 @@ public class AssigneeVsTestExecution implements Gadget {
 
     public boolean isSelectAllTestCycle() {
         return selectAllTestCycle;
+    }
+
+    public Set<String> getProducts() {
+        return products;
+    }
+
+    public void setProducts(Set<String> products) {
+        this.products = products;
     }
 
     public void setSelectAllTestCycle(boolean selectAllTestCycle) {

@@ -11,10 +11,23 @@ public class JQLIssuefields {
     private List<JQLIssueLinkVO> issuelinks;
     // Unpland
     private int customfield_14809;
+    
+    // Product
+    @JsonProperty("customfield_12718")
+    private ProductVO product;
+    
     // Epic Parrent
     @JsonProperty("customfield_11209")
     private String epicLink;
     
+    public ProductVO getProduct() {
+        return product;
+    }
+
+    public void setProduct(ProductVO product) {
+        this.product = product;
+    }
+
     public JQLIssuetypeVO getIssuetype() {
         return issuetype;
     }

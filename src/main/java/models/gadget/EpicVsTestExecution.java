@@ -18,6 +18,16 @@ public class EpicVsTestExecution implements Gadget {
     private Release release;
     private List<String> metrics;
     private Set<String> epic;
+    private Set<String> products;
+    
+    
+    public Set<String> getProducts() {
+        return products;
+    }
+
+    public void setProducts(Set<String> products) {
+        this.products = products;
+    }
 
     public String getId() {
         return id;
@@ -75,11 +85,11 @@ public class EpicVsTestExecution implements Gadget {
         this.epic = epic;
     }
 
-    public boolean isSelectAllStory() {
+    public boolean isSelectAllEpic() {
         return selectAll;
     }
 
-    public void setSelectAll(boolean selectAll) {
+    public void setSelectAllStory(boolean selectAll) {
         this.selectAll = selectAll;
     }
 
