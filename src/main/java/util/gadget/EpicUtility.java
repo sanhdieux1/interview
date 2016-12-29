@@ -64,13 +64,12 @@ public class EpicUtility {
             epics.forEach(e -> tasks.add(new FindIssueCallable(e)));
             List<Future<JQLIssueVO>> taskReulsts = ExecutorManagement.getInstance().invokeTask(tasks);
             List<JQLIssueVO> epicIssues = ExecutorManagement.getInstance().getResult(taskReulsts);
-            epicLinks = epicIssues.stream().map(new Function<JQLIssueVO, APIIssueVO>() {
+            epicLinks = epicIssues.stream().filter(e -> e != null && e.getFields() != null).map(new Function<JQLIssueVO, APIIssueVO>() {
                 @Override
                 public APIIssueVO apply(JQLIssueVO jqlIssue) {
-                    if(jqlIssue != null){
-                        return new APIIssueVO(jqlIssue.getKey(), jqlIssue.getSelf(), jqlIssue.getFields().getSummary());
-                    }
-                    return new APIIssueVO();
+                    APIIssueVO apiIssue = new APIIssueVO(jqlIssue.getKey(), jqlIssue.getSelf(), jqlIssue.getFields().getSummary());
+                    apiIssue.setPriority(jqlIssue.getFields().getPriority());
+                    return apiIssue;
                 }
             }).collect(Collectors.toSet());
         }
@@ -272,10 +271,11 @@ public class EpicUtility {
         String data = HTTPClientUtil.getInstance().getLegacyData(PropertiesUtil.getString(Constant.RESOURCE_BUNLE_SEARCH_PATH), parameters);
         JQLSearchResult searchResult = JSONUtil.getInstance().convertJSONtoObject(data, JQLSearchResult.class);
         if(searchResult != null && searchResult.getIssues() != null){
-            result = searchResult.getIssues().stream().map(new Function<JQLIssueVO, APIIssueVO>() {
+            result = searchResult.getIssues().stream().filter(i -> i != null && i.getFields() != null).map(new Function<JQLIssueVO, APIIssueVO>() {
                 @Override
                 public APIIssueVO apply(JQLIssueVO jQLIssue) {
                     APIIssueVO apiIssue = new APIIssueVO(jQLIssue.getKey(), jQLIssue.getSelf(), jQLIssue.getFields().getSummary());
+                    apiIssue.setPriority(jQLIssue.getFields().getPriority());
                     return apiIssue;
                 }
             }).collect(Collectors.toSet());

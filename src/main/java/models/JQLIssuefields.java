@@ -9,9 +9,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class JQLIssuefields {
     private JQLIssuetypeVO issuetype;
     private List<JQLIssueLinkVO> issuelinks;
+    private PriorityVO priority;
     // Unpland
     private int customfield_14809;
-    
+
     private String summary;
     // Product
     @JsonProperty("customfield_12718")
@@ -27,6 +28,14 @@ public class JQLIssuefields {
 
     public void setSummary(String summary) {
         this.summary = summary;
+    }
+
+    public PriorityVO getPriority() {
+        return priority;
+    }
+
+    public void setPriority(PriorityVO priority) {
+        this.priority = priority;
     }
 
     public ProductVO getProduct() {

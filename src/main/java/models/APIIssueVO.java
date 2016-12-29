@@ -7,6 +7,7 @@ public class APIIssueVO {
     private String key;
     private String self;
     private String summary;
+    private PriorityVO priority;
 
     public APIIssueVO() {
     }
@@ -15,11 +16,19 @@ public class APIIssueVO {
         this.key = key;
         this.self = self;
     }
-    
+
     public APIIssueVO(String key, String self, String summary) {
         this.key = key;
         this.self = self;
         this.summary = summary;
+    }
+
+    public PriorityVO getPriority() {
+        return priority;
+    }
+
+    public void setPriority(PriorityVO priority) {
+        this.priority = priority;
     }
 
     public String getKey() {
