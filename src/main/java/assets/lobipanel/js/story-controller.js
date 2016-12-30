@@ -45,7 +45,12 @@ $("#us-update-btn").click(
   });
 
 $("#us-draw-table-btn").click(function() {
-  callAjaxOnUsTable();
+	if(TEST_US_ID != null){
+		drawUsTable(TEST_EPIC_ID, $("#usMetricMultiSelect").val());
+	}
+	else{
+		callAjaxOnUsTable();
+	}
 });
 
 $("#usEpicSelectAll").change(function() {
@@ -75,8 +80,11 @@ function createJsonStringObjectFromUsInputField() {
   var values;
   var object = {};
   var jsonString;
-
-  if ($("#usProject").val() == null) {
+  if(null == $("#dashboardId").val()){
+	  alert("No valid dashboard id provided.");
+	  return;
+  }
+  else if ($("#usProject").val() == null) {
     alert("No project selected");
     return;
   } else if ($("#usRelease").val() == null) {
@@ -100,7 +108,9 @@ function createJsonStringObjectFromUsInputField() {
   values = $.map(options, function(option) {
     return option.value;
   });
-
+  
+  object['id'] = TEST_US_ID;
+  object['dashboardId'] = $("#dashboardId").val();
   object['projectName'] = $("#usProject").val();
   object['release'] = $("#usRelease").val();
   object['products'] = [$("#usProduct").val()];
@@ -123,9 +133,9 @@ function createJsonStringObjectFromUsInputField() {
 }
 
 function callAjaxToUpdateUsGadget(jsonString) {
-  if (jsonString != null && jsonString != "") {
+  if (null != jsonString &&  "" != jsonString) {
     $.ajax({
-      url: '/gadget/addGadget',
+      url: SAVE_GADGET_URI,
       method: 'POST',
       data: {
         type: 'STORY_TEST_EXECUTION',
@@ -192,8 +202,12 @@ function reloadUSList() {
 }
 
 function callAjaxOnUsTable() {
+	if(!US_TABLE_LOADING)
   $.ajax({
-    url: '/gadget/gadgets',
+	  url : GET_GADGETS_URI,
+		data: {
+			dashboardId: $("#dashboardId").val()
+		},
     success: function(gadgetList) {
       drawUsGadget(gadgetList);
     },
@@ -201,6 +215,7 @@ function callAjaxOnUsTable() {
       alert("Failed to send ajax: Widget User story table");
     },
     beforeSend: function() {
+      US_TABLE_LOADING = true;
       hideUsTable();
     }
   }).done(function(gadgetList) {
@@ -280,9 +295,9 @@ function drawUsTable(gadgetId, metricArray) {
           var customTableId = "us-table-" + index;
           var usTableDataSet = [];
           var usIndividualTable;
-          appendTemplateTable(customTableId, epicKey,
+          appendTemplateTable(customTableId, epicKey + ": "+ storyArray["summary"],
             "#us-table-container");
-          $("#" + customTableId).append(templateHeaderFooter);
+          $("#" + customTableId).append(TEMPLATE_HEADER_FOOTER);
           console.log("Pass each function");
 
           for (var i = 0; i < storyArray['issueData'].length; i++) {
@@ -290,17 +305,18 @@ function drawUsTable(gadgetId, metricArray) {
             aStoryDataSet.push(storyArray['issueData'][i]["key"]["key"]);
             aStoryDataSet.push(storyArray['issueData'][i]["key"]["summary"]);
             aStoryDataSet.push(storyArray['issueData'][i]["key"]["priority"]["name"]);
-            aStoryDataSet.push(storyArray['issueData'][i]["unexecuted"]['total']);
-            aStoryDataSet.push(storyArray['issueData'][i]["failed"]['total']);
-            aStoryDataSet.push(storyArray['issueData'][i]["wip"]['total']);
-            aStoryDataSet.push(storyArray['issueData'][i]["blocked"]['total']);
-            aStoryDataSet.push(storyArray['issueData'][i]["passed"]['total']);
-            aStoryDataSet.push(storyArray['issueData'][i]["planned"]['total']);
-            aStoryDataSet.push(storyArray['issueData'][i]["unplanned"]['total']);
+            aStoryDataSet.push(storyArray['issueData'][i]["unexecuted"]);
+            aStoryDataSet.push(storyArray['issueData'][i]["failed"]);
+            aStoryDataSet.push(storyArray['issueData'][i]["wip"]);
+            aStoryDataSet.push(storyArray['issueData'][i]["blocked"]);
+            aStoryDataSet.push(storyArray['issueData'][i]["passed"]);
+            aStoryDataSet.push(storyArray['issueData'][i]["planned"]);
+            aStoryDataSet.push(storyArray['issueData'][i]["unplanned"]);
             usTableDataSet.push(aStoryDataSet);
           }
 
           usIndividualTable = $("#" + customTableId).DataTable({
+        	 "autoWidth": true,
             paging: false,
             data: usTableDataSet,
             columns: [{
@@ -310,19 +326,40 @@ function drawUsTable(gadgetId, metricArray) {
             },{
               title: "PRIORITY"
             }, {
-              title: "UNEXECUTED"
+              title: "UNEXECUTED",
+              "render": function(data, displayOrType, rowData, setting){
+              	return createIssueLinks(data, displayOrType, rowData, setting);
+              }
             }, {
-              title: "FAILED"
+              title: "FAILED",
+              "render": function(data, displayOrType, rowData, setting){
+              	return createIssueLinks(data, displayOrType, rowData, setting);
+              }
             }, {
-              title: "WIP"
+              title: "WIP",
+              "render": function(data, displayOrType, rowData, setting){
+              	return createIssueLinks(data, displayOrType, rowData, setting);
+              }
             }, {
-              title: "BLOCKED"
+              title: "BLOCKED",
+              "render": function(data, displayOrType, rowData, setting){
+              	return createIssueLinks(data, displayOrType, rowData, setting);
+              }
             }, {
-              title: "PASSED"
+              title: "PASSED",
+              "render": function(data, displayOrType, rowData, setting){
+              	return createIssueLinks(data, displayOrType, rowData, setting);
+              }
             }, {
-              title: "PLANNED"
+              title: "PLANNED",
+              "render": function(data, displayOrType, rowData, setting){
+              	return createIssueLinks(data, displayOrType, rowData, setting);
+              }
             }, {
-              title: "UNPLANNED"
+              title: "UNPLANNED",
+              "render": function(data, displayOrType, rowData, setting){
+              	return createIssueLinks(data, displayOrType, rowData, setting);
+              }
             }]
           });
           usIndividualTable.columns(columnList).visible(false);

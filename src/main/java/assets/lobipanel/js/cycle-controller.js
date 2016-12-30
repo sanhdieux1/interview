@@ -17,7 +17,12 @@ $("#cycle-update-btn").click(function() {
 });
 
 $("#cycle-draw-table-btn").click(function() {
-  callAjaxOnCycleTable();
+	if(TEST_CYCLE_ID != null){
+		drawCycleTable(TEST_CYCLE_ID, $("#cycleMetricMultiSelect").val());
+	}
+	else{
+		callAjaxOnCycleTable();
+	}
 });
 
 $("#cycleCheckAll").click(function() {
@@ -29,15 +34,15 @@ $("#cycleCheckAll").click(function() {
 });
 
 function createJsonStringObjectFromCycleInput() {
-
   var object = {};
-
-  if ($("#cycleProject").val() == "" || $("#cycleProject").val() == null || $("#cycleRelease").val() == "" || $("#cycleRelease").val() == null) {
-    $("#warning-message").val(
-      "Please select project name and release for this gadget.");
-    $("dashboard-alert").fadeIn();
+  if(null == $("#dashboardId").val()){
+	  alert("No valid dashboard id provided.");
+	  return;
+  }
+  else if ($("#cycleProject").val() == null || $("#cycleRelease").val() == null) {
+	  alert("No project or cycle selected");
     return;
-  } else if ($("#cycleProject").val() == null) {
+  } else if ($("#cycleProduct").val() == null) {
     alert("No Products selected");
   } else if ($("#cycleMultiSelect").val() == null && !$("#cycleCheckAll").prop("checked")) {
     alert("No cycle selected");
@@ -46,7 +51,9 @@ function createJsonStringObjectFromCycleInput() {
     alert("No metric selected for this widget");
     return;
   }
-
+  
+  object['id'] = TEST_CYCLE_ID;
+  object['dashboardId'] = $("#dashboardId").val();
   object['projectName'] = $("#cycleProject").val();
   object['release'] = $("#cycleRelease").val();
   object['products'] = [$("#cycleProduct").val()];
@@ -63,7 +70,7 @@ function createJsonStringObjectFromCycleInput() {
 function callAjaxToUpdateCycle(jsonString) {
   if (jsonString != null && jsonString != "") {
     $.ajax({
-      url: '/gadget/addGadget',
+      url: SAVE_GADGET_URI,
       method: 'POST',
       data: {
         type: 'TEST_CYCLE_TEST_EXECUTION',
@@ -90,7 +97,10 @@ function callAjaxToUpdateCycle(jsonString) {
 
 function callAjaxOnCycleTable() {
   $.ajax({
-    url: '/gadget/gadgets',
+		  url : GET_GADGETS_URI,
+		data : {
+			dashboardId : $("#dashboardId").val()
+		},
     success: function(gadgetList) {
       drawCycleGadget(gadgetList);
     },
@@ -147,9 +157,9 @@ function drawCycleGadget(gadgetList) {
 
 function drawCycleTable(gadgetId, metricArray) {
   var columnList = getColumnArray(metricArray, true);
-  if (globalCycleTable != null) {
-    console.log(globalCycleTable);
-    globalCycleTable.ajax.reload();
+  if (GLOBAL_CYCLE_TABLE != null) {
+    console.log(GLOBAL_CYCLE_TABLE);
+    GLOBAL_CYCLE_TABLE.ajax.reload();
   } else {
     $.ajax({
       url: "/gadget/getData",
@@ -164,7 +174,7 @@ function drawCycleTable(gadgetId, metricArray) {
       if (debugAjaxResponse(gadgetData)) {
         return;
       }
-      globalCycleTable = $('#cycle-table').DataTable({
+      GLOBAL_CYCLE_TABLE = $('#cycle-table').DataTable({
         "fnDrawCallback": function(oSettings) {
           showCycleTable();
         },
@@ -191,19 +201,34 @@ function drawCycleTable(gadgetId, metricArray) {
         "columns": [{
           "data": "key.key"
         }, {
-          "data": "unexecuted"
+          "data": "unexecuted",
+          "render": function(data, displayOrType, rowData, setting){
+          	return createIssueLinks(data, displayOrType, rowData, setting);
+          }
         }, {
-          "data": "failed"
+          "data": "failed",
+          "render": function(data, displayOrType, rowData, setting){
+          	return createIssueLinks(data, displayOrType, rowData, setting);
+          }
         }, {
-          "data": "wip"
+          "data": "wip",
+          "render": function(data, displayOrType, rowData, setting){
+          	return createIssueLinks(data, displayOrType, rowData, setting);
+          }
         }, {
-          "data": "blocked"
+          "data": "blocked",
+          "render": function(data, displayOrType, rowData, setting){
+          	return createIssueLinks(data, displayOrType, rowData, setting);
+          }
         }, {
-          "data": "passed"
+          "data": "passed",
+          "render": function(data, displayOrType, rowData, setting){
+          	return createIssueLinks(data, displayOrType, rowData, setting);
+          }
         }]
 
       });
-      globalCycleTable.columns(columnList).visible(false);
+      GLOBAL_CYCLE_TABLE.columns(columnList).visible(false);
       showCycleTable();
     });
   }

@@ -1,4 +1,4 @@
-<div id="dashboard-alert"
+<div id="dashboard-alert""
 	class="warning alert-warning alert-dismissable">
 	<a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
 	<div id="warning-message">
@@ -7,8 +7,8 @@
 	</div>
 </div>
 <div id="epic-test-execution-div" class="col-md-12"
-	style="min-height: 20px;">
-	<div class="panel panel-info">
+	style="min-height: 20px; display:none;">
+	<div class="panel panel-primary">
 		<div class="panel-heading">
 			<div class="panel-title">
 				<h4>Epic Test Execution Report</h4>
@@ -21,7 +21,7 @@
 			<div id="epic-config">
 				<form action="/dashboard/${id}/update" method="post"
 					class="form-horizontal" role="form">
-					<div class="md-padding" ng-cloak>
+					<div class="md-padding" data-ng-cloack>
 						<table class="table table-bordered">
 							<tbody>
 								<!-- Project Row -->
@@ -96,8 +96,7 @@
 						</table>
 					</div>
 					<#if dashboard.owner == alias>
-					<button type="button" id="epic-add-gadget" class="btn btn-success">Add
-						Gadget To Database</button>
+					<button type="button" id="epic-add-gadget" class="btn btn-success">Update</button>
 					<button type="button" id="epic-get-data" class="btn btn-success">Draw
 						Table</button>
 					</#if>
@@ -108,7 +107,7 @@
 				<table id="epic-table" class="display">
 					<thead>
 						<tr>
-							<th>Title</th>
+							<th>Epic Link</th>
 							<th>SUMMARY</th>
 							<th>PRIORITY</th>
 							<th>UNEXECUTED</th>
@@ -122,7 +121,7 @@
 					</thead>
 					<tfoot>
 						<tr>
-							<th>Title</th>
+							<th>Epic Link</th>
 							<th>SUMMARY</th>
 							<th>PRIORITY</th>
 							<th>UNEXECUTED</th>
@@ -145,8 +144,8 @@
 	</div>
 </div>
 <div id="us-test-execution-div" class="col-md-12"
-	style="min-height: 20px;">
-	<div class="panel panel-info">
+	style="min-height: 20px; display:none;">
+	<div class="panel panel-primary">
 		<div class="panel-heading">
 			<div class="panel-title">
 				<h4>User Story Test Execution Report</h4>
@@ -158,7 +157,7 @@
 			</div>
 			<div id="us-config">
 				<form class="form-horizontal" role="form">
-					<div class="md-padding" ng-cloak>
+					<div class="md-padding" data-ng-cloack>
 						<table class="table table-bordered">
 							<tbody>
 								<!-- US Project Row -->
@@ -289,7 +288,7 @@
 				</form>
 			</div>
 			<br>
-			<div id="us-table-container" align="center"></div>
+			<div id="us-table-container" class="col-md-12" align="center" style="display: none"></div>
 			<div id="us-table-loader" class="col-md-12" style="display: none"
 				align="center">
 				<div class="loader"></div>
@@ -299,8 +298,8 @@
 	</div>
 </div>
 <div id="assignee-test-execution-div" class="col-md-12"
-	style="min-height: 20px;">
-	<div class="panel panel-info">
+	style="min-height: 20px; display:none;">
+	<div class="panel panel-primary">
 		<div class="panel-heading">
 			<div class="panel-title">
 				<h4>Assignee Test Execution Report</h4>
@@ -312,7 +311,7 @@
 			</div>
 			<div id="assignee-config">
 				<form class="form-horizontal" role="form">
-					<div class="md-padding" ng-cloak>
+					<div class="md-padding" data-ng-cloack>
 						<table class="table table-bordered">
 							<tbody>
 								<!-- Assignee Project Row -->
@@ -440,7 +439,7 @@
 			</div>
 			<br>
 			<!-- Assignee Table -->
-			<div id="assignee-table-container" align="center"></div>
+			<div id="assignee-table-container" class="col-md-12" align="center" style="display: none"></div>
 			<div id="assignee-table-loader" class="col-md-12"
 				style="display: none" align="center">
 				<div class="loader"></div>
@@ -451,8 +450,8 @@
 	</div>
 </div>
 <div id="cycle-test-execution-div" class="col-md-12"
-	style="min-height: 20px;">
-	<div class="panel panel-info">
+	style="min-height: 20px; display:none;">
+	<div class="panel panel-primary">
 		<div class="panel-heading">
 			<div class="panel-title">
 				<h4>Cycle Test Execution Report</h4>
@@ -464,7 +463,7 @@
 			</div>
 			<div id="cycle-config">
 				<form class="form-horizontal" role="form">
-					<div class="md-padding" ng-cloak>
+					<div class="md-padding" data-ng-cloack>
 						<table class="table table-bordered">
 							<tbody>
 								<!-- Cycle Project Row -->

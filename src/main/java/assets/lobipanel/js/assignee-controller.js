@@ -54,7 +54,11 @@ $("#assignee-update-btn").click(
     var options;
     var values;
     var jsonString;
-    if ($("#assigneeProject").val() == "" || $("#assigneeProject").val() == null || $("#assigneeRelease").val() == "" || $("#assigneeRelease").val() == null) {
+    if(null == $("#dashboardId").val()){
+  	  alert("No valid dashboard id provided.");
+  	  return;
+    }
+    else if ($("#assigneeProject").val() == "" || $("#assigneeProject").val() == null || $("#assigneeRelease").val() == "" || $("#assigneeRelease").val() == null) {
       $("#warning-message").val(
         "Please select project or release for this gadget.");
       $("dashboard-alert").fadeIn();
@@ -72,11 +76,13 @@ $("#assignee-update-btn").click(
       alert("No test metric selected");
       return;
     }
+    object['dashboardId'] = $("#dashboardId").val();
     options = $("#assigneeCycle option");
     values = $.map(options, function(option) {
       return option.value;
     });
-
+    
+    object['id'] = TEST_ASSIGNEE_ID;
     object['projectName'] = $("#assigneeProject").val();
     object['release'] = $("#assigneeRelease").val();
     object['products'] = [$("#assigneeProduct").val()];
@@ -95,7 +101,7 @@ $("#assignee-update-btn").click(
 
     jsonString = JSON.stringify(object);
     $.ajax({
-      url: '/gadget/addGadget',
+      url: SAVE_GADGET_URI,
       method: 'POST',
       data: {
         type: 'ASSIGNEE_TEST_EXECUTION',
@@ -122,7 +128,12 @@ $("#assignee-update-btn").click(
   });
 
 $("#assignee-draw-table-btn").click(function() {
-  callAjaxOnAssigneeTable();
+	if(TEST_US_ID != null){
+		drawAssigneeTable(TEST_ASSIGNEE_ID, $("#assigneeMetricMultiSelect").val());
+	}
+	else{
+		callAjaxOnAssigneeTable();
+	}
 });
 
 $("#assigneeCheckAll").click(function() {
@@ -136,6 +147,7 @@ $("#assigneeCheckAll").click(function() {
 $("#assigneeCheckAllCycle").click(function() {
   if ($(this).prop("checked")) {
     $("#assignee-cycle-available-div").fadeOut();
+    addAllCycle();
   } else {
     $("#assignee-cycle-available-div").fadeIn();
   }
@@ -224,7 +236,7 @@ function drawAssigneeTable(gadgetId, metricArray) {
                   cycleKey,
                   "#assignee-table-container");
                 $("#" + customTableId).append(
-                  templateHeaderFooter1);
+                  TEMPLATE_HEADER_FOOTER_1);
 
                 console
                   .log("Pass each function");
@@ -259,15 +271,30 @@ function drawAssigneeTable(gadgetId, metricArray) {
                     columns: [{
                       title: "Assignee"
                     }, {
-                      title: "UNEXECUTED"
+                      title: "UNEXECUTED",
+                      "render": function(data, displayOrType, rowData, setting) {
+                        return createIssueLinks(data, displayOrType, rowData, setting);
+                      }
                     }, {
-                      title: "FAILED"
+                      title: "FAILED",
+                      "render": function(data, displayOrType, rowData, setting) {
+                        return createIssueLinks(data, displayOrType, rowData, setting);
+                      }
                     }, {
-                      title: "WIP"
+                      title: "WIP",
+                      "render": function(data, displayOrType, rowData, setting) {
+                        return createIssueLinks(data, displayOrType, rowData, setting);
+                      }
                     }, {
-                      title: "BLOCKED"
+                      title: "BLOCKED",
+                      "render": function(data, displayOrType, rowData, setting) {
+                        return createIssueLinks(data, displayOrType, rowData, setting);
+                      }
                     }, {
-                      title: "PASSED"
+                      title: "PASSED",
+                      "render": function(data, displayOrType, rowData, setting) {
+                        return createIssueLinks(data, displayOrType, rowData, setting);
+                      }
                     }]
                   });
                 assigneeIndividualTable
@@ -283,7 +310,10 @@ function drawAssigneeTable(gadgetId, metricArray) {
 
 function callAjaxOnAssigneeTable() {
   $.ajax({
-    url: '/gadget/gadgets',
+	  url : GET_GADGETS_URI,
+		data: {
+			dashboardId: $("#dashboardId").val()
+		},
     success: function(gadgetList) {
       if (debugAjaxResponse(gadgetList)) {
         return;

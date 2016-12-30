@@ -19,7 +19,12 @@ $("#epic-add-gadget").click(
   });
 // When Epic gadget Draw table button is clicked
 $("#epic-get-data").click(function() {
-  callAjaxOnEpicTable();
+	if(TEST_EPIC_ID != null){
+		drawEpicTable(TEST_EPIC_ID, $("#epicMetricMultiSelect").val());
+	}
+	else{
+		callAjaxOnEpicTable();
+	}
 });
 // When epic gadget "select all" is clicked
 $("#epicCheckAll").click(function() {
@@ -32,7 +37,10 @@ $("#epicCheckAll").click(function() {
 // Send ajax to get a list of epic gadgets
 function callAjaxOnEpicTable() {
   $.ajax({
-    url: '/gadget/gadgets',
+    url: GET_GADGETS_URI,
+    data:{
+    	dashboardId: $("#dashboardId").val()
+    },
     beforeSend: function() {
       hideEpicTable();
     },
@@ -51,7 +59,12 @@ function callAjaxOnEpicTable() {
 }
 
 function createJsonStringObjectFromEpicInput() {
-  if ($("#epicProject").val() == null) {
+  var object = {};
+  if(null == $("#dashboardId").val()){
+	  alert("No valid dashboard id provided.");
+	  return;
+  }
+  else if ($("#epicProject").val() == null) {
     alert("No project selected");
     return;
   } else if ($("#epicRelease").val() == null) {
@@ -67,8 +80,8 @@ function createJsonStringObjectFromEpicInput() {
     alert("No test metric selected");
     return;
   }
-
-  var object = {};
+  object['id'] = TEST_EPIC_ID;
+  object['dashboardId'] = $("#dashboardId").val();
   object['projectName'] = $("#epicProject").val();
   object['release'] = $("#epicRelease").val();
   object['products'] = [$("#epicProduct").val()];
@@ -76,6 +89,7 @@ function createJsonStringObjectFromEpicInput() {
 
   if ($("#epicCheckAll").prop("checked")) {
     object['selectAll'] = true;
+    object['epic'] = null;
   } else {
     object['epic'] = $("#epicMultiSelect").val();
   }
@@ -85,7 +99,7 @@ function createJsonStringObjectFromEpicInput() {
 function callAjaxToUpdateGadget(jsonString) {
   if (jsonString != null && jsonString != "") {
     $.ajax({
-      url: '/gadget/addGadget',
+      url: SAVE_GADGET_URI,
       method: 'POST',
       data: {
         type: 'EPIC_US_TEST_EXECUTION',
@@ -164,6 +178,7 @@ function drawEpicGadget(gadgetList) {
         appendToSelect(true, gadgetList[i]["epic"], "#epicMultiSelect");
         $("#epicMultiSelect").val(gadgetList[i]["epic"]);
       }
+      console.log(gadgetList[i]["id"]);
       drawEpicTable(gadgetList[i]["id"], gadgetList[i]["metrics"]);
       break;
     }
@@ -172,9 +187,9 @@ function drawEpicGadget(gadgetList) {
 
 function drawEpicTable(gadgetId, metricArray) {
   var columnList = getColumnArray(metricArray, false);
-  if (globalEpicTable != null) {
-    console.log(globalEpicTable);
-    globalEpicTable.ajax.reload();
+  if (GLOBAL_EPIC_TABLE != null) {
+    console.log(GLOBAL_EPIC_TABLE);
+    GLOBAL_EPIC_TABLE.ajax.reload();
   } else {
     $.ajax({
       url: "/gadget/getData",
@@ -194,7 +209,7 @@ function drawEpicTable(gadgetId, metricArray) {
           alert("There is no available gadget");
           return;
         }
-        globalEpicTable = $('#epic-table').DataTable({
+        GLOBAL_EPIC_TABLE = $('#epic-table').DataTable({
           "fnDrawCallback": function(oSettings) {
             showEpicTable();
           },
@@ -224,24 +239,46 @@ function drawEpicTable(gadgetId, metricArray) {
           }, {
             "data": "key.summary"
           }, {
-            "data": "key.priority.name"
+            "data": "key.priority.name",
+            },
+          {
+            "data": "unexecuted",
+            "render": function(data, displayOrType, rowData, setting){
+            	return createIssueLinks(data, displayOrType, rowData, setting);
+            }
           }, {
-            "data": "unexecuted.total"
+            "data": "failed",
+            "render": function(data, displayOrType, rowData, setting){
+            	return createIssueLinks(data, displayOrType, rowData, setting);
+            }
           }, {
-            "data": "failed.total"
+            "data": "wip",
+            "render": function(data, displayOrType, rowData, setting){
+            	return createIssueLinks(data, displayOrType, rowData, setting);
+            }
           }, {
-            "data": "wip.total"
+            "data": "blocked",
+            "render": function(data, displayOrType, rowData, setting){
+            	return createIssueLinks(data, displayOrType, rowData, setting);
+            }
           }, {
-            "data": "blocked.total"
+            "data": "passed",
+            "render": function(data, displayOrType, rowData, setting){
+            	return createIssueLinks(data, displayOrType, rowData, setting);
+            }
           }, {
-            "data": "passed.total"
+            "data": "planned",
+            "render": function(data, displayOrType, rowData, setting){
+            	return createIssueLinks(data, displayOrType, rowData, setting);
+            }
           }, {
-            "data": "planned.total"
-          }, {
-            "data": "unplanned.total"
+            "data": "unplanned",
+            "render": function(data, displayOrType, rowData, setting){
+            	return createIssueLinks(data, displayOrType, rowData, setting);
+            }
           }]
         });
-        globalEpicTable.columns(columnList).visible(false);
+        GLOBAL_EPIC_TABLE.columns(columnList).visible(false);
       }
     }).done(function() {
       showEpicTable();
