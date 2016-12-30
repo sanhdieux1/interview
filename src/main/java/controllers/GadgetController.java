@@ -22,17 +22,17 @@ public class GadgetController {
         handler = new GadgetHandlerImpl();
     }
 
-    public Result addGadget(@Param("type") String type, @Param("data") String data, Context context) {
+    public Result insertOrUpdateGadget(@Param("type") String type, @Param("data") String data, Context context) {
         try{
-            return handler.addGadget(type, data, context);
+            return handler.insertOrUpdateGadget(type, data, context);
         } catch (APIException e){
             return handleException(e);
         }
     }
 
-    public Result getGadgets() {
+    public Result getGadgets(@Param("dashboardId") String id) {
         try{
-            return handler.getGadgets();
+            return handler.getGadgets(id);
         } catch (APIException e){
             return handleException(e);
         }

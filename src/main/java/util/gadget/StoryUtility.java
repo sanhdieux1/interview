@@ -111,7 +111,7 @@ public class StoryUtility {
         if(storyGadget.isSelectAllEpic() && storyGadget.isSelectAllStory()){
             String project = storyGadget.getProjectName();
             Release release = storyGadget.getRelease();
-            Set<APIIssueVO> epicIssues = EpicUtility.getInstance().getEpicLinks(project, release.toString(), storyGadget.getProducts());
+            List<APIIssueVO> epicIssues = EpicUtility.getInstance().getEpicLinks(project, release.toString(), storyGadget.getProducts());
             Set<String> epics = epicIssues.stream().map(e -> e.getKey()).collect(Collectors.toSet());
             epicWrapperMap = findStoryInEpic(new ArrayList<String>(epics));
         } else if(storyGadget.isSelectAllStory()){
@@ -153,6 +153,8 @@ public class StoryUtility {
                 data.setKey(wapper.getIssue());
                 storyDatas.add(data);
             }
+            GadgetUtility.getInstance().sortData(storyDatas);
+            
             GadgetDataWapper dataWrapper = new GadgetDataWapper();
             dataWrapper.setIssueData(storyDatas);
             dataWrapper.setSummary(storyWapper.getIssue().getFields().getSummary());

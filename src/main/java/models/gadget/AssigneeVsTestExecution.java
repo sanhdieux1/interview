@@ -7,11 +7,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import models.main.Release;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class AssigneeVsTestExecution implements Gadget {
+public class AssigneeVsTestExecution extends GadgetAPI {
     private final Gadget.Type type = Gadget.Type.ASSIGNEE_TEST_EXECUTION;
-
-    private String user;
-    private String id;
     private String projectName;
     private boolean selectAllTestCycle;
     private Set<String> cycles;
@@ -89,4 +86,13 @@ public class AssigneeVsTestExecution implements Gadget {
         this.release = release;
     }
 
+    @Override
+    public String getDashboardId() {
+        return dashboardId;
+    }
+    
+    public void setDashboardId(String id) {
+        dashboardId = id;
+    }
+    
 }

@@ -4,12 +4,13 @@ import java.util.List;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 import models.main.Release;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class StoryVsTestExecution implements Gadget {
-    private String id;
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class StoryVsTestExecution extends GadgetAPI {
     private Type type = Type.STORY_TEST_EXECUTION;
     private String projectName;
     private Release release; // fixVersion
@@ -18,7 +19,6 @@ public class StoryVsTestExecution implements Gadget {
     private Set<String> stories;
     private boolean selectAllStory;
     private boolean selectAllEpic;
-    private String user;
     private Set<String> products;
 
     public boolean isSelectAllEpic() {
@@ -111,5 +111,12 @@ public class StoryVsTestExecution implements Gadget {
     public void setSelectAllStory(boolean selectAll) {
         this.selectAllStory = selectAll;
     }
-
+    
+    @Override
+    public String getDashboardId() {
+        return dashboardId;
+    }
+    public void setDashboardId(String id) {
+        dashboardId = id;
+    }
 }

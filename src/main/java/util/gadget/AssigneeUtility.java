@@ -1,6 +1,7 @@
 package util.gadget;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -76,6 +77,9 @@ public class AssigneeUtility {
                             gadgetDatas.add(gadgetData);
                         }
                     }
+                    //sorting
+                    GadgetUtility.getInstance().sortData(gadgetDatas);
+                    
                     GadgetDataWapper gadgetDataWrapper = new GadgetDataWapper();
                     gadgetDataWrapper.setIssueData(gadgetDatas);
                     returnData.put(cycle, gadgetDataWrapper);

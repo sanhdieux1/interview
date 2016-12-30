@@ -50,6 +50,7 @@ public class CycleUtility {
         } else{
             logger.fastDebug("No Test Cycle in gadget %s", cycleGadget.getId());
         }
+        GadgetUtility.getInstance().sortData(returnData);
         return returnData;
     }
 }

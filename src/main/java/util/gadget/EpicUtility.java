@@ -50,7 +50,7 @@ public class EpicUtility {
 
     public List<GadgetData> getDataEPic(EpicVsTestExecution epicGadget) throws APIException {
         List<GadgetData> result = new ArrayList<>();
-        Set<APIIssueVO> epicLinks = null;
+        List<APIIssueVO> epicLinks = null;
 
         if(epicGadget.isSelectAll()){
             epicLinks = getEpicLinks(epicGadget.getProjectName(), epicGadget.getRelease().toString(), epicGadget.getProducts());
@@ -67,7 +67,7 @@ public class EpicUtility {
                     apiIssue.setPriority(jqlIssue.getFields().getPriority());
                     return apiIssue;
                 }
-            }).collect(Collectors.toSet());
+            }).collect(Collectors.toList());
         }
         if(epicLinks == null){
             return result;
@@ -79,7 +79,7 @@ public class EpicUtility {
             gadgetData.increasePlanned(executionIssues.getPlanned());
             result.add(gadgetData);
         }
-
+        GadgetUtility.getInstance().sortData(result);
         return result;
     }
 
@@ -202,8 +202,8 @@ public class EpicUtility {
         return testIssues;
     }
 
-    public Set<APIIssueVO> getEpicLinks(String project, String release, Set<String> products) throws APIException {
-        Set<APIIssueVO> result = null;
+    public List<APIIssueVO> getEpicLinks(String project, String release, Set<String> products) throws APIException {
+        List<APIIssueVO> result = null;
         logger.fasttrace("getEpicLinks(%s,%s)", project, release);
         if(project == null){
             throw new APIException("project param cannot be null");
@@ -248,10 +248,11 @@ public class EpicUtility {
                     apiIssue.setPriority(jQLIssue.getFields().getPriority());
                     return apiIssue;
                 }
-            }).collect(Collectors.toSet());
+            }).collect(Collectors.toList());
         } else{
             throw new APIException(data);
         }
+        GadgetUtility.getInstance().sortIssue(result);
         return result;
     }
 

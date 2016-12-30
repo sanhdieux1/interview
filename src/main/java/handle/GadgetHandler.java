@@ -8,9 +8,9 @@ import ninja.Result;
 
 public abstract class GadgetHandler extends Handler {
 
-    public abstract Result addGadget(String type, String data, Context context) throws APIException;
+    public abstract Result insertOrUpdateGadget(String type, String data, Context context) throws APIException;
 
-    public abstract Result getGadgets() throws APIException;
+    public abstract Result getGadgets(String id) throws APIException;
 
     public abstract Result getDataGadget(String id) throws APIException;
 

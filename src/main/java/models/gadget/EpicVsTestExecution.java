@@ -8,10 +8,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import models.main.Release;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class EpicVsTestExecution implements Gadget {
+public class EpicVsTestExecution extends GadgetAPI {
     private boolean selectAll;
-    private String user;
-    private String id;
     private Gadget.Type type = Gadget.Type.EPIC_US_TEST_EXECUTION;
     private String projectName;
     // fixVersion
@@ -93,4 +91,11 @@ public class EpicVsTestExecution implements Gadget {
         this.selectAll = selectAll;
     }
 
+    @Override
+    public String getDashboardId() {
+        return dashboardId;
+    }
+    public void setDashboardId(String id) {
+        dashboardId = id;
+    }
 }

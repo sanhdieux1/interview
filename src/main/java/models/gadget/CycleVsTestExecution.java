@@ -8,15 +8,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import models.main.Release;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class CycleVsTestExecution implements Gadget {
+public class CycleVsTestExecution extends GadgetAPI {
     private Type type = Type.TEST_CYCLE_TEST_EXECUTION;
-    private String id;
     @JsonProperty(required = true)
     private String projectName;
     private Set<String> metrics;
     private Set<String> cycles;
     private Release release; // fixVersion
-    private String user;
     private boolean selectAllCycle;
     private Set<String> products;
 
@@ -93,6 +91,14 @@ public class CycleVsTestExecution implements Gadget {
 
     public void setRelease(Release release) {
         this.release = release;
+    }
+
+    @Override
+    public String getDashboardId() {
+        return dashboardId;
+    }
+    public void setDashboardId(String id) {
+        dashboardId = id;
     }
 
 }

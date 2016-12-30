@@ -1,5 +1,6 @@
 package handle;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,7 +10,6 @@ import java.util.stream.Collectors;
 
 import manament.log.LoggerWapper;
 import models.JQLIssueWapper;
-import models.UserVO;
 import models.exception.APIException;
 import models.gadget.AssigneeVsTestExecution;
 import models.gadget.CycleVsTestExecution;
@@ -27,13 +27,13 @@ import util.gadget.GadgetUtility;
 
 public class GadgetHandlerImpl extends GadgetHandler {
     final static LoggerWapper logger = LoggerWapper.getLogger(GadgetHandlerImpl.class);
-    
+
     public GadgetHandlerImpl() {
         gadgetService = GadgetUtility.getInstance();
     }
 
     @Override
-    public Result addGadget(String type, String data, Context context) throws APIException {
+    public Result insertOrUpdateGadget(String type, String data, Context context) throws APIException {
         Gadget gadget = null;
         Type gadgetType = Gadget.Type.valueOf(type);
         if(gadgetType == null){
@@ -43,44 +43,82 @@ public class GadgetHandlerImpl extends GadgetHandler {
             throw new APIException("data cannot be null");
         }
         String username = (String) context.getAttribute("username");
-        String friendlyname = (String) context.getAttribute("alias");
-        UserVO userVO = userService.find(username, friendlyname);
-
+        // String friendlyname = (String) context.getAttribute("alias");
+        List<String> errorMessages = new ArrayList<>();
         if(Gadget.Type.EPIC_US_TEST_EXECUTION.equals(gadgetType)){
             EpicVsTestExecution epicGadget = JSONUtil.getInstance().convertJSONtoObject(data, EpicVsTestExecution.class);
-            epicGadget.setUser(userVO.getUsername());
+            epicGadget.setUser(username);
+            if(epicGadget.getEpic() == null || epicGadget.getEpic().isEmpty()){
+                errorMessages.add("Epic link");
+            }
             gadget = epicGadget;
         } else if(Gadget.Type.ASSIGNEE_TEST_EXECUTION.equals(gadgetType)){
             AssigneeVsTestExecution assigneeGadget = JSONUtil.getInstance().convertJSONtoObject(data, AssigneeVsTestExecution.class);
-            assigneeGadget.setUser(userVO.getUsername());
+            assigneeGadget.setUser(username);
+            if(!assigneeGadget.isSelectAllTestCycle() && (assigneeGadget.getCycles() == null || assigneeGadget.getCycles().isEmpty())){
+                errorMessages.add("Cycle name");
+            }
             gadget = assigneeGadget;
         } else if(Gadget.Type.TEST_CYCLE_TEST_EXECUTION.equals(gadgetType)){
             CycleVsTestExecution cycleGadget = JSONUtil.getInstance().convertJSONtoObject(data, CycleVsTestExecution.class);
-            cycleGadget.setUser(userVO.getUsername());
+            cycleGadget.setUser(username);
+            if(!cycleGadget.isSelectAllCycle() && (cycleGadget.getCycles() == null || cycleGadget.getCycles().isEmpty())){
+                errorMessages.add("Cycle name");
+            }
             gadget = cycleGadget;
         } else if(Gadget.Type.STORY_TEST_EXECUTION.equals(gadgetType)){
             StoryVsTestExecution storyGadget = JSONUtil.getInstance().convertJSONtoObject(data, StoryVsTestExecution.class);
-            storyGadget.setUser(userVO.getUsername());
+            storyGadget.setUser(username);
+            if(!storyGadget.isSelectAllStory() && (storyGadget.getStories() == null || storyGadget.getStories().isEmpty())){
+                errorMessages.add("Story");
+            }
+            if(!storyGadget.isSelectAllEpic() && (storyGadget.getEpic() == null || storyGadget.getEpic().isEmpty())){
+                errorMessages.add("Epic");
+            }
             gadget = storyGadget;
         }
         if(gadget != null){
-            gadgetService.insertOrUpdate(gadget);
+
+            if(gadget.getDashboardId() == null){
+                errorMessages.add("dashboardId cannot be null");
+            }
+            if(gadget.getProducts() == null || gadget.getProducts().isEmpty()){
+                errorMessages.add("Products");
+            }
+            if(gadget.getProjectName() == null || gadget.getProjectName().isEmpty()){
+                errorMessages.add("Project");
+            }
+            if(gadget.getRelease() == null){
+                errorMessages.add("Release");
+            }
+            if(errorMessages.isEmpty()){
+                gadgetService.insertOrUpdate(gadget);
+            } else{
+                StringBuffer error = new StringBuffer();
+                errorMessages.forEach(e -> error.append(e).append(", "));
+                error.append("cannot be null");
+                throw new APIException(error.toString());
+            }
         } else{
-            throw new APIException("can not map to Epic gadget");
+            throw new APIException("can not map to any Epic gadget");
         }
 
         return Results.json().render("message", "successful");
     }
 
     @Override
-    public Result getGadgets() throws APIException {
-        List<Gadget> gadgets = gadgetService.getAll();
+    public Result getGadgets(String id) throws APIException {
+        List<Gadget> gadgets = new ArrayList<>();
+        if(gadgets != null){
+            gadgets.addAll(gadgetService.findByDashboardId(id));
+        }
         return Results.json().render(gadgets);
     }
 
     @Override
     public Result getDataGadget(String id) throws APIException {
-        Map<String, GadgetDataWapper> gadgetsData = new HashMap<>();;
+        Map<String, GadgetDataWapper> gadgetsData = new HashMap<>();
+        ;
         Gadget gadget = gadgetService.get(id);
         if(gadget != null){
             if(Gadget.Type.EPIC_US_TEST_EXECUTION.equals(gadget.getType())){
@@ -104,13 +142,13 @@ public class GadgetHandlerImpl extends GadgetHandler {
                 StoryVsTestExecution storyGadget = (StoryVsTestExecution) gadget;
                 gadgetsData = storyService.getDataStory(storyGadget);
             }
-        }else {
+        } else{
             throw new APIException(String.format("gadget id=%s not found", id));
         }
         Result result = Results.json();
         result.render("type", "success");
         result.render("data", gadgetsData);
-        
+
         return result;
     }
 
@@ -121,11 +159,11 @@ public class GadgetHandlerImpl extends GadgetHandler {
         storiesIssues.forEach(new BiConsumer<String, JQLIssueWapper>() {
             @Override
             public void accept(String epic, JQLIssueWapper storiesIssue) {
-                //Filter issueKey
+                // Filter issueKey
                 storiesInEpic.put(epic, storiesIssue.getChild().stream().map(i -> i.getKey()).collect(Collectors.toSet()));
             }
         });
-        
+
         return Results.json().render(storiesInEpic);
     }
 
@@ -133,6 +171,5 @@ public class GadgetHandlerImpl extends GadgetHandler {
     public Result getProjectList() throws APIException {
         return Results.json().render(gadgetService.getProjectList());
     }
-    
-   
+
 }
