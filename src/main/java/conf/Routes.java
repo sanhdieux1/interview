@@ -7,6 +7,7 @@ import controllers.DashboardController;
 import controllers.EpicController;
 import controllers.GadgetController;
 import controllers.LoginLogoutController;
+import controllers.ProductController;
 import ninja.AssetsController;
 import ninja.Router;
 import ninja.application.ApplicationRoutes;
@@ -20,6 +21,9 @@ public class Routes implements ApplicationRoutes {
     	router.GET().route("/gadget/gadgets").with(GadgetController.class, "getGadgets");
     	router.GET().route("/gadget/getStoryInEpic").with(GadgetController.class,"getStoryInEpic");
     	router.GET().route("/findExecutionIssues").with(EpicController.class,"findExecutionIssues");
+    	
+    	router.POST().route("/product/insert").with(ProductController.class,"addProduct");
+    	router.GET().route("/product").with(ProductController.class,"productPage");
     	
     	router.GET().route("/findAllIssues").with(EpicController.class,"findAllIssues");
     	router.GET().route("/getEpicLinks").with(EpicController.class,"getEpicLinks");

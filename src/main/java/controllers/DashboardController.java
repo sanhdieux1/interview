@@ -57,7 +57,7 @@ public class DashboardController {
 
 	final static Logger logger = Logger.getLogger(DashboardController.class);
 
-//	@FilterWith(SecureFilter.class)
+	@FilterWith(SecureFilter.class)
 	public Result dashboard(@SessionParam("username") String username, @PathParam("id") Integer id) {
 		if (id == null) {
 			id = 1;
@@ -118,12 +118,12 @@ public class DashboardController {
 		return Results.html().render("dashboards", dashboards).render("id", id);
 	}
 
-//	@FilterWith(SecureFilter.class)
+	@FilterWith(SecureFilter.class)
 	public Result new_dashboard() {
 		return Results.html();
 	}
 
-//	@FilterWith(SecureFilter.class)
+	@FilterWith(SecureFilter.class)
 	public Result new_dashboard_post(@SessionParam("username") String username, @Param("name") String name,
 			@Param("share") String share) {
 
@@ -140,12 +140,12 @@ public class DashboardController {
 		return Results.redirect("../dashboard/" + max_id);
 	}
 
-//	@FilterWith(SecureFilter.class)
+	@FilterWith(SecureFilter.class)
 	public Result find_dashboard() {
 		return Results.html();
 	}
 
-//	@FilterWith(SecureFilter.class)
+	@FilterWith(SecureFilter.class)
 	public Result find_dashboard_post(@Param("name") String name) {
 		MongoClient mongoClient = new MongoClient();
 		MongoCollection<Document> collection = mongoClient.getDatabase("Interview").getCollection("Sonar_Metric");
@@ -203,7 +203,7 @@ public class DashboardController {
 		return Results.html().render("name", name).render("dashboards", dashboards);
 	}
 
-//	@FilterWith(SecureFilter.class)
+	@FilterWith(SecureFilter.class)
 	public Result show_dashboard(@SessionParam("username") String username, @SessionParam("alias") String alias,
 			@SessionParam("role") String role, @PathParam("id") Long id, Context context) {
 		MongoClient mongoClient = new MongoClient();
