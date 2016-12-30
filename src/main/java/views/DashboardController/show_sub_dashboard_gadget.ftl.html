@@ -46,7 +46,7 @@
 								<!-- Product Row -->
 								<tr>
 									<td class="col-md-6"><label>Product</label></td>
-									<td class="col-md-6"><select multiple id="epicProduct"
+									<td class="col-md-6"><select id="epicProduct"
 										class="form-control">
 											<option selected disabled>-Select Product-</option>
 											<option value="ANV">ANV</option>
@@ -81,6 +81,8 @@
 									<td class="col-md-6"><label>Metrics</label></td>
 									<td class="col-md-6"><select multiple class="form-control"
 										id="epicMetricMultiSelect">
+											<option value="SUMMARY">SUMMARY</option>
+											<option value=PRIORITY>PRIORITY</option>
 											<option value="UNEXECUTED">UNEXECUTED</option>
 											<option value="FAILED">FAILED</option>
 											<option value="WIP">WIP</option>
@@ -102,12 +104,14 @@
 				</form>
 			</div>
 			<br>
-			<div id="epic-table-container" class="col-md-12" align="center">
+			<div id="epic-table-container" class="col-md-12" align="center"  style="display: none">
 				<table id="epic-table" class="display">
 					<thead>
 						<tr>
 							<th>Title</th>
-							<th class="column-executed">UNEXECUTED</th>
+							<th>SUMMARY</th>
+							<th>PRIORITY</th>
+							<th>UNEXECUTED</th>
 							<th>FAILED</th>
 							<th>WIP</th>
 							<th>BLOCKED</th>
@@ -119,6 +123,8 @@
 					<tfoot>
 						<tr>
 							<th>Title</th>
+							<th>SUMMARY</th>
+							<th>PRIORITY</th>
 							<th>UNEXECUTED</th>
 							<th>FAILED</th>
 							<th>WIP</th>
@@ -177,7 +183,7 @@
 								<!-- Product Row -->
 								<tr>
 									<td class="col-md-6"><label>Product</label></td>
-									<td class="col-md-6"><select multiple id="usProduct"
+									<td class="col-md-6"><select id="usProduct"
 										class="form-control">
 											<option selected disabled>-Select Product-</option>
 											<option value="ANV">ANV</option>
@@ -191,43 +197,47 @@
 								<tr>
 									<td class="col-md-6"><label>Epic Link</label></td>
 									<td class="col-md-6">
-										<div id="us-epic-loader" align="center" style="display: none;">
-											<div class="loader"></div>
-										</div>
-										<div id="us-epic-available-div">
-											<label>Available</label> <select class="form-control"
-												multiple id="usEpicAvailable">
-											</select>
-											<div align="center" style="padding-top: 20px;">
-												<button id="us-add-epic-btn" style="width: 35px;"
-													class="btn btn-primary btn-sm">
-													<i style="font-size: 20px" class="fa fa-angle-down"></i>
-												</button>
-
-												<button id="us-remove-epic-btn" style="width: 35px;"
-													class="btn btn-primary btn-sm">
-													<i style="font-size: 20px" class="fa fa-angle-up"></i>
-												</button>
-
-												<button id="us-add-all-epic-btn" style="width: 35px;"
-													class="btn btn-primary btn-sm">
-													<i style="font-size: 20px" class="fa fa-angle-double-down"></i>
-												</button>
-
-												<button id="us-remove-all-epic-btn" style="width: 35px;"
-													class="btn btn-primary btn-sm">
-													<i style="font-size: 20px" class="fa fa-angle-double-up"></i>
-												</button>
-
+										<div id="us-epic-container">
+											<div id="us-epic-loader" align="center"
+												style="display: none;">
+												<div class="loader"></div>
 											</div>
-											<label>To be fetched</label> <select class="form-control"
-												multiple id="usEpic">
-											</select>
+											<div id="us-epic-available-div">
+												<label>Available</label> <select class="form-control"
+													multiple id="usEpicAvailable">
+												</select>
+												<div align="center" style="padding-top: 20px;">
+													<button id="us-add-epic-btn" style="width: 35px;"
+														class="btn btn-primary btn-sm">
+														<i style="font-size: 20px" class="fa fa-angle-down"></i>
+													</button>
+
+													<button id="us-remove-epic-btn" style="width: 35px;"
+														class="btn btn-primary btn-sm">
+														<i style="font-size: 20px" class="fa fa-angle-up"></i>
+													</button>
+
+													<button id="us-add-all-epic-btn" style="width: 35px;"
+														class="btn btn-primary btn-sm">
+														<i style="font-size: 20px" class="fa fa-angle-double-down"></i>
+													</button>
+
+													<button id="us-remove-all-epic-btn" style="width: 35px;"
+														class="btn btn-primary btn-sm">
+														<i style="font-size: 20px" class="fa fa-angle-double-up"></i>
+													</button>
+
+												</div>
+												<label>To be fetched</label> <select class="form-control"
+													multiple id="usEpic">
+												</select>
+											</div>
 										</div>
 										<div class="col-md-12" align="center"
 											style="padding-top: 10px;">
 											<label><input type="checkbox" id="usCheckAllEpic">Select
 												All</label>
+
 										</div>
 									</td>
 								</tr>
@@ -240,7 +250,7 @@
 											<select multiple class="form-control" id="usMultiSelect">
 											</select>
 
-											<div id="us-us-loader" style="display: none">
+											<div id="us-us-loader" align="center" style="display: none">
 												<div class="loader"></div>
 											</div>
 										</div>
@@ -257,6 +267,8 @@
 									<td class="col-md-6"><label>Metrics</label></td>
 									<td class="col-md-6"><select multiple class="form-control"
 										id="usMetricMultiSelect">
+											<option value="SUMMARY">SUMMARY</option>
+											<option value=PRIORITY>PRIORITY</option>
 											<option value="UNEXECUTED">UNEXECUTED</option>
 											<option value="FAILED">FAILED</option>
 											<option value="WIP">WIP</option>
@@ -327,7 +339,7 @@
 								<tr>
 									<td class="col-md-6"><label>Product</label></td>
 
-									<td class="col-md-6"><select multiple class="form-control"
+									<td class="col-md-6"><select class="form-control"
 										id="assigneeProduct">
 											<option selected disabled>-Select Product-</option>
 											<option value="ANV">ANV</option>
@@ -341,7 +353,7 @@
 								<tr>
 									<td class="col-md-6"><label>Test Cycle</label></td>
 									<td class="col-md-6">
-										<div id="assignee-cycle-loader" class="col-md-12"
+										<div id="assignee-cycle-loader" align="center" class="col-md-12"
 											style="display: none" align="center">
 											<div class="loader"></div>
 										</div>
@@ -478,7 +490,7 @@
 								<!-- Cycle Product Row -->
 								<tr>
 									<td class="col-md-6"><label>Product</label></td>
-									<td class="col-md-6"><select multiple class="form-control"
+									<td class="col-md-6"><select class="form-control"
 										id="cycleProduct">
 											<option selected disabled>-Select Product-</option>
 											<option value="ANV">ANV</option>
@@ -494,7 +506,7 @@
 									<td class="col-md-6"><label>Cycle</label></td>
 									<td class="col-md-6">
 										<div id="cycle-container">
-											<div id="cycle-loader" style="display: none;">
+											<div id="cycle-loader" align="center" style="display: none;">
 												<div class="loader"></div>
 											</div>
 											<select multiple class="form-control" id="cycleMultiSelect">
@@ -530,8 +542,8 @@
 					</#if>
 				</form>
 			</div>
-			<div id="cycle-table-container" align="center" class="col-md-12">
-				<table id="cycle-table">
+			<div id="cycle-table-container" align="center" class="col-md-12" style="display: none">
+				<table id="cycle-table" >
 					<thead>
 						<tr>
 							<th>Cycle</th>
