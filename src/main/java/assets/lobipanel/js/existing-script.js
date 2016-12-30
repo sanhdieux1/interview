@@ -75,11 +75,17 @@
             // if panels are closed
             if (getCookie("sonar") == "close" || getCookie("sonar") == "") {
             	$('.panel-info').lobiPanel('close');
+            	if(null == document.getElementById("sonar-btn")){
+            		return;
+            	}
             	document.getElementById("sonar-btn").disabled = false;
             }
 
             if (getCookie("review") == "close" || getCookie("review") == "") {
             	$('.panel-danger').lobiPanel('close');
+            	if(null == document.getElementById("review-btn")){
+            		return;
+            	}
             	document.getElementById("review-btn").disabled = false;
             }
 
