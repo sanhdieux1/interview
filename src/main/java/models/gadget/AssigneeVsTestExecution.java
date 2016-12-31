@@ -1,21 +1,21 @@
 package models.gadget;
 
+import java.util.List;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 import models.main.Release;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class AssigneeVsTestExecution extends GadgetAPI {
     private final Gadget.Type type = Gadget.Type.ASSIGNEE_TEST_EXECUTION;
     private String projectName;
     private boolean selectAllTestCycle;
     private Set<String> cycles;
-    private Set<String> metrics;
-    private Release release; // fixVersion
-    private Set<String> products;
-
+    
     @Override
     public String getId() {
         return id;
@@ -70,11 +70,11 @@ public class AssigneeVsTestExecution extends GadgetAPI {
         this.cycles = cycles;
     }
 
-    public Set<String> getMetrics() {
+    public List<String> getMetrics() {
         return metrics;
     }
 
-    public void setMetrics(Set<String> metrics) {
+    public void setMetrics(List<String> metrics) {
         this.metrics = metrics;
     }
 

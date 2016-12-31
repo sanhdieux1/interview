@@ -3,20 +3,20 @@ package models.gadget;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import models.main.Release;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class CycleVsTestExecution extends GadgetAPI {
     private Type type = Type.TEST_CYCLE_TEST_EXECUTION;
     @JsonProperty(required = true)
     private String projectName;
     private Set<String> metrics;
     private Set<String> cycles;
-    private Release release; // fixVersion
     private boolean selectAllCycle;
-    private Set<String> products;
 
     @Override
     public String getId() {

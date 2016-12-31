@@ -28,7 +28,7 @@ public class ExecutorManagement {
         return INSTANCE;
     }
 
-    public synchronized <T> List<Future<T>> invokeTask(List<? extends Callable<T>> tasks) throws APIException {
+    public <T> List<Future<T>> invokeTask(List<? extends Callable<T>> tasks) throws APIException {
         try{
             return executor.invokeAll(tasks);
         } catch (InterruptedException e){

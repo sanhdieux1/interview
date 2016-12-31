@@ -18,6 +18,7 @@ public interface Gadget {
     public Release getRelease();
     
     public String getProjectName();
+    
     public enum Type {
         ASSIGNEE_TEST_EXECUTION, TEST_CYCLE_TEST_EXECUTION, EPIC_US_TEST_EXECUTION, STORY_TEST_EXECUTION;
     }

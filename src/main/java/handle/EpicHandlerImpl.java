@@ -23,15 +23,5 @@ public class EpicHandlerImpl extends EpicHandler {
         Set<String> result = epicService.getEpicLinks(project, release, productsSet).stream().map(e -> e.getKey()).collect(Collectors.toSet());
         return Results.json().render(result);
     }
-
-    @Override
-    public Result findAllIssues(String epic) throws APIException {
-        return Results.json().render(epicService.findAllIssuesInEpicLink(epic));
-    }
-
-    @Override
-    public Result findExecutionIsuee(String issueKey) throws APIException {
-        return Results.json().render(epicService.findTestExecutionInIsuee(issueKey));
-    }
-
+    
 }

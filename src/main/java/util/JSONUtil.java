@@ -31,7 +31,7 @@ public class JSONUtil {
         try{
             listObject = mapper.readValue(json, mapper.getTypeFactory().constructCollectionType(List.class, t));
         } catch (IOException e){
-            logger.fasttrace("cannot parse json: %s", e, json);
+            logger.fastDebug("cannot parse json: %s", e, json);
             throw new APIException("cannot parse json", e);
         }
         return listObject;
@@ -83,25 +83,9 @@ public class JSONUtil {
 
             result = mapper.readValue(json, type);
         } catch (IOException e){
-            logger.fasttrace("cannot parse json: %s", e, json);
+            logger.fastDebug("cannot parse json: %s", e, json);
             throw new APIException("cannot parse json", e);
         }
         return result;
-    }
-
-    public static void main(String[] args) {
-        String str = "{\"errorMessages2\":\"An issue with key 'FNMS-5' does not exist for field 'issue'.\",\"errors\":{}}";
-        try{
-            JSONUtil.getInstance().convertJSONtoObject(str, CycleVsTestExecution.class);
-        } catch (APIException e){
-            System.out.println(e.getMessage());
-            e.printStackTrace();
-
-        }
-
-        CycleVsTestExecution cyc = new CycleVsTestExecution();
-        cyc.setId("id-12445");
-        cyc.setUser("abc");
-        // mapper.t
     }
 }

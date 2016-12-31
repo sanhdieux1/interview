@@ -13,13 +13,10 @@ import models.main.Release;
 public class StoryVsTestExecution extends GadgetAPI {
     private Type type = Type.STORY_TEST_EXECUTION;
     private String projectName;
-    private Release release; // fixVersion
-    private List<String> metrics;
     private Set<String> epic;
     private Set<String> stories;
     private boolean selectAllStory;
     private boolean selectAllEpic;
-    private Set<String> products;
 
     public boolean isSelectAllEpic() {
         return selectAllEpic;

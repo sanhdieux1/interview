@@ -17,6 +17,7 @@ import ninja.Result;
 import ninja.Results;
 import ninja.params.Param;
 import ninja.session.Session;
+import service.HTTPClientUtil;
 import service.RESTService;
 import service.RESTServiceImpl;
 import util.Constant;
@@ -39,9 +40,9 @@ public class LoginLogoutController {
         boolean isUserNameAndPasswordValid = util.isUserAndPasswordValid(username, password);
 
         if (isUserNameAndPasswordValid) {
+            HTTPClientUtil.getInstance().loginGreenhopper(username, password);
         	Session session = context.getSession();
     		session.put("username", username);
-    		
     		Document doc = util.getConnection(String.format(Constant.LINK_GET_JIRA_USER_INFO, username), Constant.TOKEN);
     		if (doc != null) {
     			String json = doc.body().text();

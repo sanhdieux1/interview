@@ -11,10 +11,10 @@ import handle.AssigneeHandler;
 import handle.AssigneeHandlerImpl;
 import manament.log.LoggerWapper;
 import models.exception.APIException;
+import models.exception.APIExceptionUtil;
 import models.main.Release;
 import ninja.FilterWith;
 import ninja.Result;
-import ninja.Results;
 import ninja.params.Param;
 import util.JSONUtil;
 
@@ -33,7 +33,7 @@ public class AssigneeController {
         try{
             return handler.getAssigneeList(projectName, Release.fromString(release));
         } catch (APIException e){
-            return handleException(e);
+            return APIExceptionUtil.convert(e);
         }
     }
 
@@ -46,14 +46,8 @@ public class AssigneeController {
             }
             return handler.getListCycleName(projectName, Release.fromString(release), products);
         } catch (APIException e){
-            return handleException(e);
+            return APIExceptionUtil.convert(e);
         }
     }
 
-    public Result handleException(APIException e) {
-        Result result = Results.json();
-        result.render("type", "error");
-        result.render("data", e.getMessage());
-        return result;
-    }
 }

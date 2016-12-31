@@ -9,9 +9,9 @@ import handle.EpicHandler;
 import handle.EpicHandlerImpl;
 import manament.log.LoggerWapper;
 import models.exception.APIException;
+import models.exception.APIExceptionUtil;
 import ninja.FilterWith;
 import ninja.Result;
-import ninja.Results;
 import ninja.params.Param;
 import util.JSONUtil;
 
@@ -30,30 +30,8 @@ public class EpicController {
             List<String> products = JSONUtil.getInstance().convertJSONtoListObject(productArrays, String.class);
             return handler.getEpicLinks(project, release, products);
         } catch (APIException e){
-            return handleException(e);
-        }
-    }
-
-    public Result findAllIssues(@Param("epic") String epic) {
-        try{
-            return handler.findAllIssues(epic);
-        } catch (APIException e){
-            return handleException(e);
-        }
-    }
-
-    public Result findExecutionIssues(@Param("issueKey") String issueKey) {
-        try{
-            return handler.findExecutionIsuee(issueKey);
-        } catch (APIException e){
-            return handleException(e);
+            return APIExceptionUtil.convert(e);
         }
     }
     
-    public Result handleException(APIException e){
-        Result result = Results.json();
-        result.render("type", "error");
-        result.render("data", e.getMessage());
-        return result;
-    }
 }

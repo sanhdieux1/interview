@@ -8,26 +8,34 @@ import org.bson.Document;
 
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
+import com.mongodb.client.result.DeleteResult;
 
 import service.DatabaseUtility;
 
-public class ProductUtility extends DatabaseUtility{
+public class ProductUtility extends DatabaseUtility {
     private static final String PRODUCT_COLLECTION = "Product";
     private static final String NAME = "name";
     private static ProductUtility INSTANCE = new ProductUtility();
     private MongoCollection<Document> collection;
-    
+
     private ProductUtility() {
         collection = db.getCollection(PRODUCT_COLLECTION);
     }
+
     public static ProductUtility getInstance() {
         return INSTANCE;
     }
-    public void insert(String product){
-        Document document = new Document(NAME,product);
+
+    public boolean insert(String product) {
+        if(getAll().contains(product)){
+            return false;
+        }
+        Document document = new Document(NAME, product);
         collection.insertOne(document);
+        return true;
     }
-    public Set<String> getAll(){
+
+    public Set<String> getAll() {
         Set<String> products = new HashSet<>();
         FindIterable<Document> documents = collection.find();
         documents.forEach(new Consumer<Document>() {
@@ -38,11 +46,13 @@ public class ProductUtility extends DatabaseUtility{
         });
         return products;
     }
-    
-    public void delete(String product){
-        Document document = new Document(NAME,product);
-        collection.deleteOne(document);
+
+    public long delete(String product) {
+        Document document = new Document(NAME, product);
+        DeleteResult result = collection.deleteOne(document);
+        return result.getDeletedCount();
     }
+
     public static void main(String[] args) {
         ProductUtility.INSTANCE.insert("ANV");
         System.out.println(ProductUtility.INSTANCE.getAll());
