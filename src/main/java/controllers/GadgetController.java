@@ -7,7 +7,7 @@ import com.google.inject.Singleton;
 import handle.GadgetHandler;
 import handle.GadgetHandlerImpl;
 import models.exception.APIException;
-import models.exception.APIExceptionUtil;
+import models.exception.ResultsUtil;
 import ninja.Context;
 import ninja.Result;
 import ninja.params.Param;
@@ -26,15 +26,22 @@ public class GadgetController {
         try{
             return handler.insertOrUpdateGadget(type, data, context);
         } catch (APIException e){
-            return APIExceptionUtil.convert(e);
+            return ResultsUtil.convertException(e);
         }
     }
-
+    
+    public Result deleteGadget(@Param("id") String id){
+        try{
+            return handler.deleteGadget(id);
+        } catch (APIException e){
+            return ResultsUtil.convertException(e);
+        }
+    }
     public Result getGadgets(@Param("dashboardId") String id) {
         try{
             return handler.getGadgets(id);
         } catch (APIException e){
-            return APIExceptionUtil.convert(e);
+            return ResultsUtil.convertException(e);
         }
 
     }
@@ -43,7 +50,7 @@ public class GadgetController {
         try{
             return handler.getDataGadget(id);
         } catch (APIException e){
-            return APIExceptionUtil.convert(e);
+            return ResultsUtil.convertException(e);
         }
     }
     public Result getStoryInEpic(@Param("epics") String epic){
@@ -51,7 +58,7 @@ public class GadgetController {
             List<String> epics = JSONUtil.getInstance().convertJSONtoListObject(epic, String.class);
             return handler.getStoryInEpic(epics);
         } catch (APIException e){
-            return APIExceptionUtil.convert(e);
+            return ResultsUtil.convertException(e);
         }
     }
 
@@ -60,7 +67,7 @@ public class GadgetController {
         try{
             return handler.getProjectList();
         } catch (APIException e){
-            return APIExceptionUtil.convert(e);
+            return ResultsUtil.convertException(e);
         }
     }
 }

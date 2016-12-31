@@ -9,7 +9,7 @@ import handle.EpicHandler;
 import handle.EpicHandlerImpl;
 import manament.log.LoggerWapper;
 import models.exception.APIException;
-import models.exception.APIExceptionUtil;
+import models.exception.ResultsUtil;
 import ninja.FilterWith;
 import ninja.Result;
 import ninja.params.Param;
@@ -30,7 +30,7 @@ public class EpicController {
             List<String> products = JSONUtil.getInstance().convertJSONtoListObject(productArrays, String.class);
             return handler.getEpicLinks(project, release, products);
         } catch (APIException e){
-            return APIExceptionUtil.convert(e);
+            return ResultsUtil.convertException(e);
         }
     }
     

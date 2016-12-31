@@ -10,7 +10,9 @@ import java.util.stream.Collectors;
 
 import manament.log.LoggerWapper;
 import models.JQLIssueWapper;
+import models.ResultCode;
 import models.exception.APIException;
+import models.exception.ResultsUtil;
 import models.gadget.AssigneeVsTestExecution;
 import models.gadget.CycleVsTestExecution;
 import models.gadget.EpicVsTestExecution;
@@ -42,7 +44,7 @@ public class GadgetHandlerImpl extends GadgetHandler {
         if(data == null){
             throw new APIException("data cannot be null");
         }
-        String username = (String) context.getAttribute("username");
+        String username = (String) context.getSession().get("username");
         // String friendlyname = (String) context.getAttribute("alias");
         List<String> errorMessages = new ArrayList<>();
         if(Gadget.Type.EPIC_US_TEST_EXECUTION.equals(gadgetType)){
@@ -145,11 +147,7 @@ public class GadgetHandlerImpl extends GadgetHandler {
         } else{
             throw new APIException(String.format("gadget id=%s not found", id));
         }
-        Result result = Results.json();
-        result.render("type", "success");
-        result.render("data", gadgetsData);
-
-        return result;
+        return ResultsUtil.convertToResult(ResultCode.SUCCESS, gadgetsData);
     }
 
     @Override
@@ -170,6 +168,11 @@ public class GadgetHandlerImpl extends GadgetHandler {
     @Override
     public Result getProjectList() throws APIException {
         return Results.json().render(gadgetService.getProjectList());
+    }
+
+    @Override
+    public Result deleteGadget(String id) throws APIException {
+        return ResultsUtil.convertToResult(ResultCode.SUCCESS, gadgetService.delete(id));
     }
 
 }

@@ -20,6 +20,7 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
+import com.mongodb.client.result.DeleteResult;
 
 import manament.log.LoggerWapper;
 import models.APIIssueVO;
@@ -92,27 +93,31 @@ public class GadgetUtility extends DatabaseUtility {
     }
 
     public void insertOrUpdate(Gadget gadget) throws APIException {
-        try{
-            String id = gadget.getId();
-            Gadget existingGadget = null;
-            if(id != null){
+        String id = gadget.getId();
+        Gadget existingGadget = null;
+        try {
+            if (id != null) {
                 existingGadget = get(id);
             }
+        } catch (APIException e) {
+            // ingnore exception
+        }
+        try {
             Document dbObject = Document.parse(mapper.writeValueAsString(gadget));
             dbObject.remove("id");
             System.out.println(dbObject.toJson());
-            if(existingGadget != null){
+            if (existingGadget != null) {
                 BasicDBObject updateQuery = new BasicDBObject();
                 updateQuery.append("$set", dbObject);
                 BasicDBObject searchQuery = new BasicDBObject();
                 searchQuery.append("_id", new ObjectId(id));
                 logger.fasttrace("update gadget id %s by user:%s", id, gadget.getUser());
                 collection.updateOne(searchQuery, updateQuery);
-            } else{
+            } else {
                 logger.fasttrace("insert gadget:%s by user:%s", gadget.getType(), gadget.getUser());
                 collection.insertOne(dbObject);
             }
-        } catch (JsonProcessingException e){
+        } catch (JsonProcessingException e) {
             logger.fastDebug("error during mapper.writeValueAsString", e);
             throw new APIException("cannot insert gadget", e);
         }
@@ -120,46 +125,55 @@ public class GadgetUtility extends DatabaseUtility {
 
     public Gadget get(String gadgetId) throws APIException {
         Gadget gadget = null;
-        BasicDBObject query = new BasicDBObject();
-        try{
-            query.put("_id", new ObjectId(gadgetId));
-        } catch (java.lang.IllegalArgumentException e){
-            logger.fasttrace("gadget id %s not found", gadgetId);
-            return null;
-        }
+        BasicDBObject query = getQueryById(gadgetId);
         FindIterable<Document> document = collection.find(query);
         Document dbObj = document.first();
 
-        if(dbObj != null && Gadget.Type.valueOf(((String) dbObj.get("type"))) != null){
+        if (dbObj != null && Gadget.Type.valueOf(((String) dbObj.get("type"))) != null) {
             Gadget.Type type = Gadget.Type.valueOf(((String) dbObj.get("type")));
-            try{
-                if(type == Gadget.Type.EPIC_US_TEST_EXECUTION){
-                    EpicVsTestExecution epicGadget = mapper.readValue(dbObj.toJson(), EpicVsTestExecution.class);
+            try {
+                if (type == Gadget.Type.EPIC_US_TEST_EXECUTION) {
+                    EpicVsTestExecution epicGadget = mapper.readValue(dbObj.toJson(),
+                            EpicVsTestExecution.class);
                     epicGadget.setId(getObjectId(dbObj));
                     gadget = epicGadget;
 
-                } else if(type == Gadget.Type.ASSIGNEE_TEST_EXECUTION){
-                    AssigneeVsTestExecution assigneeGadget = mapper.readValue(dbObj.toJson(), AssigneeVsTestExecution.class);
+                } else if (type == Gadget.Type.ASSIGNEE_TEST_EXECUTION) {
+                    AssigneeVsTestExecution assigneeGadget = mapper.readValue(dbObj.toJson(),
+                            AssigneeVsTestExecution.class);
                     assigneeGadget.setId(getObjectId(dbObj));
                     gadget = assigneeGadget;
-                } else if(type == Gadget.Type.TEST_CYCLE_TEST_EXECUTION){
-                    CycleVsTestExecution cycleGadget = mapper.readValue(dbObj.toJson(), CycleVsTestExecution.class);
+                } else if (type == Gadget.Type.TEST_CYCLE_TEST_EXECUTION) {
+                    CycleVsTestExecution cycleGadget = mapper.readValue(dbObj.toJson(),
+                            CycleVsTestExecution.class);
                     cycleGadget.setId(getObjectId(dbObj));
                     gadget = cycleGadget;
-                } else if(type == Gadget.Type.STORY_TEST_EXECUTION){
-                    StoryVsTestExecution storyGadget = mapper.readValue(dbObj.toJson(), StoryVsTestExecution.class);
+                } else if (type == Gadget.Type.STORY_TEST_EXECUTION) {
+                    StoryVsTestExecution storyGadget = mapper.readValue(dbObj.toJson(),
+                            StoryVsTestExecution.class);
                     storyGadget.setId(getObjectId(dbObj));
                     gadget = storyGadget;
                 }
 
-            } catch (IOException e){
+            } catch (IOException e) {
                 logger.fastDebug("Error during loading gadget", e);
                 throw new APIException("Error during loading gadget", e);
             }
-        } else{
+        } else {
             logger.fasttrace("gadget id %s not found", gadgetId);
         }
         return gadget;
+    }
+
+    private BasicDBObject getQueryById(String id) throws APIException {
+        BasicDBObject query = new BasicDBObject();
+        try {
+            query.put("_id", new ObjectId(id));
+        } catch (java.lang.IllegalArgumentException e) {
+            logger.fasttrace("gadget id %s not found", id);
+            throw new APIException("gadget id=" + id + " not found", e);
+        }
+        return query;
     }
 
     public List<Gadget> getAll() throws APIException {
@@ -177,26 +191,34 @@ public class GadgetUtility extends DatabaseUtility {
     private List<Gadget> parse(FindIterable<Document> documents) throws APIException {
         MongoCursor<Document> dbCursor = documents.iterator();
         List<Gadget> gadgets = new ArrayList<Gadget>();
-        while (dbCursor.hasNext()){
+        while (dbCursor.hasNext()) {
             Document document = dbCursor.next();
-            if(document != null){
-                if(Gadget.Type.ASSIGNEE_TEST_EXECUTION.equals(Gadget.Type.valueOf((String) document.get(TYPE)))){
-                    AssigneeVsTestExecution assigneeGadget = JSONUtil.getInstance().convertJSONtoObject(document.toJson(), AssigneeVsTestExecution.class);
+            if (document != null) {
+                if (Gadget.Type.ASSIGNEE_TEST_EXECUTION
+                        .equals(Gadget.Type.valueOf((String) document.get(TYPE)))) {
+                    AssigneeVsTestExecution assigneeGadget = JSONUtil.getInstance()
+                            .convertJSONtoObject(document.toJson(), AssigneeVsTestExecution.class);
                     assigneeGadget.setId(getObjectId(document));
                     gadgets.add(assigneeGadget);
-                } else if(Gadget.Type.EPIC_US_TEST_EXECUTION.equals(Gadget.Type.valueOf((String) document.get(TYPE)))){
-                    EpicVsTestExecution epicGadget = JSONUtil.getInstance().convertJSONtoObject(document.toJson(), EpicVsTestExecution.class);
+                } else if (Gadget.Type.EPIC_US_TEST_EXECUTION
+                        .equals(Gadget.Type.valueOf((String) document.get(TYPE)))) {
+                    EpicVsTestExecution epicGadget = JSONUtil.getInstance()
+                            .convertJSONtoObject(document.toJson(), EpicVsTestExecution.class);
                     epicGadget.setId(getObjectId(document));
                     gadgets.add(epicGadget);
-                } else if(Gadget.Type.TEST_CYCLE_TEST_EXECUTION.equals(Gadget.Type.valueOf((String) document.get(TYPE)))){
-                    CycleVsTestExecution cyclGadget = JSONUtil.getInstance().convertJSONtoObject(document.toJson(), CycleVsTestExecution.class);
+                } else if (Gadget.Type.TEST_CYCLE_TEST_EXECUTION
+                        .equals(Gadget.Type.valueOf((String) document.get(TYPE)))) {
+                    CycleVsTestExecution cyclGadget = JSONUtil.getInstance()
+                            .convertJSONtoObject(document.toJson(), CycleVsTestExecution.class);
                     cyclGadget.setId(getObjectId(document));
                     gadgets.add(cyclGadget);
-                } else if(Gadget.Type.STORY_TEST_EXECUTION.equals(Gadget.Type.valueOf((String) document.get(TYPE)))){
-                    StoryVsTestExecution storyGadget = JSONUtil.getInstance().convertJSONtoObject(document.toJson(), StoryVsTestExecution.class);
+                } else if (Gadget.Type.STORY_TEST_EXECUTION
+                        .equals(Gadget.Type.valueOf((String) document.get(TYPE)))) {
+                    StoryVsTestExecution storyGadget = JSONUtil.getInstance()
+                            .convertJSONtoObject(document.toJson(), StoryVsTestExecution.class);
                     storyGadget.setId(getObjectId(document));
                     gadgets.add(storyGadget);
-                } else{
+                } else {
                     logger.fastDebug("type %s is not available", document.get(TYPE));
                 }
             }
@@ -206,7 +228,7 @@ public class GadgetUtility extends DatabaseUtility {
 
     public GadgetData convertToGadgetData(List<ExecutionIssueVO> testExecution) {
         GadgetData gadgetData = new GadgetData();
-        if(testExecution != null){
+        if (testExecution != null) {
             testExecution.forEach(new Consumer<ExecutionIssueVO>() {
                 @Override
                 public void accept(ExecutionIssueVO issue) {
@@ -237,7 +259,8 @@ public class GadgetUtility extends DatabaseUtility {
                 }
             });
         }
-        gadgetData.increaseUnplanned(gadgetData.getBlocked().getTotal() + gadgetData.getFailed().getTotal() + gadgetData.getPassed().getTotal()
+        gadgetData.increaseUnplanned(gadgetData.getBlocked().getTotal()
+                + gadgetData.getFailed().getTotal() + gadgetData.getPassed().getTotal()
                 + gadgetData.getWip().getTotal() + gadgetData.getUnexecuted().getTotal());
         gadgetData.getUnplanned().getIssues().addAll(gadgetData.getBlocked().getIssues());
         gadgetData.getUnplanned().getIssues().addAll(gadgetData.getFailed().getIssues());
@@ -248,8 +271,9 @@ public class GadgetUtility extends DatabaseUtility {
     }
 
     public void sortData(List<GadgetData> gadgetDatas) {
-        if(gadgetDatas != null && !gadgetDatas.isEmpty()){
-            Collections.sort(gadgetDatas, (d1, d2) -> d1.getKey().getKey().compareToIgnoreCase(d2.getKey().getKey()));
+        if (gadgetDatas != null && !gadgetDatas.isEmpty()) {
+            Collections.sort(gadgetDatas,
+                    (d1, d2) -> d1.getKey().getKey().compareToIgnoreCase(d2.getKey().getKey()));
         }
     }
 
@@ -259,16 +283,18 @@ public class GadgetUtility extends DatabaseUtility {
         Map<String, String> parameters = new HashMap<String, String>();
         parameters.put(Constant.PARAMERTER_JQL_QUERY, String.format(query, issueKey));
         parameters.put(Constant.PARAMERTER_MAXRESULTS,
-                PropertiesUtil.getString(Constant.RESOURCE_BUNLE_SEARCH_MAXRECORDS, Constant.RESOURCE_BUNLE_SEARCH_MAXRECORDS_DEFAULT));
+                PropertiesUtil.getString(Constant.RESOURCE_BUNLE_SEARCH_MAXRECORDS,
+                        Constant.RESOURCE_BUNLE_SEARCH_MAXRECORDS_DEFAULT));
         parameters.put(Constant.PARAMERTER_OFFSET, "0");
-        String data = HTTPClientUtil.getInstance().getLegacyData(PropertiesUtil.getString(Constant.RESOURCE_BUNLE_SEARCH_PATH), parameters);
-        try{
+        String data = HTTPClientUtil.getInstance().getLegacyData(
+                PropertiesUtil.getString(Constant.RESOURCE_BUNLE_SEARCH_PATH), parameters);
+        try {
             searchResult = JSONUtil.getInstance().convertJSONtoObject(data, JQLSearchResult.class);
-        } catch (APIException e){
+        } catch (APIException e) {
             // ignore exception, issue not found.
-            if(!APIErrorCode.PARSE_JSON.equals(e.getErrorCode())){
+            if (!APIErrorCode.PARSE_JSON.equals(e.getErrorCode())) {
                 return null;
-            } else{
+            } else {
                 throw e;
             }
         }
@@ -276,19 +302,22 @@ public class GadgetUtility extends DatabaseUtility {
     }
 
     public List<String> getProjectList() throws APIException {
-        if(projectsCache.isEmpty()){
-            String data = HTTPClientUtil.getInstance().getLegacyData(PropertiesUtil.getString(Constant.RESOURCE_BUNLE_PROJECT_PATH),
+        if (projectsCache.isEmpty()) {
+            String data = HTTPClientUtil.getInstance().getLegacyData(
+                    PropertiesUtil.getString(Constant.RESOURCE_BUNLE_PROJECT_PATH),
                     new HashMap<String, String>());
-            List<ProjectVO> projects = JSONUtil.getInstance().convertJSONtoListObject(data, ProjectVO.class);
+            List<ProjectVO> projects = JSONUtil.getInstance().convertJSONtoListObject(data,
+                    ProjectVO.class);
 
-            Set<String> projectsList = projects.stream().map(p -> p.getName()).filter(t -> t != null && !t.isEmpty()).collect(Collectors.toSet());
+            Set<String> projectsList = projects.stream().map(p -> p.getName())
+                    .filter(t -> t != null && !t.isEmpty()).collect(Collectors.toSet());
             projectsCache = projectsList.stream().sorted(new Comparator<String>() {
                 @Override
                 public int compare(String p1, String p2) {
-                    if(Constant.MAIN_PROJECT.equals(p1)){
+                    if (Constant.MAIN_PROJECT.equals(p1)) {
                         return -1;
                     }
-                    if(Constant.MAIN_PROJECT.equals(p2)){
+                    if (Constant.MAIN_PROJECT.equals(p2)) {
                         return 1;
                     }
                     return p1.compareToIgnoreCase(p2);
@@ -301,15 +330,23 @@ public class GadgetUtility extends DatabaseUtility {
     }
 
     public List<JQLIssueVO> filterProduct(List<JQLIssueVO> issues, Set<String> product) {
-        if(issues != null && product != null){
-            return issues.stream().filter(i -> product.contains(i.getFields().getProduct().getValue())).collect(Collectors.toList());
+        if (issues != null && product != null) {
+            return issues.stream()
+                    .filter(i -> product.contains(i.getFields().getProduct().getValue()))
+                    .collect(Collectors.toList());
         }
         return null;
     }
 
     public void sortIssue(List<APIIssueVO> result) {
-        if(result != null && !result.isEmpty()){
+        if (result != null && !result.isEmpty()) {
             Collections.sort(result, (d1, d2) -> d1.getKey().compareToIgnoreCase(d2.getKey()));
         }
+    }
+
+    public long delete(String id) throws APIException {
+        BasicDBObject query = getQueryById(id);
+        DeleteResult res = collection.deleteOne(query);
+        return res.getDeletedCount();
     }
 }

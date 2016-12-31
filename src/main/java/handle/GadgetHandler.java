@@ -17,4 +17,6 @@ public abstract class GadgetHandler extends Handler {
     public abstract Result getStoryInEpic(List<String> epic) throws APIException;
 
     public abstract Result getProjectList() throws APIException;
+
+    public abstract Result deleteGadget(String id) throws APIException;
 }
