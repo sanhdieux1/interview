@@ -73,7 +73,7 @@ function callAjaxToUpdateCycle(jsonString) {
       url: SAVE_GADGET_URI,
       method: 'POST',
       data: {
-        type: 'TEST_CYCLE_TEST_EXECUTION',
+        type: CYCLE_TYPE,
         data: jsonString
       },
       beforeSend: function() {
@@ -121,7 +121,7 @@ function callAjaxOnCycleTable() {
 
 function drawCycleGadget(gadgetList) {
   for (var i = 0; i < gadgetList.length; i++) {
-    if (gadgetList[i]["type"] == "TEST_CYCLE_TEST_EXECUTION") {
+    if (gadgetList[i]["type"] == CYCLE_TYPE) {
       console.log("At gadget List");
       if (gadgetList[i]["projectName"] != "" && gadgetList[i]["projectName"] != null) {
         $("#cycleProject").val(gadgetList[i]["projectName"]);

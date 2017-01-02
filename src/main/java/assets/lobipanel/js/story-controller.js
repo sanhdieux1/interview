@@ -414,6 +414,27 @@ function callAjaxOnUsProjectAndRelease() {
   });
 }
 
+function addEpic() {
+	var options = $("#usEpicAvailable option:selected").clone();
+	if (options.length == 0) {
+		return;
+	}
+	$("#usEpic").append(options);
+	$("#usEpicAvailable option:selected").remove();
+	reloadUSList();
+}
+
+function removeEpic() {
+	var options = $("#usEpic option:selected").clone();
+	if (options.length == 0) {
+		return;
+	}
+	$("#usEpicAvailable").append(options);
+	$("#usEpic option:selected").remove();
+	reloadUSList();
+}
+
+
 function addAllEpic() {
   var options = $("#usEpicAvailable option").clone();
   if (options.length == 0) {

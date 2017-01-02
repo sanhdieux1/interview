@@ -6,6 +6,11 @@ var GREENHOPPER_ISSUE_API_LINK = 'https://greenhopper.app.alcatel-lucent.com/iss
 var IS_TESTING = true;
 var SAVE_GADGET_URI = "/gadget/save";
 var GET_GADGETS_URI = "/gadget/gadgets";
+var GET_EPIC_URI = "/getEpicLinks";
+var GET_DATA_URI = "/gadget/getData";
+var GET_STORY_URI = "/gadget/getStoryInEpic";
+var GET_CYCLE_URI = "/listcycle";
+var GET_ASSIGNEE_URI = "/getassignee";
 var EPIC_TYPE = "EPIC_US_TEST_EXECUTION";
 var US_TYPE = "STORY_TEST_EXECUTION";
 var ASSIGNEE_TYPE = "ASSIGNEE_TEST_EXECUTION";
@@ -424,5 +429,9 @@ function createIssueLinks(data, displayOrType, rowData, setting){
 }
 
 
-//
+function inheritPrototype(childObject, parentObject) {
+	var copyOfParent = Object.create(parentObject.prototype);
+	copyOfParent.constructor = childObject;
+	childObject.prototype = copyOfParent;
+}
 

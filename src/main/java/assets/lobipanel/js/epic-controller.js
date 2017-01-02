@@ -1,3 +1,7 @@
+/*
+ * This script deals with epic controller, setting up jquery on change, click, etc...
+ */
+
 // When epic project input is changed
 $("#epicProject").change(function() {
   callAjaxOnEpicProjectAndRelease();
@@ -289,19 +293,6 @@ function drawEpicTable(gadgetId, metricArray) {
 function showEpicLinks() {
   $('#epicMultiSelect').fadeIn();
   $('#epic-link-loader').fadeOut();
-}
-
-function convertEpicLinkToApiIssue(epicList) {
-  var issue = [];
-
-  $.each(epicList, function(key, value) {
-    issue.push({
-      "key": value,
-      self: "",
-      parrent: ""
-    });
-  });
-  return issue;
 }
 
 function showEpicTable() {
