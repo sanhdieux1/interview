@@ -22,13 +22,17 @@ public class Routes implements ApplicationRoutes {
     	router.GET().route("/gadget/getStoryInEpic").with(GadgetController.class,"getStoryInEpic");
     	
     	router.GET().route("/product").with(ProductController.class,"productPage");
-    	router.POST().route("/product/delete").with(ProductController.class,"deleteProduct");
-        router.POST().route("/product/insert").with(ProductController.class,"addProduct");
-        router.GET().route("/product/getall").with(ProductController.class,"getAll");
+    	router.POST().route("/product/deleteProduct").with(ProductController.class,"deleteProduct");
+        router.POST().route("/product/insertProduct").with(ProductController.class,"addProduct");
+        router.POST().route("/product/deleteCycle").with(ProductController.class,"deleteCycle");
+        router.POST().route("/product/insertCycle").with(ProductController.class,"addCycle");
+        router.GET().route("/product/getall").with(ProductController.class,"getAllProduct");
         
     	router.GET().route("/getEpicLinks").with(EpicController.class,"getEpicLinks");
     	router.GET().route("/getassignee").with(AssigneeController.class,"getAssigneeList");
     	router.GET().route("/listcycle").with(AssigneeController.class,"getListCycleName");
+    	router.GET().route("/cycleExisting").with(AssigneeController.class,"getListExistingCycle");
+    	
     	router.GET().route("/listproject").with(GadgetController.class,"getProjectList");
         router.GET().route("/login").with(LoginLogoutController.class, "login");
         router.POST().route("/login").with(LoginLogoutController.class, "loginPost");

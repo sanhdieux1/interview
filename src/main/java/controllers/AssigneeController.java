@@ -16,7 +16,9 @@ import models.main.Release;
 import ninja.Context;
 import ninja.FilterWith;
 import ninja.Result;
+import ninja.Results;
 import ninja.params.Param;
+import util.AdminUtility;
 import util.JSONUtil;
 
 @Singleton
@@ -50,5 +52,9 @@ public class AssigneeController {
             return ResultsUtil.convertException(e);
         }
     }
-
+    
+    public Result getListExistingCycle(Context context) {
+        Set<String> cycles = AdminUtility.getInstance().getAllCycle();
+        return Results.json().render(cycles);
+    }
 }
