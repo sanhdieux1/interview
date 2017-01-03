@@ -119,20 +119,22 @@ public class StoryUtility {
         } else{
             Set<JQLIssueVO> storyIssues = new HashSet<>();
             Set<String> stories = storyGadget.getStories();
-            List<FindIssueCallable> tasks = new ArrayList<FindIssueCallable>();
-            stories.forEach(s -> tasks.add(new FindIssueCallable(s, cookies)));
+            if(stories != null){
+                List<FindIssueCallable> tasks = new ArrayList<FindIssueCallable>();
+                stories.forEach(s -> tasks.add(new FindIssueCallable(s, cookies)));
 
-            List<Future<JQLIssueVO>> taskResult = ExecutorManagement.getInstance().invokeTask(tasks);
-            List<JQLIssueVO> storyIssuesList = ExecutorManagement.getInstance().getResult(taskResult);
-            if(storyIssuesList != null){
-                storyIssues.addAll(storyIssuesList);
-            }
-            Map<String, Set<JQLIssueVO>> epicMap = storyIssues.stream()
-                    .collect(Collectors.groupingBy(s -> s.getFields().getEpicLink() != null ? s.getFields().getEpicLink() : "", Collectors.toSet()));
-            epicWrapperMap = new HashMap<>();
-            for(String epicKey : epicMap.keySet()){
-                JQLIssueVO epicIssue = GadgetUtility.getInstance().findIssue(epicKey, cookies);
-                epicWrapperMap.put(epicKey, new JQLIssueWapper(epicIssue, epicMap.get(epicKey)));
+                List<Future<JQLIssueVO>> taskResult = ExecutorManagement.getInstance().invokeTask(tasks);
+                List<JQLIssueVO> storyIssuesList = ExecutorManagement.getInstance().getResult(taskResult);
+                if(storyIssuesList != null){
+                    storyIssues.addAll(storyIssuesList);
+                }
+                Map<String, Set<JQLIssueVO>> epicMap = storyIssues.stream()
+                        .collect(Collectors.groupingBy(s -> s.getFields().getEpicLink() != null ? s.getFields().getEpicLink() : "", Collectors.toSet()));
+                epicWrapperMap = new HashMap<>();
+                for (String epicKey : epicMap.keySet()){
+                    JQLIssueVO epicIssue = GadgetUtility.getInstance().findIssue(epicKey, cookies);
+                    epicWrapperMap.put(epicKey, new JQLIssueWapper(epicIssue, epicMap.get(epicKey)));
+                }
             }
         }
 

@@ -128,27 +128,35 @@ function createEvent() {
         $("#searchComponent").attr("disabled", ""); 
         var releaseValue = $("#release").val();
         var productValue = $("#product").val();
+        var productValues =[productValue];
+        console.log(productValues);
+        console.log(releaseValue);
+        
         $("#suggest").html('');
+        $("#loader").addClass("loader");
         $.ajax({
             method : "GET",
             url : "/listcycle",
             dataType : "json",
             dataContext: "json",
             data: {
-                product : productValue,
+                products : JSON.stringify(productValues),
                 release : releaseValue,
                 project : "FNMS 557x"
             },
             success : function(data) {
+                console.log(data);
                 if ($.isArray(data)) {
                     for (i = 0; i < data.length; i++) {
                         $("#suggest").append('<option>' + data[i] + '</option>');
                     }
                     $("#searchComponent").removeAttr("disabled");
                 }
+                $("#loader").removeClass("loader");
             },
             error : function(data) {
                 alert(data);
+                $("#loader").removeClass("loader");
             }
         });
     });
