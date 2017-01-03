@@ -1,6 +1,7 @@
 package handle.executors;
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 
 import manament.log.LoggerWapper;
@@ -16,11 +17,12 @@ public class TestExecutionCallable implements Callable<ExecutionIssueResultWappe
     final static LoggerWapper logger = LoggerWapper.getLogger(TestExecutionCallable.class);
     private JQLIssueVO issue;
     private Type type;
-
-    public TestExecutionCallable(JQLIssueVO issue, Type type) {
+    private Map<String, String> cookies;
+    public TestExecutionCallable(JQLIssueVO issue, Type type, Map<String, String> cookies) {
         super();
         this.issue = issue;
         this.type = type;
+        this.cookies = cookies; 
     }
 
     @Override
@@ -35,12 +37,12 @@ public class TestExecutionCallable implements Callable<ExecutionIssueResultWappe
         
         resultWapper.setIssue(apiIssue);
         if(Type.TEST.equals(type)){
-            List<ExecutionIssueVO> executionIssues = EpicUtility.getInstance().findTestExecutionInIsuee(issue.getKey());
+            List<ExecutionIssueVO> executionIssues = EpicUtility.getInstance().findTestExecutionInIsuee(issue.getKey(), cookies);
             if(executionIssues != null && !executionIssues.isEmpty()){
                 resultWapper.getExecutionsVO().addAll(executionIssues);
             }
         } else if(Type.STORY.equals(type)){
-            List<ExecutionIssueVO> executionIssues = StoryUtility.getInstance().findAllTestExecutionInStory(issue);
+            List<ExecutionIssueVO> executionIssues = StoryUtility.getInstance().findAllTestExecutionInStory(issue, cookies);
             resultWapper.setPlanned(issue.getFields().getCustomfield_14809());
             if(executionIssues != null && !executionIssues.isEmpty()){
                 resultWapper.getExecutionsVO().addAll(executionIssues);

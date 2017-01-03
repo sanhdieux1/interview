@@ -8,6 +8,7 @@ import java.net.Proxy;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiConsumer;
 
@@ -36,37 +37,33 @@ public class HTTPClientUtil {
     private static HTTPClientUtil instance;
     private CloseableHttpClient httpclient;
     private String loginURL;
-    private Map<String, String> cookies;
 
     private HTTPClientUtil() {
         loginURL = PropertiesUtil.getString(Constant.RESOURCE_BUNLE_HOST_TYPE) + "://"
-                + (PropertiesUtil.getString(Constant.RESOURCE_BUNLE_HOST)
-                        + PropertiesUtil.getString(Constant.RESOURCE_BUNLE_LOGIN_PATH));
+                + (PropertiesUtil.getString(Constant.RESOURCE_BUNLE_HOST) + PropertiesUtil.getString(Constant.RESOURCE_BUNLE_LOGIN_PATH));
     }
 
     public synchronized static HTTPClientUtil getInstance() {
-        if (instance == null) {
+        if(instance == null){
             instance = new HTTPClientUtil();
         }
         return instance;
     }
 
     public CloseableHttpResponse execute(HttpUriRequest request) {
-        try {
+        try{
             return httpclient.execute(request);
-        } catch (IOException e) {
+        } catch (IOException e){
             logger.fastDebug("cannot execute request", e, new Object());
         }
         return null;
     }
 
-    private void login(CloseableHttpClient httpclient)
-            throws URISyntaxException, ClientProtocolException, IOException {
+    private void login(CloseableHttpClient httpclient) throws URISyntaxException, ClientProtocolException, IOException {
         URI uri = new URI(loginURL);
-        RequestBuilder requestBuilder = RequestBuilder.post().setUri(uri)
-                .addParameter("os_username", "hcongle").addParameter("os_password", "hcl49#Tma");
+        RequestBuilder requestBuilder = RequestBuilder.post().setUri(uri).addParameter("os_username", "hcongle").addParameter("os_password", "hcl49#Tma");
         RequestConfig config = getProxyConfig();
-        if (config != null) {
+        if(config != null){
             requestBuilder.setConfig(config);
         }
 
@@ -82,43 +79,39 @@ public class HTTPClientUtil {
         return httpclient;
     }
 
-    public void loginGreenhopper(String username, String password) {
-        try {
+    public Map<String, String> loginGreenhopper(String username, String password) {
+        Map<String, String> sessionCookies = new HashMap<String, String>();
+        try{
             Proxy proxy = getProxy();
             logger.fastDebug("Login to %s , proxy:%s", loginURL, proxy.toString());
-            Connection req = Jsoup.connect(loginURL).ignoreHttpErrors(true).ignoreContentType(true)
-                    .data("os_username", username).data("os_password", password)
-                    .timeout(PropertiesUtil.getInt(Constant.PARAMERTER_TIMEOUT, 70000))
-                    .method(Connection.Method.POST);
-            if (proxy != null) {
+            Connection req = Jsoup.connect(loginURL).ignoreHttpErrors(true).ignoreContentType(true).data("os_username", username).data("os_password", password)
+                    .timeout(PropertiesUtil.getInt(Constant.PARAMERTER_TIMEOUT, 70000)).method(Connection.Method.POST);
+            if(proxy != null){
                 req.proxy(proxy);
             }
             Response res = req.execute();
-            cookies = res.cookies();
-            logger.fastDebug("cookies:" + cookies);
-        } catch (IOException e) {
-            logger.fastDebug("cannot login to %s", e, loginURL);
-            cookies = null;
+            sessionCookies = res.cookies();
+            logger.fasttrace("User: %s, cookies:%s", username, sessionCookies);
+        } catch (IOException e){
+            logger.fastDebug("User: %s, cannot login to %s", e, username, loginURL);
         }
+        return sessionCookies;
     }
 
-    public String getLegacyData(String path, Map<String, String> parameters) throws APIException {
-        return getLegacyData(path, parameters,
-                PropertiesUtil.getInt(Constant.PARAMERTER_TIMEOUT, 60000));
+    public String getLegacyData(String path, Map<String, String> parameters, Map<String, String> cookies) throws APIException {
+        return getLegacyData(path, parameters, PropertiesUtil.getInt(Constant.PARAMERTER_TIMEOUT, 60000), cookies);
     }
 
-    public String getLegacyData(String path, Map<String, String> parameters, int timeout)
-            throws APIException {
+    public String getLegacyData(String path, Map<String, String> parameters, int timeout, Map<String, String> cookies) throws APIException {
         String data = null;
         String host = PropertiesUtil.getString(Constant.RESOURCE_BUNLE_HOST);
         String scheme = PropertiesUtil.getString(Constant.RESOURCE_BUNLE_HOST_TYPE);
 
         String url = scheme + ":" + SLASH + SLASH + host + path;
-        Connection connection = Jsoup.connect(url).ignoreHttpErrors(true).ignoreContentType(true)
-                .timeout(timeout).maxBodySize(0).method(Connection.Method.GET);
-        if (cookies != null) {
+        Connection connection = Jsoup.connect(url).ignoreHttpErrors(true).ignoreContentType(true).timeout(timeout).maxBodySize(0).method(Connection.Method.GET);
+        if(!cookies.isEmpty()){
             connection.cookies(cookies);
-        } else {
+        } else{
             throw new APIException("Login session not available, need re-login to greenhopper");
         }
         parameters.forEach(new BiConsumer<String, String>() {
@@ -128,15 +121,14 @@ public class HTTPClientUtil {
             }
         });
         Proxy proxy = getProxy();
-        logger.fasttrace("getLegacyData(%s , %s) , connecting to %s \nproxy:%s", path,
-                parameters.toString(), url, proxy.toString());
-        if (proxy != null) {
+        logger.fasttrace("getLegacyData(%s , %s) , connecting to %s \nproxy:%s", path, parameters.toString(), url, proxy.toString());
+        if(proxy != null){
             connection.proxy(proxy);
         }
-        try {
+        try{
             Response re = connection.execute();
             data = re.body();
-        } catch (IOException e) {
+        } catch (IOException e){
             logger.fastDebug("Cannot connect to %s, %s", e, url, e.getMessage());
             throw new APIException("Cannot connect to " + host + ", " + e.getMessage(), e);
         }
@@ -160,33 +152,32 @@ public class HTTPClientUtil {
         StringBuffer result = new StringBuffer();
         CloseableHttpResponse response = null;
         BufferedReader rd = null;
-        try {
+        try{
             URI uri = builder.build();
             logger.fasttrace("Connecting to URI %s", uri.toString());
             HttpGet httpget = new HttpGet(uri);
             RequestConfig config = getProxyConfig();
-            if (config != null) {
+            if(config != null){
                 httpget.setConfig(config);
             }
-            try {
+            try{
                 response = HTTPClientUtil.getInstance().execute(httpget);
                 String line = "";
-                if (response != null) {
-                    rd = new BufferedReader(
-                            new InputStreamReader(response.getEntity().getContent()));
-                    while ((line = rd.readLine()) != null) {
+                if(response != null){
+                    rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
+                    while ((line = rd.readLine()) != null){
                         result.append(line);
                     }
                 }
-            } finally {
-                if (response != null) {
+            } finally{
+                if(response != null){
                     response.close();
                 }
-                if (rd != null) {
+                if(rd != null){
                     rd.close();
                 }
             }
-        } catch (URISyntaxException | IOException e) {
+        } catch (URISyntaxException | IOException e){
             logger.fastDebug("cannot connect to %s", e, host);
         }
         return result.toString();
@@ -198,14 +189,14 @@ public class HTTPClientUtil {
         String proxyPortStr = PropertiesUtil.getString(Constant.RESOURCE_BUNLE_PROXY_PORT);
         String proxyType = PropertiesUtil.getString(Constant.RESOURCE_BUNLE_PROXY_TYPE);
         int proxyPort = 0;
-        try {
-            if (proxyPortStr != null) {
+        try{
+            if(proxyPortStr != null){
                 proxyPort = Integer.parseInt(proxyPortStr);
             }
-        } catch (NumberFormatException e) {
+        } catch (NumberFormatException e){
             logger.fasttrace("Incorrect proxy port address %s", e, proxyPortStr);
         }
-        if (proxyIP != null && proxyType != null) {
+        if(proxyIP != null && proxyType != null){
             // logger.info("using proxy:" + proxyType + "://" + proxyIP + ":" + proxyPort);
             HttpHost proxy = new HttpHost(proxyIP, proxyPort, proxyType);
             config = RequestConfig.custom().setProxy(proxy).build();
@@ -217,17 +208,17 @@ public class HTTPClientUtil {
         String proxyIP = PropertiesUtil.getString(Constant.RESOURCE_BUNLE_PROXY_IP);
         String proxyPortStr = PropertiesUtil.getString(Constant.RESOURCE_BUNLE_PROXY_PORT);
         int proxyPort = 0;
-        if (proxyIP == null || proxyPortStr == null) {
+        if(proxyIP == null || proxyPortStr == null){
             return null;
         }
-        try {
+        try{
             proxyPort = Integer.parseInt(proxyPortStr);
-        } catch (NumberFormatException e) {
+        } catch (NumberFormatException e){
             logger.fasttrace("Incorrect proxy port address %s", e, proxyPortStr);
             return null;
         }
-        Proxy proxy = new Proxy(java.net.Proxy.Type.HTTP,
-                new InetSocketAddress(proxyIP, proxyPort));
+        Proxy proxy = new Proxy(java.net.Proxy.Type.HTTP, new InetSocketAddress(proxyIP, proxyPort));
         return proxy;
     }
+
 }

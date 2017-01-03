@@ -15,7 +15,7 @@ import util.PropertiesUtil;
 import util.gadget.EpicUtility;
 
 public class ExecutorManagement {
-    final static LoggerWapper logger = LoggerWapper.getLogger(EpicUtility.class);
+    final static LoggerWapper logger = LoggerWapper.getLogger(ExecutorManagement.class);
     private static ExecutorManagement INSTANCE = new ExecutorManagement();
 
     private ExecutorService executor;

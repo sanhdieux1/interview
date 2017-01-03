@@ -1,7 +1,6 @@
 package util.gadget;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -46,20 +45,20 @@ public class AssigneeUtility {
         return INSTANCE;
     }
 
-    public Map<String, GadgetDataWapper> getDataAssignee(AssigneeVsTestExecution assigneeGadget) throws APIException {
+    public Map<String, GadgetDataWapper> getDataAssignee(AssigneeVsTestExecution assigneeGadget, Map<String, String> cookies) throws APIException {
         Map<String, GadgetDataWapper> returnData = new HashMap<>();
 
         String projectName = assigneeGadget.getProjectName();
-        Set<AssigneeVO> assigneeVOs = findAssigneeList(projectName, assigneeGadget.getRelease());
+        Set<AssigneeVO> assigneeVOs = findAssigneeList(projectName, assigneeGadget.getRelease(), cookies);
         Set<String> assignees = assigneeVOs.stream().map(a -> a.getDisplay()).collect(Collectors.toSet());
         Set<String> cycles = assigneeGadget.getCycles();
 
         if(assigneeGadget.isSelectAllTestCycle()){
-            cycles = getListCycleName(projectName, assigneeGadget.getRelease(), assigneeGadget.getProducts());
+            cycles = getListCycleName(projectName, assigneeGadget.getRelease(), assigneeGadget.getProducts(), cookies);
         }
         if(cycles != null && !cycles.isEmpty()){
             for (String cycle : cycles){
-                ExecutionsVO executions = findExecution(projectName, cycle, assignees);
+                ExecutionsVO executions = findExecution(projectName, cycle, assignees, cookies);
                 if(executions != null && executions.getExecutions() != null){
                     Map<String, List<ExecutionIssueVO>> assigneeMap = executions.getExecutions().stream()
                             .collect(Collectors.groupingBy(ExecutionIssueVO::getAssigneeDisplay));
@@ -77,9 +76,9 @@ public class AssigneeUtility {
                             gadgetDatas.add(gadgetData);
                         }
                     }
-                    //sorting
+                    // sorting
                     GadgetUtility.getInstance().sortData(gadgetDatas);
-                    
+
                     GadgetDataWapper gadgetDataWrapper = new GadgetDataWapper();
                     gadgetDataWrapper.setIssueData(gadgetDatas);
                     returnData.put(cycle, gadgetDataWrapper);
@@ -91,9 +90,9 @@ public class AssigneeUtility {
         return returnData;
     }
 
-    public Set<AssigneeVO> findAssigneeList(String projectName, Release release) throws APIException {
+    public Set<AssigneeVO> findAssigneeList(String projectName, Release release, Map<String, String> cookies) throws APIException {
         if(assigneesCache.get(projectName + PLUS + release) == null || assigneesCache.get(projectName + PLUS + release).isEmpty()){
-            ExecutionsVO executions = findAllExecutionIsueeInProject(projectName, release);
+            ExecutionsVO executions = findAllExecutionIsueeInProject(projectName, release, cookies);
             if(executions != null && executions.getExecutions() != null){
                 List<ExecutionIssueVO> excutions = executions.getExecutions();
                 Stream<ExecutionIssueVO> excutionsStream = excutions.stream();
@@ -112,7 +111,7 @@ public class AssigneeUtility {
 
     }
 
-    public ExecutionsVO findExecution(String project, String cyclename, Set<String> assignees) throws APIException {
+    public ExecutionsVO findExecution(String project, String cyclename, Set<String> assignees, Map<String, String> cookies) throws APIException {
         StringBuilder query = new StringBuilder();
         query.append(String.format("project = \"%s\"", project));
         if(assignees != null && !assignees.isEmpty()){
@@ -134,12 +133,12 @@ public class AssigneeUtility {
         }
         Map<String, String> parameters = new HashMap<String, String>();
         parameters.put(Constant.PARAMERTER_ZQL_QUERY, query.toString());
-        String data = HTTPClientUtil.getInstance().getLegacyData(PropertiesUtil.getString(Constant.RESOURCE_BUNLE_PATH), parameters);
+        String data = HTTPClientUtil.getInstance().getLegacyData(PropertiesUtil.getString(Constant.RESOURCE_BUNLE_PATH), parameters, cookies);
         ExecutionsVO executions = JSONUtil.getInstance().convertJSONtoObject(data, ExecutionsVO.class);
         return executions;
     }
 
-    public ExecutionsVO findAllExecutionIsueeInProject(String projectName, Release release) throws APIException {
+    public ExecutionsVO findAllExecutionIsueeInProject(String projectName, Release release, Map<String, String> cookies) throws APIException {
         StringBuffer query = new StringBuffer();
         if(projectName == null || projectName.isEmpty()){
             return null;
@@ -154,28 +153,28 @@ public class AssigneeUtility {
         parameters.put(Constant.PARAMERTER_MAXRECORDS,
                 PropertiesUtil.getString(Constant.RESOURCE_BUNLE_SEARCH_MAXRECORDS, Constant.RESOURCE_BUNLE_SEARCH_MAXRECORDS_DEFAULT));
         parameters.put(Constant.PARAMERTER_OFFSET, "0");
-        String result = HTTPClientUtil.getInstance().getLegacyData(PropertiesUtil.getString(Constant.RESOURCE_BUNLE_PATH), parameters);
+        String result = HTTPClientUtil.getInstance().getLegacyData(PropertiesUtil.getString(Constant.RESOURCE_BUNLE_PATH), parameters, cookies);
         ExecutionsVO executions = JSONUtil.getInstance().convertJSONtoObject(result, ExecutionsVO.class);
         return executions;
     }
 
-    public Set<String> getListCycleName(String projectName, Release release, Set<String> products) throws APIException {
+    public Set<String> getListCycleName(String projectName, Release release, Set<String> products, Map<String, String> cookies) throws APIException {
         Set<String> returnData = new HashSet<>();
         StringBuffer provisional = new StringBuffer();
         provisional.append(provisional);
         if(release != null){
             provisional.append(PLUS + release.toString());
-        } 
+        }
         if(products != null && !products.isEmpty()){
             provisional.append(PLUS + products);
         }
         String keyProvisional = provisional.toString();
         if(cycleNameCache.get(keyProvisional) == null || cycleNameCache.get(keyProvisional).isEmpty()){
-            List<JQLIssueVO> issues = findAllIssueInProject(projectName, release, products);
+            List<JQLIssueVO> issues = findAllIssueInProject(projectName, release, products, cookies);
             List<ExecutionIssueVO> executions = new ArrayList<>();
             if(issues != null){
                 List<TestExecutionCallable> tasks = new ArrayList<>();
-                issues.forEach(i -> tasks.add(new TestExecutionCallable(i, JQLIssuetypeVO.Type.fromString(i.getFields().getIssuetype().getName()))));
+                issues.forEach(i -> tasks.add(new TestExecutionCallable(i, JQLIssuetypeVO.Type.fromString(i.getFields().getIssuetype().getName()), cookies)));
 
                 List<ExecutionIssueResultWapper> taskResult = ExecutorManagement.getInstance().invokeAndGet(tasks);
                 for (ExecutionIssueResultWapper wapper : taskResult){
@@ -190,7 +189,7 @@ public class AssigneeUtility {
                     cycleNameCache.put(keyProvisional, returnData);
                 }
             }
-        }else{
+        } else{
             returnData = cycleNameCache.get(keyProvisional);
         }
         return returnData;
@@ -200,7 +199,7 @@ public class AssigneeUtility {
         cycleNameCache = null;
     }
 
-    public List<JQLIssueVO> findAllIssueInProject(String projectName, Release release, Set<String> products) throws APIException {
+    public List<JQLIssueVO> findAllIssueInProject(String projectName, Release release, Set<String> products, Map<String, String> cookies) throws APIException {
         List<JQLIssueVO> returnData = new ArrayList<>();
         StringBuffer query = new StringBuffer();
         if(projectName == null || projectName.isEmpty()){
@@ -238,12 +237,17 @@ public class AssigneeUtility {
         parameters.put(Constant.PARAMERTER_MAXRESULTS,
                 PropertiesUtil.getString(Constant.RESOURCE_BUNLE_SEARCH_MAXRECORDS, Constant.RESOURCE_BUNLE_SEARCH_MAXRECORDS_DEFAULT));
         parameters.put(Constant.PARAMERTER_OFFSET, "0");
-        String result = HTTPClientUtil.getInstance().getLegacyData(PropertiesUtil.getString(Constant.RESOURCE_BUNLE_SEARCH_PATH), parameters, 0);
+        String result = HTTPClientUtil.getInstance().getLegacyData(PropertiesUtil.getString(Constant.RESOURCE_BUNLE_SEARCH_PATH), parameters, 0, cookies);
         JQLSearchResult jqpIssues = JSONUtil.getInstance().convertJSONtoObject(result, JQLSearchResult.class);
         if(jqpIssues != null && jqpIssues.getIssues() != null){
             List<JQLIssueVO> issues = jqpIssues.getIssues();
             returnData = issues;
         }
         return returnData;
+    }
+
+    public void clearCache() {
+        cycleNameCache.clear();
+        assigneesCache.clear();
     }
 }

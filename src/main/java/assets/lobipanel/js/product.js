@@ -37,7 +37,34 @@ function deleteProduct(product, callback) {
     });
 }
 
-function addEventAction() {
+function createEvent() {
+    $('#addProduct').on('click', function() {
+        var newProduct = $("#productInput").val();
+        if (newProduct != null && newProduct != "") {
+            $.ajax({
+                method : "POST",
+                url : "/product/insert",
+                dataType : "json",
+                data : {
+                    "product" : newProduct
+                },
+                dataContext : "json",
+                success : function(data) {
+                    if (productTable != null && data.type == "success" && data.data == true) {
+                        productTable.row.add([ newProduct, "" ]).draw(false);
+                        addEventTablesAction();
+                        $("#productInput").val("");
+                    }
+                },
+                error : function(data) {
+                    alert(data);
+                }
+            });
+        }
+    });
+}
+
+function addEventTablesAction() {
     $('.action').off();
     $('.action').unbind();
     $('.action').on('click', '.delete-action', function(e) {
@@ -54,27 +81,6 @@ function addEventAction() {
 
 $(function() {
     createProducTable();
-    addEventAction();
-
-    $('#addProduct').on('click', function() {
-        var newProduct = $("#productInput").val();
-        $.ajax({ method : "POST",
-        url : "/product/insert",
-        dataType : "json",
-        data : { "product" : newProduct
-        },
-        dataContext : "json",
-        success : function(data) {
-            if (productTable != null && data.type == "success" && data.data == true) {
-                productTable.row.add([ newProduct, "" ]).draw(false);
-                addEventAction();
-                $("#productInput").val("");
-            }
-        },
-        error : function(data) {
-            alert(data);
-        }
-        });
-    });
-
+    createEvent();
+    addEventTablesAction();
 });

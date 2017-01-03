@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import manament.log.LoggerWapper;
 import models.JQLIssueWapper;
 import models.ResultCode;
+import models.SessionInfo;
 import models.exception.APIException;
 import models.exception.ResultsUtil;
 import models.gadget.AssigneeVsTestExecution;
@@ -37,6 +38,7 @@ public class GadgetHandlerImpl extends GadgetHandler {
     @Override
     public Result insertOrUpdateGadget(String type, String data, Context context) throws APIException {
         Gadget gadget = null;
+        String gadgetId="";
         Type gadgetType = Gadget.Type.valueOf(type);
         if(gadgetType == null){
             throw new APIException("type " + type + " not available");
@@ -94,7 +96,7 @@ public class GadgetHandlerImpl extends GadgetHandler {
                 errorMessages.add("Release");
             }
             if(errorMessages.isEmpty()){
-                gadgetService.insertOrUpdate(gadget);
+                gadgetId = gadgetService.insertOrUpdate(gadget);
             } else{
                 StringBuffer error = new StringBuffer();
                 errorMessages.forEach(e -> error.append(e).append(", "));
@@ -105,7 +107,7 @@ public class GadgetHandlerImpl extends GadgetHandler {
             throw new APIException("can not map to any Epic gadget");
         }
 
-        return Results.json().render("message", "successful");
+        return Results.json().render("message", "successful").render("data", gadgetId);
     }
 
     @Override
@@ -118,31 +120,31 @@ public class GadgetHandlerImpl extends GadgetHandler {
     }
 
     @Override
-    public Result getDataGadget(String id) throws APIException {
+    public Result getDataGadget(String id, SessionInfo sessionInfo) throws APIException {
         Map<String, GadgetDataWapper> gadgetsData = new HashMap<>();
         ;
         Gadget gadget = gadgetService.get(id);
         if(gadget != null){
             if(Gadget.Type.EPIC_US_TEST_EXECUTION.equals(gadget.getType())){
                 EpicVsTestExecution epicGadget = (EpicVsTestExecution) gadget;
-                List<GadgetData> epicData = epicService.getDataEPic(epicGadget);
+                List<GadgetData> epicData = epicService.getDataEPic(epicGadget, sessionInfo.getCookies());
                 GadgetDataWapper epicDataWapper = new GadgetDataWapper();
                 epicDataWapper.setIssueData(epicData);
                 epicDataWapper.setSummary(epicGadget.getProjectName());
                 gadgetsData.put(epicGadget.getProjectName(), epicDataWapper);
             } else if(Gadget.Type.TEST_CYCLE_TEST_EXECUTION.equals(gadget.getType())){
                 CycleVsTestExecution cycleGadget = (CycleVsTestExecution) gadget;
-                List<GadgetData> cycleData = cycleService.getDataCycle(cycleGadget);
+                List<GadgetData> cycleData = cycleService.getDataCycle(cycleGadget, sessionInfo.getCookies());
                 GadgetDataWapper epicDataWapper = new GadgetDataWapper();
                 epicDataWapper.setIssueData(cycleData);
                 epicDataWapper.setSummary(cycleGadget.getProjectName());
                 gadgetsData.put(cycleGadget.getProjectName(), epicDataWapper);
             } else if(Gadget.Type.ASSIGNEE_TEST_EXECUTION.equals(gadget.getType())){
                 AssigneeVsTestExecution assigneeGadget = (AssigneeVsTestExecution) gadget;
-                gadgetsData = assigneeService.getDataAssignee(assigneeGadget);
+                gadgetsData = assigneeService.getDataAssignee(assigneeGadget, sessionInfo.getCookies());
             } else if(Gadget.Type.STORY_TEST_EXECUTION.equals(gadget.getType())){
                 StoryVsTestExecution storyGadget = (StoryVsTestExecution) gadget;
-                gadgetsData = storyService.getDataStory(storyGadget);
+                gadgetsData = storyService.getDataStory(storyGadget, sessionInfo.getCookies());
             }
         } else{
             throw new APIException(String.format("gadget id=%s not found", id));
@@ -151,8 +153,8 @@ public class GadgetHandlerImpl extends GadgetHandler {
     }
 
     @Override
-    public Result getStoryInEpic(List<String> epics) throws APIException {
-        Map<String, JQLIssueWapper> storiesIssues = storyService.findStoryInEpic(epics);
+    public Result getStoryInEpic(List<String> epics, SessionInfo sessionInfo) throws APIException {
+        Map<String, JQLIssueWapper> storiesIssues = storyService.findStoryInEpic(epics,sessionInfo.getCookies());
         Map<String, Set<String>> storiesInEpic = new HashMap<>();
         storiesIssues.forEach(new BiConsumer<String, JQLIssueWapper>() {
             @Override
@@ -166,8 +168,8 @@ public class GadgetHandlerImpl extends GadgetHandler {
     }
 
     @Override
-    public Result getProjectList() throws APIException {
-        return Results.json().render(gadgetService.getProjectList());
+    public Result getProjectList(SessionInfo sessionInfo) throws APIException {
+        return Results.json().render(gadgetService.getProjectList(sessionInfo.getCookies()));
     }
 
     @Override

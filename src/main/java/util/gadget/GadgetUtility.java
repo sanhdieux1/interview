@@ -92,7 +92,7 @@ public class GadgetUtility extends DatabaseUtility {
         // GadgetUtility.getInstance().insertOrUpdate(gadget);
     }
 
-    public void insertOrUpdate(Gadget gadget) throws APIException {
+    public String insertOrUpdate(Gadget gadget) throws APIException {
         String id = gadget.getId();
         Gadget existingGadget = null;
         try {
@@ -105,7 +105,6 @@ public class GadgetUtility extends DatabaseUtility {
         try {
             Document dbObject = Document.parse(mapper.writeValueAsString(gadget));
             dbObject.remove("id");
-            System.out.println(dbObject.toJson());
             if (existingGadget != null) {
                 BasicDBObject updateQuery = new BasicDBObject();
                 updateQuery.append("$set", dbObject);
@@ -113,9 +112,13 @@ public class GadgetUtility extends DatabaseUtility {
                 searchQuery.append("_id", new ObjectId(id));
                 logger.fasttrace("update gadget id %s by user:%s", id, gadget.getUser());
                 collection.updateOne(searchQuery, updateQuery);
+                return id;
             } else {
                 logger.fasttrace("insert gadget:%s by user:%s", gadget.getType(), gadget.getUser());
+                ObjectId idObj = new ObjectId();
+                dbObject.append("_id", idObj);
                 collection.insertOne(dbObject);
+                return idObj.toString();
             }
         } catch (JsonProcessingException e) {
             logger.fastDebug("error during mapper.writeValueAsString", e);
@@ -277,7 +280,7 @@ public class GadgetUtility extends DatabaseUtility {
         }
     }
 
-    public JQLIssueVO findIssue(String issueKey) throws APIException {
+    public JQLIssueVO findIssue(String issueKey,  Map<String, String> cookies) throws APIException {
         JQLSearchResult searchResult = null;
         String query = "issue=%s";
         Map<String, String> parameters = new HashMap<String, String>();
@@ -287,7 +290,7 @@ public class GadgetUtility extends DatabaseUtility {
                         Constant.RESOURCE_BUNLE_SEARCH_MAXRECORDS_DEFAULT));
         parameters.put(Constant.PARAMERTER_OFFSET, "0");
         String data = HTTPClientUtil.getInstance().getLegacyData(
-                PropertiesUtil.getString(Constant.RESOURCE_BUNLE_SEARCH_PATH), parameters);
+                PropertiesUtil.getString(Constant.RESOURCE_BUNLE_SEARCH_PATH), parameters, cookies);
         try {
             searchResult = JSONUtil.getInstance().convertJSONtoObject(data, JQLSearchResult.class);
         } catch (APIException e) {
@@ -301,11 +304,11 @@ public class GadgetUtility extends DatabaseUtility {
         return searchResult.getIssues().get(0);
     }
 
-    public List<String> getProjectList() throws APIException {
+    public List<String> getProjectList(Map<String, String> cookies) throws APIException {
         if (projectsCache.isEmpty()) {
             String data = HTTPClientUtil.getInstance().getLegacyData(
                     PropertiesUtil.getString(Constant.RESOURCE_BUNLE_PROJECT_PATH),
-                    new HashMap<String, String>());
+                    new HashMap<String, String>(), cookies);
             List<ProjectVO> projects = JSONUtil.getInstance().convertJSONtoListObject(data,
                     ProjectVO.class);
 
@@ -348,5 +351,9 @@ public class GadgetUtility extends DatabaseUtility {
         BasicDBObject query = getQueryById(id);
         DeleteResult res = collection.deleteOne(query);
         return res.getDeletedCount();
+    }
+    
+    public void clearCache(){
+        projectsCache.clear();
     }
 }

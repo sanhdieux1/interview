@@ -1,8 +1,10 @@
 package util;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -39,7 +41,21 @@ public class JSONUtil {
         }
         return listObject;
     }
-
+    public <T> HashMap<String, T> convertJSONtoMapObject(String json, Class<T> t) throws APIException {
+        if(json == null){
+            return null;
+        }
+        
+        HashMap<String, T> mapObject;
+        try{
+            mapObject = mapper.readValue(json, mapper.getTypeFactory().constructMapType(HashMap.class,String.class, t));
+        } catch (IOException e){
+            logger.fastDebug("cannot parse json: %s", e, json);
+            throw new APIException("cannot parse json", e);
+        }
+        return mapObject;
+    }
+    
     public <T> T convertJSONtoObject(String json, Class<T> type) throws APIException {
         if(json == null){
             return null;
@@ -92,5 +108,13 @@ public class JSONUtil {
         return result;
     }
     
- 
+ public String convertToString(Object obj){
+     
+     try{
+        return mapper.writeValueAsString(obj);
+    } catch (JsonProcessingException e){
+        logger.fastDebug("Cannot deserialize %s to String", e, obj);
+    }
+     return null;
+ }
 }

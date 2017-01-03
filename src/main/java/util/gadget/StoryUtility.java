@@ -11,9 +11,9 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
-import handle.FindIssueInEpicCallable;
 import handle.executors.ExecutorManagement;
 import handle.executors.FindIssueCallable;
+import handle.executors.FindIssueInEpicCallable;
 import handle.executors.TestExecutionCallable;
 import manament.log.LoggerWapper;
 import models.APIIssueVO;
@@ -43,13 +43,13 @@ public class StoryUtility {
         return INSTANCE;
     }
 
-    public Map<String, JQLIssueWapper> findStoryInEpic(List<String> epics) throws APIException {
+    public Map<String, JQLIssueWapper> findStoryInEpic(List<String> epics,  Map<String, String> cookies) throws APIException {
         Map<String, JQLIssueWapper> storiesData = new HashMap<>();
         List<FindIssueInEpicCallable> tasks = new ArrayList<FindIssueInEpicCallable>();
         for (String epic : epics){
-            JQLIssueVO epicIssue = GadgetUtility.getInstance().findIssue(epic);
+            JQLIssueVO epicIssue = GadgetUtility.getInstance().findIssue(epic, cookies);
             if(storyInEpic.get(epic) == null){
-                tasks.add(new FindIssueInEpicCallable(epicIssue));
+                tasks.add(new FindIssueInEpicCallable(epicIssue, cookies));
             } else{
                 storiesData.put(epic, storyInEpic.get(epic));
             }
@@ -74,7 +74,7 @@ public class StoryUtility {
         return set.stream().filter(i -> type.toString().equalsIgnoreCase(i.getFields().getIssuetype().getName())).collect(Collectors.toSet());
     }
 
-    public List<ExecutionIssueVO> findAllTestExecutionInStory(JQLIssueVO issue) throws APIException {
+    public List<ExecutionIssueVO> findAllTestExecutionInStory(JQLIssueVO issue,  Map<String, String> cookies) throws APIException {
         List<ExecutionIssueVO> result = new ArrayList<>();
         if(JQLIssuetypeVO.Type.STORY.toString().equalsIgnoreCase(issue.getFields().getIssuetype().getName())){
             List<JQLIssueLinkVO> issueLinks = findAllTestIssueForStory(issue);
@@ -84,7 +84,7 @@ public class StoryUtility {
             }
             if(issueLinks != null && !issueLinks.isEmpty()){
                 for (JQLIssueLinkVO issueLink : issueLinks){
-                    List<ExecutionIssueVO> executionIssues = EpicUtility.getInstance().findTestExecutionInIsuee(issueLink.getInwardIssue().getKey());
+                    List<ExecutionIssueVO> executionIssues = EpicUtility.getInstance().findTestExecutionInIsuee(issueLink.getInwardIssue().getKey(), cookies);
                     if(executionIssues != null && !executionIssues.isEmpty()){
                         result.addAll(executionIssues);
                     }
@@ -105,22 +105,22 @@ public class StoryUtility {
         return testIssue;
     }
 
-    public Map<String, GadgetDataWapper> getDataStory(StoryVsTestExecution storyGadget) throws APIException {
+    public Map<String, GadgetDataWapper> getDataStory(StoryVsTestExecution storyGadget,  Map<String, String> cookies) throws APIException {
         Map<String, GadgetDataWapper> returnData = new HashMap<>();
         Map<String, JQLIssueWapper> epicWrapperMap = null;
         if(storyGadget.isSelectAllEpic() && storyGadget.isSelectAllStory()){
             String project = storyGadget.getProjectName();
             Release release = storyGadget.getRelease();
-            List<APIIssueVO> epicIssues = EpicUtility.getInstance().getEpicLinks(project, release.toString(), storyGadget.getProducts());
+            List<APIIssueVO> epicIssues = EpicUtility.getInstance().getEpicLinks(project, release.toString(), storyGadget.getProducts(), cookies);
             Set<String> epics = epicIssues.stream().map(e -> e.getKey()).collect(Collectors.toSet());
-            epicWrapperMap = findStoryInEpic(new ArrayList<String>(epics));
+            epicWrapperMap = findStoryInEpic(new ArrayList<String>(epics), cookies);
         } else if(storyGadget.isSelectAllStory()){
-            epicWrapperMap = findStoryInEpic(new ArrayList<String>(storyGadget.getEpic()));
+            epicWrapperMap = findStoryInEpic(new ArrayList<String>(storyGadget.getEpic()), cookies);
         } else{
             Set<JQLIssueVO> storyIssues = new HashSet<>();
             Set<String> stories = storyGadget.getStories();
             List<FindIssueCallable> tasks = new ArrayList<FindIssueCallable>();
-            stories.forEach(s -> tasks.add(new FindIssueCallable(s)));
+            stories.forEach(s -> tasks.add(new FindIssueCallable(s, cookies)));
 
             List<Future<JQLIssueVO>> taskResult = ExecutorManagement.getInstance().invokeTask(tasks);
             List<JQLIssueVO> storyIssuesList = ExecutorManagement.getInstance().getResult(taskResult);
@@ -131,7 +131,7 @@ public class StoryUtility {
                     .collect(Collectors.groupingBy(s -> s.getFields().getEpicLink() != null ? s.getFields().getEpicLink() : "", Collectors.toSet()));
             epicWrapperMap = new HashMap<>();
             for(String epicKey : epicMap.keySet()){
-                JQLIssueVO epicIssue = GadgetUtility.getInstance().findIssue(epicKey);
+                JQLIssueVO epicIssue = GadgetUtility.getInstance().findIssue(epicKey, cookies);
                 epicWrapperMap.put(epicKey, new JQLIssueWapper(epicIssue, epicMap.get(epicKey)));
             }
         }
@@ -143,7 +143,7 @@ public class StoryUtility {
         for (String epic : epicWrapperMap.keySet()){
             List<TestExecutionCallable> tasks = new ArrayList<TestExecutionCallable>();
             JQLIssueWapper storyWapper = epicWrapperMap.get(epic);
-            storyWapper.getChild().forEach(s -> tasks.add(new TestExecutionCallable(s, type)));
+            storyWapper.getChild().forEach(s -> tasks.add(new TestExecutionCallable(s, type, cookies)));
             List<ExecutionIssueResultWapper> results = ExecutorManagement.getInstance().invokeAndGet(tasks);
             
             List<GadgetData> storyDatas = new ArrayList<>();
@@ -163,4 +163,7 @@ public class StoryUtility {
         return returnData;
     }
 
+    public void clearCache(){
+        storyInEpic.clear();
+    }
 }

@@ -60,6 +60,11 @@ public class Constant {
     public static final String DASHBOAR_ID = "dashboardId";
     //internal conf
     public static final String CONCURRENT_THREAD = "internal.conf.concurrent_thread";
+    public static final String CLEAN_CACHE_TIME = "internal.conf.clearcache.time";
     
+    public static final String API_SESSION_INFO = "APICookies"; 
+    public static final String API_SESSION_INFO_INTERNAL = "APICookiesInternal";
     
+    //message
+    public static final String SESSION_ERROR_MESSAGE = "session.error.message";
 }

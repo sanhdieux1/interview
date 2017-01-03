@@ -2,6 +2,7 @@ package util.gadget;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Future;
 
@@ -25,18 +26,18 @@ public class CycleUtility {
         return INSTANCE;
     }
 
-    public List<GadgetData> getDataCycle(CycleVsTestExecution cycleGadget) throws APIException {
+    public List<GadgetData> getDataCycle(CycleVsTestExecution cycleGadget,  Map<String, String> cookies) throws APIException {
         List<GadgetData> returnData = new ArrayList<>();
         Set<String> cycles = cycleGadget.getCycles();
         String project = cycleGadget.getProjectName();
         Release release = cycleGadget.getRelease();
         if(cycleGadget.isSelectAllCycle()){
-            cycles = AssigneeUtility.getInstance().getListCycleName(project, release, cycleGadget.getProducts());
+            cycles = AssigneeUtility.getInstance().getListCycleName(project, release, cycleGadget.getProducts(), cookies);
         }
         List<CycleTestCallable> tasks = new ArrayList<>();
         if(cycles != null && !cycles.isEmpty()){
             for (String cycle : cycles){
-                tasks.add(new CycleTestCallable(cycle, project));
+                tasks.add(new CycleTestCallable(cycle, project, cookies));
             }
             List<Future<ExecutionIssueResultWapper>> taskResult = ExecutorManagement.getInstance().invokeTask(tasks);
             List<ExecutionIssueResultWapper> results = ExecutorManagement.getInstance().getResult(taskResult);
