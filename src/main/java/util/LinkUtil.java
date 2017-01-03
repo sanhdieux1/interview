@@ -14,6 +14,8 @@ import org.jsoup.Connection.Response;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
+import service.HTTPClientUtil;
+
 public class LinkUtil {
     final static Logger logger = Logger.getLogger(LinkUtil.class);
 
@@ -50,8 +52,14 @@ public class LinkUtil {
         Document doc = null;
         try {
             URL url = new URL(link);
-            Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(ip, port));
-            HttpURLConnection uc = (HttpURLConnection) url.openConnection(proxy);
+            
+            Proxy proxy = HTTPClientUtil.getInstance().getProxy();
+            HttpURLConnection uc = null;
+            if(proxy != null){
+                uc = (HttpURLConnection) url.openConnection(proxy);
+            } else{
+                uc = (HttpURLConnection) url.openConnection();
+            }
             uc.setConnectTimeout(3000);
             // non-proxy
             // HttpURLConnection uc = (HttpURLConnection)url.openConnection();
