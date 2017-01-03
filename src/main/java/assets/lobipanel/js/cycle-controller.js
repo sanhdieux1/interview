@@ -73,9 +73,9 @@ function callAjaxToUpdateCycle(jsonString) {
       beforeSend: function() {
         hideCycleTable();
       },
-      error: function(res) {
+      error: function(xhr, textStatus, error) {
     	$(this).prop("disabled", true);
-        alert("Error while updating object using Ajax");
+    	debugError(xhr, textStatus, error);
         $("#cycle-update-btn").prop("disabled",false);
         showCycleTable();
       },
@@ -85,7 +85,7 @@ function callAjaxToUpdateCycle(jsonString) {
         }
         alert("Gadget updated succesfully");
       }
-    }).done(function() {
+    }).always(function() {
       console.log(jsonString);
     });
   }
@@ -100,15 +100,15 @@ function callAjaxOnCycleTable() {
     success: function(gadgetList) {
       drawCycleGadget(gadgetList);
     },
-    error: function(response) {
-      alert("Error while drawing cycle table");
+    error: function(xhr, textStatus, error) {
+      debugError(xhr, textStatus, error);
       $(this).prop("disabled", true);
       showCycleTable();
     },
     beforeSend: function() {
       hideCycleTable();
     }
-  }).done(function(gadgetList) {
+  }).always(function(gadgetList) {
     if (debugAjaxResponse(gadgetList)) {
       return;
     }
@@ -223,11 +223,10 @@ function callAjaxOnCycleProjectAndRelease() {
         data.sort();
         appendToSelect(true, data, "#cycleMultiSelect");
       },
-      error: function(data) {
-        alert("Error: Failed to get cycle list");
-        console.log(data);
+      error: function(xhr, textStatus, error) {
+    	  debugError(xhr, textStatus, error);
       }
-    }).done(function() {
+    }).always(function() {
       showCycleSelect();
     });
   }

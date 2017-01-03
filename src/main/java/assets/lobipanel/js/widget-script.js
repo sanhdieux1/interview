@@ -12,6 +12,7 @@ var GET_EPIC_URI = "/getEpicLinks";
 var GET_DATA_URI = "/gadget/getData";
 var GET_STORY_URI = "/gadget/getStoryInEpic";
 var GET_CYCLE_URI = "/listcycle";
+var GET_PRODUCT_URI = "/product/getall";
 var GET_ASSIGNEE_URI = "/getassignee";
 var EPIC_TYPE = "EPIC_US_TEST_EXECUTION";
 var US_TYPE = "STORY_TEST_EXECUTION";
@@ -23,6 +24,7 @@ var TEST_EPIC_ID = null;
 var TEST_US_ID = null;
 var TEST_ASSIGNEE_ID = null;
 var TEST_CYCLE_ID = null;
+var PRODUCT_MANAGEMENT_URI = location.origin = location.protocol + "//" + location.host +"/product";
 
 $("#btn-add-gadget-epic").click(function(){
 	$("#epic-test-execution-div").show();
@@ -58,8 +60,8 @@ function fetchGadgetList() {
 				}
 				drawGadgets(gadgetList);
 			},
-			error : function(response) {
-				alert("Ajax request failed");
+			error : function(xhr, textStatus, error) {
+				debugError(xhr, textStatus, error);
 			},
 		});
 	}
@@ -117,11 +119,11 @@ function drawGadgets(gadgetList) {
 			}
 			if (gadgetList[i]["selectAll"] == true) {
 				$("epicCheckAll").prop("checked", true);
-				$("#epic-link-container").fadeOut();
+				$("#epic-link-container").hide();
 			} else if (gadgetList[i]["epic"] != null) {
-				$("epicCheckAll").prop("checked", false);
-				$("#epic-link-container").fadeIn();
-				$("epic-link-loader").hide();
+				$("#epicCheckAll").prop("checked", false);
+				$("#epic-link-container").show();
+				$("#epic-link-loader").hide();
 				appendToSelect(true, gadgetList[i]["epic"], "#epicMultiSelect");
 				$("#epicMultiSelect").val(gadgetList[i]["epic"]);
 			}
@@ -259,6 +261,7 @@ function drawGadgets(gadgetList) {
 
 // On document ready, append projects list to 4 widget project field
 $(document).ready(function() {
+	var productPage;
 	if("dashboard" != window.location.href.split('/')[3] ){
 		return;
 	}
@@ -280,31 +283,31 @@ $(document).ready(function() {
 		});
 	}
 	
-	fetchGadgetList();
-	checkAddGadgetButton();
-});
-
-// Setting up ajax error function
-$(function() {
-	$.ajaxSetup({
-		error : function(jqXHR, exception) {
-			if (jqXHR.status === 0) {
-				alert('Connection lost.');
-			} else if (jqXHR.status == 404) {
-				alert('Requested page not found. [404]');
-			} else if (jqXHR.status == 500) {
-				alert('Internal Server Error [500].');
-			} else if (exception === 'parsererror') {
-				alert('Requested JSON parse failed.');
-			} else if (exception === 'timeout') {
-				alert('Time out error.');
-			} else if (exception === 'abort') {
-				alert('Ajax request aborted.');
-			} else {
-				alert('Uncaught Error.\n' + jqXHR.responseText);
+	$.ajax({
+		url: GET_PRODUCT_URI,
+		error: function(xhr, textStatus, error){
+			debugError(xhr, textStatus, error);
+		},
+		success: function(data){
+			if(debugAjaxResponse(data)){
+				return;
+			}
+			else{
+				console.log(data);
+				appendToSelect(false, data["data"], "#epicProduct");
+				appendToSelect(false, data["data"], "#usProduct");
+				appendToSelect(false, data["data"], "#assigneeProduct");
+				appendToSelect(false, data["data"], "#cycleProduct");
 			}
 		}
 	});
+	
+	productPage = location.protocol + "//" + location.host+ "/product";
+	console.log(productPage);
+	$(".btn-to-product").attr("href", productPage);
+	
+	fetchGadgetList();
+	checkAddGadgetButton();
 });
 
 // Create new table for each epic or cycle in Story table and Assignee table
@@ -447,7 +450,7 @@ function debugAjaxResponse(data) {
 }
 
 window.onerror = function(msg, url, linenumber) {
-    alert('Uncaught error message: '+msg+'\nURL: '+url+'\nLine Number: '+linenumber);
+    alert('Unhandled error message: '+msg+'\nURL: '+url+'\nLine Number: '+linenumber);
     return true;
 }
 
@@ -470,4 +473,11 @@ function createIssueLinks(data, displayOrType, rowData, setting){
 		return htmlString += ')">' + data["total"] + '</a>';
 	}
 	return data["total"];
+}
+
+function debugError(xhr, textStatus, error){
+	alert("Request status: " + xhr.statusText + "\nDescription: " + textStatus+ "\nError:" + error);
+	console.log(xhr);
+	console.log(textStatus);
+	console.log(error);
 }

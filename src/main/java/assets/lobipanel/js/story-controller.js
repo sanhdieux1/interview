@@ -141,8 +141,8 @@ function callAjaxToUpdateUsGadget(jsonString) {
       beforeSend: function() {
         hideUsTable();
       },
-      error: function(res) {
-        alert("Error while updating object using Ajax");
+      error: function(xhr, textStatus, error) {
+    	  debugError(xhr, textStatus, error);
         $("#us-update-btn").prop("disabled", false);
         showUsTable();
       },
@@ -152,7 +152,7 @@ function callAjaxToUpdateUsGadget(jsonString) {
         }
         alert("Gadget updated succesfully");
       }
-    }).done(function(returnMessage) {
+    }).always(function(returnMessage) {
       console.log(jsonString);
 
     });
@@ -176,8 +176,8 @@ function reloadUSList() {
     data: {
       epics: jsonString
     },
-    error: function(data) {
-      alert("Error: failed to get user story list");
+    error: function(xhr, textStatus, error) {
+    	debugError(xhr, textStatus, error);
     },
     beforeSend: function() {
       $("#usMultiSelect").fadeOut();
@@ -197,10 +197,8 @@ function reloadUSList() {
         }
       })
     }
-  }).done(
+  }).always(
     function(data) {
-
-
       $("#usMultiSelect").fadeIn();
       $("#us-us-loader").fadeOut();
     });
@@ -216,15 +214,15 @@ function callAjaxOnUsTable() {
       success: function(gadgetList) {
         drawUsGadget(gadgetList);
       },
-      error: function(response) {
-        alert("Failed to send ajax: Widget User story table");
+      error: function(xhr, textStatus, error) {
+    	  debugError(xhr, textStatus, error);
         $("#us-update-btn").prop("disabled", false);
       },
       beforeSend: function() {
         US_TABLE_LOADING = true;
         hideUsTable();
       }
-    }).done(function(gadgetList) {
+    }).always(function(gadgetList) {
       if (debugAjaxResponse(gadgetList)) {
         return;
       }
@@ -235,6 +233,7 @@ function callAjaxOnUsTable() {
 function drawUsGadget(gadgetList) {
   for (var i = 0; i < gadgetList.length; i++) {
     if (gadgetList[i]["type"] == US_TYPE) {
+      console.log(gadgetList[i]["id"]);
       TEST_US_ID = gadgetList[i]["id"];
       console.log("prepare to draw table");
       drawUsTable(gadgetList[i]["id"], gadgetList[i]["metrics"]);
@@ -260,8 +259,8 @@ function drawUsTable(gadgetId, metricArray) {
       GLOBAL_US_TABLES_AJAX.loading = true;
       hideUsTable();
     },
-    error: function(mess) {
-      console.log(mess);
+    error: function(xhr, textStatus, error) {
+    	debugError(xhr, textStatus, error);
     },
     success: function(responseData) {
     	if (debugAjaxResponse(responseData)) {
@@ -351,7 +350,7 @@ function drawUsTable(gadgetId, metricArray) {
         GLOBAL_US_TABLES_AJAX.loading = false;
       });
     }
-  }).done(
+  }).always(
     function(responseData) {
       $("#us-update-btn").prop("disabled", false);
       showUsTable();
@@ -381,8 +380,13 @@ function callAjaxOnUsProjectAndRelease() {
       }
 
     },
-    error: function(data) {
-      alert("Error: Ajax failed.");
+    error: function(xhr, textStatus, error) {
+    	debugError(xhr, textStatus, error);
+    	if (!$("#usCheckAllEpic").prop("checked")) {
+            showUsEpic();
+          } else if (!$("#usCheckAllStory").prop("checked")) {
+            showUsStory();
+          }
     },
     success: function(data) {
       if (debugAjaxResponse(data)) {

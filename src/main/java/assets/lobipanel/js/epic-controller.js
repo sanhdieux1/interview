@@ -43,8 +43,8 @@ function callAjaxOnEpicTable() {
 		beforeSend : function() {
 			hideEpicTable();
 		},
-		error : function() {
-			alert("Failed to execute ajax fetching epic table");
+		error : function(xhr, textStatus, error) {
+			debugError(xhr, textStatus, error);
 			$("#epic-add-gadget").prop("disabled",false);
 			showEpicTable();
 		},
@@ -84,7 +84,7 @@ function callAjaxOnEpicProjectAndRelease() {
 				data.sort();
 				appendToSelect(true, data, "#epicMultiSelect");
 			}
-		}).done(function(data) {
+		}).always(function(data) {
 			showEpicLinks();
 		});
 	}
@@ -144,8 +144,8 @@ function callAjaxToUpdateGadget(jsonString) {
 				}
 				alert("Gadget updated succesfully");
 			},
-			error: function(mess){
-				alert("Error: Cannot update gadget.")
+			error: function(xhr, textStatus, error){
+				 debugError(xhr, textStatus, error);
 				$("#epic-add-gadget").prop("disabled",false);
 			}
 		});

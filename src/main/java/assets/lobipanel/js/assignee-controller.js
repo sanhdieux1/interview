@@ -120,8 +120,8 @@ function updateAssigneeGadget(jsonString) {
       beforeSend: function() {
         hideAssigneeTable();
       },
-      error: function(res) {
-        alert("Error while updating object using Ajax");
+      error: function(xhr, textStatus, error) {
+    	  debugError(xhr, textStatus, error);
         $("#assignee-update-btn").prop("disabled", false);
         showAssigneeTable();
       },
@@ -131,7 +131,7 @@ function updateAssigneeGadget(jsonString) {
         }
         alert("Gadget updated succesfully");
       }
-    }).done(function(returnMessage) {
+    }).always(function(returnMessage) {
       console.log(jsonString);
     });
   }
@@ -196,8 +196,9 @@ function drawAssigneeTable(gadgetId, metricArray) {
         GLOBAL_ASSIGNEE_TABLES_AJAX.loading = true;
         hideAssigneeTable();
       },
-      error: function(response) {
-        console.log(response);
+      error: function(xhr, textStatus, error) {
+    	  debugError(xhr, textStatus, error);
+    	  showAssigneeTable();
       },
       success: function(responseData) {
         GLOBAL_ASSIGNEE_TABLES_AJAX.loading = false;
@@ -335,7 +336,7 @@ function drawAssigneeTable(gadgetId, metricArray) {
               }
             });
       }
-    }).done(function(responseData) {
+    }).always(function(responseData) {
       $("#assignee-update-btn").prop("disabled", false);
       showAssigneeTable();
     });
@@ -353,14 +354,14 @@ function callAjaxOnAssigneeTable() {
       }
       drawAssigneeGadget(gadgetList);
     },
-    error: function(response) {
-      alert("Error while drawing assignee table");
+    error: function(xhr, textStatus, error) {
+    	debugError(xhr, textStatus, error);
       $("#assignee-update-btn").prop("disabled", false);
     },
     beforeSend: function() {
       hideAssigneeTable();
     }
-  }).done(function(gadgetList) {
+  }).always(function(gadgetList) {
     console.log(gadgetList);
   });
 }
@@ -394,9 +395,10 @@ function callAjaxOnAssigneeProjectAndRelease() {
         appendToSelect(true, data, "#assigneeCycleAvailable");
         $("#assigneeCycle").find("option").remove().end();
       },
-      error: function(data) {
-        alert("Error : Cant fetch cycle");
-        console.log(data);
+      error: function(xhr, textStatus, error) {
+    	  debugError(xhr, textStatus, error);
+    	  showAssigneeCycle();
+          console.log(data);
       }
     }).always(function() {
       showAssigneeCycle();
@@ -425,8 +427,8 @@ function callAjaxOnAssigneeProjectAndRelease() {
         tempAssigneeList.sort();
         appendToSelect(true, tempAssigneeList, "#assigneeMultiSelect");
       },
-      error: function(data) {
-        alert("Error fetching assignee list");
+      error: function(xhr, textStatus, error) {
+    	 debugError(xhr, textStatus, error);
         console.log(data);
       }
     }).always(function() {
