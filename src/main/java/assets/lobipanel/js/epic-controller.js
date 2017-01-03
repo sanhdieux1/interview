@@ -30,6 +30,7 @@ $("#epicCheckAll").click(function() {
 		$("#epic-link-container").fadeOut();
 	} else {
 		$("#epic-link-container").fadeIn();
+		callAjaxOnEpicProjectAndRelease();
 	}
 });
 // Send ajax to get a list of epic gadgets

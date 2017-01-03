@@ -23,6 +23,7 @@ $("#cycleCheckAll").click(function() {
     $("#cycle-container").fadeOut();
   } else {
     $("#cycle-container").fadeIn();
+    callAjaxOnCycleProjectAndRelease();
   }
 });
 

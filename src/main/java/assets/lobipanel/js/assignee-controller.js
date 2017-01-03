@@ -151,7 +151,7 @@ $("#assigneeCheckAll").click(function() {
   if ($(this).prop("checked") == true) {
     $("#assignee-container").fadeOut();
   } else {
-    $("#assignee-container").fadeIn();
+    $("#assignee-container").fadeIn(); 
   }
 });
 
@@ -162,7 +162,7 @@ $("#assigneeCheckAllCycle").click(function() {
     addAllCycle();
   } else {
     $("#assignee-cycle-container").fadeIn();
-    showAssigneeCycle();
+    callAjaxOnAssigneeProjectAndRelease();
   }
 });
 

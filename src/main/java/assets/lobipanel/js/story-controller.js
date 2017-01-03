@@ -40,7 +40,7 @@ $("#us-remove-all-epic-btn").click(function() {
 
 $("#us-update-btn").click(
   function() {
-	  $(this).prop("disabled", true);
+    $(this).prop("disabled", true);
     var jsonString = createJsonStringObjectFromUsInputField();
     callAjaxToUpdateUsGadget(jsonString);
     callAjaxOnUsTable();
@@ -58,6 +58,7 @@ $("#usCheckAllEpic").click(function() {
     addAllEpic();
   } else {
     $("#us-epic-container").fadeIn();
+    callAjaxOnUsProjectAndRelease();
   }
 });
 
@@ -66,6 +67,9 @@ $("#usCheckAllStory").click(function() {
     $("#us-container").fadeOut();
   } else {
     $("#us-container").fadeIn();
+    if (!$("#usCheckAllEpic").prop("checked")) {
+      callAjaxOnUsProjectAndRelease();
+    }
   }
 });
 
@@ -74,11 +78,10 @@ function createJsonStringObjectFromUsInputField() {
   var values;
   var object = {};
   var jsonString;
-  if(null == $("#dashboardId").val()){
-	  alert("No valid dashboard id provided.");
-	  return;
-  }
-  else if ($("#usProject").val() == null) {
+  if (null == $("#dashboardId").val()) {
+    alert("No valid dashboard id provided.");
+    return;
+  } else if ($("#usProject").val() == null) {
     alert("No project selected");
     return;
   } else if ($("#usRelease").val() == null) {
@@ -102,7 +105,7 @@ function createJsonStringObjectFromUsInputField() {
   values = $.map(options, function(option) {
     return option.value;
   });
-  
+
   object['id'] = TEST_US_ID;
   object['dashboardId'] = $("#dashboardId").val();
   object['projectName'] = $("#usProject").val();
@@ -127,7 +130,7 @@ function createJsonStringObjectFromUsInputField() {
 }
 
 function callAjaxToUpdateUsGadget(jsonString) {
-  if (null != jsonString &&  "" != jsonString) {
+  if (null != jsonString && "" != jsonString) {
     $.ajax({
       url: SAVE_GADGET_URI,
       method: 'POST',
@@ -151,7 +154,7 @@ function callAjaxToUpdateUsGadget(jsonString) {
       }
     }).done(function(returnMessage) {
       console.log(jsonString);
-      
+
     });
   }
 }
@@ -173,13 +176,15 @@ function reloadUSList() {
     data: {
       epics: jsonString
     },
+    error: function(data) {
+      alert("Error: failed to get user story list");
+    },
     beforeSend: function() {
       $("#usMultiSelect").fadeOut();
       $("#us-us-loader").fadeIn();
-    }
-  }).done(
-    function(data) {
-      if (data == null || data.length == 0) {
+    },
+    success: function(data) {
+      if (debugAjaxResponse(data)) {
         return;
       }
 
@@ -191,6 +196,10 @@ function reloadUSList() {
             '#usMultiSelect');
         }
       })
+    }
+  }).done(
+    function(data) {
+
 
       $("#usMultiSelect").fadeIn();
       $("#us-us-loader").fadeOut();
@@ -198,49 +207,49 @@ function reloadUSList() {
 }
 
 function callAjaxOnUsTable() {
-	if(!US_TABLE_LOADING)
-  $.ajax({
-	  url : GET_GADGETS_URI,
-		data: {
-			dashboardId: $("#dashboardId").val()
-		},
-    success: function(gadgetList) {
-      drawUsGadget(gadgetList);
-    },
-    error: function(response) {
-      alert("Failed to send ajax: Widget User story table");
-      $("#us-update-btn").prop("disabled", false);
-    },
-    beforeSend: function() {
-      US_TABLE_LOADING = true;
-      hideUsTable();
-    }
-  }).done(function(gadgetList) {
-    if (debugAjaxResponse(gadgetList)) {
-      return;
-    }
-    console.log(gadgetList);
-  });
+  if (!US_TABLE_LOADING)
+    $.ajax({
+      url: GET_GADGETS_URI,
+      data: {
+        dashboardId: $("#dashboardId").val()
+      },
+      success: function(gadgetList) {
+        drawUsGadget(gadgetList);
+      },
+      error: function(response) {
+        alert("Failed to send ajax: Widget User story table");
+        $("#us-update-btn").prop("disabled", false);
+      },
+      beforeSend: function() {
+        US_TABLE_LOADING = true;
+        hideUsTable();
+      }
+    }).done(function(gadgetList) {
+      if (debugAjaxResponse(gadgetList)) {
+        return;
+      }
+      console.log(gadgetList);
+    });
 }
 
 function drawUsGadget(gadgetList) {
-	for (var i = 0; i < gadgetList.length; i++) {
-		if (gadgetList[i]["type"] == US_TYPE) {
-			TEST_US_ID = gadgetList[i]["id"];
-			console.log("prepare to draw table");
-			drawUsTable(gadgetList[i]["id"], gadgetList[i]["metrics"]);
-			break;
-		}
-	}
+  for (var i = 0; i < gadgetList.length; i++) {
+    if (gadgetList[i]["type"] == US_TYPE) {
+      TEST_US_ID = gadgetList[i]["id"];
+      console.log("prepare to draw table");
+      drawUsTable(gadgetList[i]["id"], gadgetList[i]["metrics"]);
+      break;
+    }
+  }
 }
 
 function drawUsTable(gadgetId, metricArray) {
   var columnList = getColumnArray(metricArray, false);
   var jsonObjectForUsTable;
-  if(GLOBAL_US_TABLES_AJAX.loading == true && GLOBAL_US_TABLES_AJAX.ajax != null){
-	  GLOBAL_US_TABLES_AJAX.ajax.abort();
+  if (GLOBAL_US_TABLES_AJAX.loading == true && GLOBAL_US_TABLES_AJAX.ajax != null) {
+    GLOBAL_US_TABLES_AJAX.ajax.abort();
   }
-  
+
   GLOBAL_US_TABLES_AJAX.ajax = $.ajax({
     url: "/gadget/getData?",
     method: "GET",
@@ -251,106 +260,107 @@ function drawUsTable(gadgetId, metricArray) {
       GLOBAL_US_TABLES_AJAX.loading = true;
       hideUsTable();
     },
-    error:function(mess){
-    	console.log(mess);
+    error: function(mess) {
+      console.log(mess);
     },
-    success: function(responseData){
-    	$("#us-table-container").html("");
-        var index = 0;
-        if (debugAjaxResponse(responseData)) {
-          return;
-        }
-        jsonObjectForUsTable = responseData;
-        console.log(jsonObjectForUsTable["data"]);
-
-        $.each(jsonObjectForUsTable["data"], function(epicKey,
-          storyArray) {
-          if (storyArray["issueData"].length != 0) {
-            var customTableId = "us-table-" + index;
-            var usTableDataSet = [];
-            var usIndividualTable;
-            appendTemplateTable(customTableId, epicKey + ": "+ storyArray["summary"],
-              "#us-table-container");
-            $("#" + customTableId).append(TEMPLATE_HEADER_FOOTER);
-            console.log("Pass each function");
-
-            for (var i = 0; i < storyArray['issueData'].length; i++) {
-              var aStoryDataSet = [];
-              aStoryDataSet.push(storyArray['issueData'][i]["key"]["key"]);
-              aStoryDataSet.push(storyArray['issueData'][i]["key"]["summary"]);
-              aStoryDataSet.push(storyArray['issueData'][i]["key"]["priority"]["name"]);
-              aStoryDataSet.push(storyArray['issueData'][i]["unexecuted"]);
-              aStoryDataSet.push(storyArray['issueData'][i]["failed"]);
-              aStoryDataSet.push(storyArray['issueData'][i]["wip"]);
-              aStoryDataSet.push(storyArray['issueData'][i]["blocked"]);
-              aStoryDataSet.push(storyArray['issueData'][i]["passed"]);
-              aStoryDataSet.push(storyArray['issueData'][i]["planned"]);
-              aStoryDataSet.push(storyArray['issueData'][i]["unplanned"]);
-              usTableDataSet.push(aStoryDataSet);
-            }
-
-            usIndividualTable = $("#" + customTableId).DataTable({
-          	bAutoWidth: false,
-              data: usTableDataSet,
-              columns: [{
-                title: "User Story"
-              },{
-                title: "SUMMARY"
-              },{
-                title: "PRIORITY"
-              }, {
-                title: "UNEXECUTED",
-                "render": function(data, displayOrType, rowData, setting){
-                	return createIssueLinks(data, displayOrType, rowData, setting);
-                }
-              }, {
-                title: "FAILED",
-                "render": function(data, displayOrType, rowData, setting){
-                	return createIssueLinks(data, displayOrType, rowData, setting);
-                }
-              }, {
-                title: "WIP",
-                "render": function(data, displayOrType, rowData, setting){
-                	return createIssueLinks(data, displayOrType, rowData, setting);
-                }
-              }, {
-                title: "BLOCKED",
-                "render": function(data, displayOrType, rowData, setting){
-                	return createIssueLinks(data, displayOrType, rowData, setting);
-                }
-              }, {
-                title: "PASSED",
-                "render": function(data, displayOrType, rowData, setting){
-                	return createIssueLinks(data, displayOrType, rowData, setting);
-                }
-              }, {
-                title: "PLANNED",
-                "render": function(data, displayOrType, rowData, setting){
-                	return createIssueLinks(data, displayOrType, rowData, setting);
-                }
-              }, {
-                title: "UNPLANNED",
-                "render": function(data, displayOrType, rowData, setting){
-                	return createIssueLinks(data, displayOrType, rowData, setting);
-                }
-              }]
-            });
-            usIndividualTable.columns(columnList).visible(false);
-            index++;
+    success: function(responseData) {
+    	if (debugAjaxResponse(responseData)) {
+            return;
           }
-          GLOBAL_US_TABLES_AJAX.loading = false;
-        });
+      $("#us-table-container").html("");
+      var index = 0;
+      
+      jsonObjectForUsTable = responseData;
+      console.log(jsonObjectForUsTable["data"]);
+
+      $.each(jsonObjectForUsTable["data"], function(epicKey,
+        storyArray) {
+        if (storyArray["issueData"].length != 0) {
+          var customTableId = "us-table-" + index;
+          var usTableDataSet = [];
+          var usIndividualTable;
+          appendTemplateTable(customTableId, epicKey + ": " + storyArray["summary"],
+            "#us-table-container");
+          $("#" + customTableId).append(TEMPLATE_HEADER_FOOTER);
+          console.log("Pass each function");
+
+          for (var i = 0; i < storyArray['issueData'].length; i++) {
+            var aStoryDataSet = [];
+            aStoryDataSet.push(storyArray['issueData'][i]["key"]["key"]);
+            aStoryDataSet.push(storyArray['issueData'][i]["key"]["summary"]);
+            aStoryDataSet.push(storyArray['issueData'][i]["key"]["priority"]["name"]);
+            aStoryDataSet.push(storyArray['issueData'][i]["unexecuted"]);
+            aStoryDataSet.push(storyArray['issueData'][i]["failed"]);
+            aStoryDataSet.push(storyArray['issueData'][i]["wip"]);
+            aStoryDataSet.push(storyArray['issueData'][i]["blocked"]);
+            aStoryDataSet.push(storyArray['issueData'][i]["passed"]);
+            aStoryDataSet.push(storyArray['issueData'][i]["planned"]);
+            aStoryDataSet.push(storyArray['issueData'][i]["unplanned"]);
+            usTableDataSet.push(aStoryDataSet);
+          }
+
+          usIndividualTable = $("#" + customTableId).DataTable({
+            bAutoWidth: false,
+            data: usTableDataSet,
+            columns: [{
+              title: "User Story"
+            }, {
+              title: "SUMMARY"
+            }, {
+              title: "PRIORITY"
+            }, {
+              title: "UNEXECUTED",
+              "render": function(data, displayOrType, rowData, setting) {
+                return createIssueLinks(data, displayOrType, rowData, setting);
+              }
+            }, {
+              title: "FAILED",
+              "render": function(data, displayOrType, rowData, setting) {
+                return createIssueLinks(data, displayOrType, rowData, setting);
+              }
+            }, {
+              title: "WIP",
+              "render": function(data, displayOrType, rowData, setting) {
+                return createIssueLinks(data, displayOrType, rowData, setting);
+              }
+            }, {
+              title: "BLOCKED",
+              "render": function(data, displayOrType, rowData, setting) {
+                return createIssueLinks(data, displayOrType, rowData, setting);
+              }
+            }, {
+              title: "PASSED",
+              "render": function(data, displayOrType, rowData, setting) {
+                return createIssueLinks(data, displayOrType, rowData, setting);
+              }
+            }, {
+              title: "PLANNED",
+              "render": function(data, displayOrType, rowData, setting) {
+                return createIssueLinks(data, displayOrType, rowData, setting);
+              }
+            }, {
+              title: "UNPLANNED",
+              "render": function(data, displayOrType, rowData, setting) {
+                return createIssueLinks(data, displayOrType, rowData, setting);
+              }
+            }]
+          });
+          usIndividualTable.columns(columnList).visible(false);
+          index++;
+        }
+        GLOBAL_US_TABLES_AJAX.loading = false;
+      });
     }
   }).done(
     function(responseData) {
-    	$("#us-update-btn").prop("disabled", false);
+      $("#us-update-btn").prop("disabled", false);
       showUsTable();
     });
 
 }
 
 function callAjaxOnUsProjectAndRelease() {
-  if ($("#usProject").val() == null || $("#usProject").val() == null || $("#usProduct").val() == null) {
+  if ($("#usProject").val() == null || $("#usRelease").val() == null || $("#usProduct").val() == null) {
     return;
   }
 
@@ -393,23 +403,23 @@ function callAjaxOnUsProjectAndRelease() {
 }
 
 function addEpic() {
-	var options = $("#usEpicAvailable option:selected").clone();
-	if (options.length == 0) {
-		return;
-	}
-	$("#usEpic").append(options);
-	$("#usEpicAvailable option:selected").remove();
-	reloadUSList();
+  var options = $("#usEpicAvailable option:selected").clone();
+  if (options.length == 0) {
+    return;
+  }
+  $("#usEpic").append(options);
+  $("#usEpicAvailable option:selected").remove();
+  reloadUSList();
 }
 
 function removeEpic() {
-	var options = $("#usEpic option:selected").clone();
-	if (options.length == 0) {
-		return;
-	}
-	$("#usEpicAvailable").append(options);
-	$("#usEpic option:selected").remove();
-	reloadUSList();
+  var options = $("#usEpic option:selected").clone();
+  if (options.length == 0) {
+    return;
+  }
+  $("#usEpicAvailable").append(options);
+  $("#usEpic option:selected").remove();
+  reloadUSList();
 }
 
 
