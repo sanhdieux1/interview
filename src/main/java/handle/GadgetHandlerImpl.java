@@ -52,7 +52,7 @@ public class GadgetHandlerImpl extends GadgetHandler {
         if(Gadget.Type.EPIC_US_TEST_EXECUTION.equals(gadgetType)){
             EpicVsTestExecution epicGadget = JSONUtil.getInstance().convertJSONtoObject(data, EpicVsTestExecution.class);
             epicGadget.setUser(username);
-            if(epicGadget.getEpic() == null || epicGadget.getEpic().isEmpty()){
+            if(!epicGadget.isSelectAll() && (epicGadget.getEpic() == null || epicGadget.getEpic().isEmpty())){
                 errorMessages.add("Epic link");
             }
             gadget = epicGadget;

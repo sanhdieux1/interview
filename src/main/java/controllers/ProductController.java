@@ -17,16 +17,16 @@ import util.ProductUtility;
 @Singleton
 public class ProductController {
     final static LoggerWapper logger = LoggerWapper.getLogger(ProductController.class);
-    @FilterWith(AdminSecureFilter.class)
+//    @FilterWith(AdminSecureFilter.class)
     public Result addProduct(@Param("product") String product){
         return Results.json().render("type", "success").render("data",ProductUtility.getInstance().insert(product));
     }
-    @FilterWith(AdminSecureFilter.class)
+//    @FilterWith(AdminSecureFilter.class)
     public Result deleteProduct(@Param("product") String product){
         long result = ProductUtility.getInstance().delete(product);
         return Results.json().render("type", "success").render("data",result);
     }
-    @FilterWith(AdminSecureFilter.class)
+//    @FilterWith(AdminSecureFilter.class)
     public Result productPage(){
         Set<String> products = ProductUtility.getInstance().getAll();
         return Results.html().render("isProductPage" , true).render("products",products);
