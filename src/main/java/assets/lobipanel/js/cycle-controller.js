@@ -12,17 +12,10 @@ $("#cycleProduct").change(function() {
 });
 
 $("#cycle-update-btn").click(function() {
+  $(this).prop("disabled", true);
   var jsonString = createJsonStringObjectFromCycleInput();
   callAjaxToUpdateCycle(jsonString);
-});
-
-$("#cycle-draw-table-btn").click(function() {
-	if(TEST_CYCLE_ID != null){
-		drawCycleTable(TEST_CYCLE_ID, $("#cycleMetricMultiSelect").val());
-	}
-	else{
-		callAjaxOnCycleTable();
-	}
+  callAjaxOnCycleTable();
 });
 
 $("#cycleCheckAll").click(function() {
@@ -80,7 +73,10 @@ function callAjaxToUpdateCycle(jsonString) {
         hideCycleTable();
       },
       error: function(res) {
+    	$(this).prop("disabled", true);
         alert("Error while updating object using Ajax");
+        $("#cycle-update-btn").prop("disabled",false);
+        showCycleTable();
       },
       success: function(data) {
         if (debugAjaxResponse(data)) {
@@ -88,9 +84,8 @@ function callAjaxToUpdateCycle(jsonString) {
         }
         alert("Gadget updated succesfully");
       }
-    }).always(function() {
+    }).done(function() {
       console.log(jsonString);
-      showCycleTable();
     });
   }
 }
@@ -106,6 +101,8 @@ function callAjaxOnCycleTable() {
     },
     error: function(response) {
       alert("Error while drawing cycle table");
+      $(this).prop("disabled", true);
+      showCycleTable();
     },
     beforeSend: function() {
       hideCycleTable();
@@ -120,65 +117,34 @@ function callAjaxOnCycleTable() {
 }
 
 function drawCycleGadget(gadgetList) {
-  for (var i = 0; i < gadgetList.length; i++) {
-    if (gadgetList[i]["type"] == CYCLE_TYPE) {
-      console.log("At gadget List");
-      if (gadgetList[i]["projectName"] != "" && gadgetList[i]["projectName"] != null) {
-        $("#cycleProject").val(gadgetList[i]["projectName"]);
-      }
-
-      if (gadgetList[i]["products"] != "" && gadgetList[i]["products"] != null) {
-        $("#cycleProduct").val(gadgetList[i]["products"]);
-      }
-
-      if (gadgetList[i]["release"] != "" && gadgetList[i]["release"] != null) {
-        $("#cycleRelease").val(gadgetList[i]["release"]);
-      }
-      if (gadgetList[i]["selectAllCycle"] == true) {
-        $("#cycleCheckAll").prop("checked", true);
-        $("#cycle-container").fadeOut();
-      } else {
-        if (gadgetList[i]["cycles"] != "" && gadgetList[i]["cycles"] != null) {
-          appendToSelect(true, gadgetList[i]["cycles"],
-            "#cycleMultiSelect");
-          $("#cycleMultiSelect").val(gadgetList[i]["cycles"]);
-        }
-      }
-
-      if (gadgetList[i]["metrics"] != "" && gadgetList[i]["metrics"] != null) {
-        $("#cycleMetricMultiSelect").val(gadgetList[i]["metrics"]);
-      }
-      console.log("prepare to draw table");
-      drawCycleTable(gadgetList[i]["id"], gadgetList[i]["metrics"]);
-      break;
-    }
-  }
+	for (var i = 0; i < gadgetList.length; i++) {
+		if (gadgetList[i]["type"] == CYCLE_TYPE) {
+			TEST_CYCLE_ID = gadgetList[i]["id"];
+			console.log("Prepare to draw table");
+			drawCycleTable(gadgetList[i]["id"], gadgetList[i]["metrics"]);
+			break;
+		}
+	}
 }
 
 function drawCycleTable(gadgetId, metricArray) {
   var columnList = getColumnArray(metricArray, true);
+  resetTableColumns(GLOBAL_CYCLE_TABLE, true);
   if (GLOBAL_CYCLE_TABLE != null) {
     console.log(GLOBAL_CYCLE_TABLE);
-    GLOBAL_CYCLE_TABLE.ajax.reload();
+    hideCycleTable();
+    GLOBAL_CYCLE_TABLE.ajax.reload(function(){
+    	showCycleTable();
+    });
+    GLOBAL_CYCLE_TABLE.columns(columnList).visible(false);
   } else {
-    $.ajax({
-      url: "/gadget/getData",
-      data: {
-        "id": gadgetId
-      },
-
-      beforeSend: function() {
-        hideCycleTable();
-      }
-    }).done(function(gadgetData) {
-      if (debugAjaxResponse(gadgetData)) {
-        return;
-      }
+	  hideCycleTable();
       GLOBAL_CYCLE_TABLE = $('#cycle-table').DataTable({
         "fnDrawCallback": function(oSettings) {
+          $("#cycle-update-btn").prop("disabled", false);
           showCycleTable();
         },
-        paging: false,
+        bAutoWidth: false,
         "ajax": {
           url: "/gadget/getData",
           data: {
@@ -229,9 +195,8 @@ function drawCycleTable(gadgetId, metricArray) {
 
       });
       GLOBAL_CYCLE_TABLE.columns(columnList).visible(false);
-      showCycleTable();
-    });
-  }
+      
+    }
 }
 
 function callAjaxOnCycleProjectAndRelease() {
@@ -261,7 +226,7 @@ function callAjaxOnCycleProjectAndRelease() {
         alert("Error: Failed to get cycle list");
         console.log(data);
       }
-    }).always(function() {
+    }).done(function() {
       showCycleSelect();
     });
   }

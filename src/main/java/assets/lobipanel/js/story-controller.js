@@ -40,18 +40,12 @@ $("#us-remove-all-epic-btn").click(function() {
 
 $("#us-update-btn").click(
   function() {
+	  $(this).prop("disabled", true);
     var jsonString = createJsonStringObjectFromUsInputField();
     callAjaxToUpdateUsGadget(jsonString);
+    callAjaxOnUsTable();
   });
 
-$("#us-draw-table-btn").click(function() {
-	if(TEST_US_ID != null){
-		drawUsTable(TEST_EPIC_ID, $("#usMetricMultiSelect").val());
-	}
-	else{
-		callAjaxOnUsTable();
-	}
-});
 
 $("#usEpicSelectAll").change(function() {
   $("#us-epic-available-div").fadeOut();
@@ -146,6 +140,8 @@ function callAjaxToUpdateUsGadget(jsonString) {
       },
       error: function(res) {
         alert("Error while updating object using Ajax");
+        $("#us-update-btn").prop("disabled", false);
+        showUsTable();
       },
       success: function(data) {
         if (debugAjaxResponse(data)) {
@@ -155,7 +151,7 @@ function callAjaxToUpdateUsGadget(jsonString) {
       }
     }).done(function(returnMessage) {
       console.log(jsonString);
-      showUsTable();
+      
     });
   }
 }
@@ -213,6 +209,7 @@ function callAjaxOnUsTable() {
     },
     error: function(response) {
       alert("Failed to send ajax: Widget User story table");
+      $("#us-update-btn").prop("disabled", false);
     },
     beforeSend: function() {
       US_TABLE_LOADING = true;
@@ -227,145 +224,126 @@ function callAjaxOnUsTable() {
 }
 
 function drawUsGadget(gadgetList) {
-  for (var i = 0; i < gadgetList.length; i++) {
-    if (gadgetList[i]["type"] == "STORY_TEST_EXECUTION") {
-      console.log("At gadget List");
-      if (gadgetList[i]["projectName"] != "" && gadgetList[i]["projectName"] != null) {
-        $("#usProject").val(gadgetList[i]["projectName"]);
-      }
-
-      if (gadgetList[i]["release"] != "" && gadgetList[i]["release"] != null) {
-        $("#usRelease").val(gadgetList[i]["release"]);
-      }
-
-      if (gadgetList[i]["products"] != "" && gadgetList[i]["products"] != null) {
-        $("#usProduct").val(gadgetList[i]["products"]);
-      }
-
-      if (gadgetList[i]["stories"] != "" && gadgetList[i]["stories"] != null) {
-        appendToSelect(true, gadgetList[i]["stories"], "#usMultiSelect");
-        $("#usMultiSelect").val(gadgetList[i]["stories"]);
-      }
-
-      if (gadgetList[i]["metrics"] != "" && gadgetList[i]["metrics"] != null) {
-        $("#usMetricMultiSelect").val(gadgetList[i]["metrics"]);
-      }
-      if (gadgetList[i]["epic"] != "" && gadgetList[i]["epic"] != null) {
-        appendToSelect(true, gadgetList[i]["epic"], "#usEpic");
-        $("#usEpic").val(gadgetList[i]["epic"]);
-      }
-      console.log("prepare to draw table");
-      drawUsTable(gadgetList[i]["id"], gadgetList[i]["metrics"]);
-      break;
-    }
-  }
+	for (var i = 0; i < gadgetList.length; i++) {
+		if (gadgetList[i]["type"] == US_TYPE) {
+			TEST_US_ID = gadgetList[i]["id"];
+			console.log("prepare to draw table");
+			drawUsTable(gadgetList[i]["id"], gadgetList[i]["metrics"]);
+			break;
+		}
+	}
 }
 
 function drawUsTable(gadgetId, metricArray) {
   var columnList = getColumnArray(metricArray, false);
   var jsonObjectForUsTable;
-
-  $("#us-table-container").html("");
-  $.ajax({
+  if(GLOBAL_US_TABLES_AJAX.loading == true && GLOBAL_US_TABLES_AJAX.ajax != null){
+	  GLOBAL_US_TABLES_AJAX.ajax.abort();
+  }
+  
+  GLOBAL_US_TABLES_AJAX.ajax = $.ajax({
     url: "/gadget/getData?",
     method: "GET",
     data: {
       id: gadgetId
     },
     beforeSend: function() {
+      GLOBAL_US_TABLES_AJAX.loading = true;
       hideUsTable();
     },
-    error: function(response) {
-      alert("Error: Failed to send ajax");
-      console.log(response);
-      showUsTable();
+    error:function(mess){
+    	console.log(mess);
+    },
+    success: function(responseData){
+    	$("#us-table-container").html("");
+        var index = 0;
+        if (debugAjaxResponse(responseData)) {
+          return;
+        }
+        jsonObjectForUsTable = responseData;
+        console.log(jsonObjectForUsTable["data"]);
+
+        $.each(jsonObjectForUsTable["data"], function(epicKey,
+          storyArray) {
+          if (storyArray["issueData"].length != 0) {
+            var customTableId = "us-table-" + index;
+            var usTableDataSet = [];
+            var usIndividualTable;
+            appendTemplateTable(customTableId, epicKey + ": "+ storyArray["summary"],
+              "#us-table-container");
+            $("#" + customTableId).append(TEMPLATE_HEADER_FOOTER);
+            console.log("Pass each function");
+
+            for (var i = 0; i < storyArray['issueData'].length; i++) {
+              var aStoryDataSet = [];
+              aStoryDataSet.push(storyArray['issueData'][i]["key"]["key"]);
+              aStoryDataSet.push(storyArray['issueData'][i]["key"]["summary"]);
+              aStoryDataSet.push(storyArray['issueData'][i]["key"]["priority"]["name"]);
+              aStoryDataSet.push(storyArray['issueData'][i]["unexecuted"]);
+              aStoryDataSet.push(storyArray['issueData'][i]["failed"]);
+              aStoryDataSet.push(storyArray['issueData'][i]["wip"]);
+              aStoryDataSet.push(storyArray['issueData'][i]["blocked"]);
+              aStoryDataSet.push(storyArray['issueData'][i]["passed"]);
+              aStoryDataSet.push(storyArray['issueData'][i]["planned"]);
+              aStoryDataSet.push(storyArray['issueData'][i]["unplanned"]);
+              usTableDataSet.push(aStoryDataSet);
+            }
+
+            usIndividualTable = $("#" + customTableId).DataTable({
+          	bAutoWidth: false,
+              data: usTableDataSet,
+              columns: [{
+                title: "User Story"
+              },{
+                title: "SUMMARY"
+              },{
+                title: "PRIORITY"
+              }, {
+                title: "UNEXECUTED",
+                "render": function(data, displayOrType, rowData, setting){
+                	return createIssueLinks(data, displayOrType, rowData, setting);
+                }
+              }, {
+                title: "FAILED",
+                "render": function(data, displayOrType, rowData, setting){
+                	return createIssueLinks(data, displayOrType, rowData, setting);
+                }
+              }, {
+                title: "WIP",
+                "render": function(data, displayOrType, rowData, setting){
+                	return createIssueLinks(data, displayOrType, rowData, setting);
+                }
+              }, {
+                title: "BLOCKED",
+                "render": function(data, displayOrType, rowData, setting){
+                	return createIssueLinks(data, displayOrType, rowData, setting);
+                }
+              }, {
+                title: "PASSED",
+                "render": function(data, displayOrType, rowData, setting){
+                	return createIssueLinks(data, displayOrType, rowData, setting);
+                }
+              }, {
+                title: "PLANNED",
+                "render": function(data, displayOrType, rowData, setting){
+                	return createIssueLinks(data, displayOrType, rowData, setting);
+                }
+              }, {
+                title: "UNPLANNED",
+                "render": function(data, displayOrType, rowData, setting){
+                	return createIssueLinks(data, displayOrType, rowData, setting);
+                }
+              }]
+            });
+            usIndividualTable.columns(columnList).visible(false);
+            index++;
+          }
+          GLOBAL_US_TABLES_AJAX.loading = false;
+        });
     }
   }).done(
     function(responseData) {
-      var index = 0;
-      if (debugAjaxResponse(responseData)) {
-        return;
-      }
-      jsonObjectForUsTable = responseData;
-      console.log(jsonObjectForUsTable["data"]);
-
-      $.each(jsonObjectForUsTable["data"], function(epicKey,
-        storyArray) {
-        if (storyArray["issueData"].length != 0) {
-          var customTableId = "us-table-" + index;
-          var usTableDataSet = [];
-          var usIndividualTable;
-          appendTemplateTable(customTableId, epicKey + ": "+ storyArray["summary"],
-            "#us-table-container");
-          $("#" + customTableId).append(TEMPLATE_HEADER_FOOTER);
-          console.log("Pass each function");
-
-          for (var i = 0; i < storyArray['issueData'].length; i++) {
-            var aStoryDataSet = [];
-            aStoryDataSet.push(storyArray['issueData'][i]["key"]["key"]);
-            aStoryDataSet.push(storyArray['issueData'][i]["key"]["summary"]);
-            aStoryDataSet.push(storyArray['issueData'][i]["key"]["priority"]["name"]);
-            aStoryDataSet.push(storyArray['issueData'][i]["unexecuted"]);
-            aStoryDataSet.push(storyArray['issueData'][i]["failed"]);
-            aStoryDataSet.push(storyArray['issueData'][i]["wip"]);
-            aStoryDataSet.push(storyArray['issueData'][i]["blocked"]);
-            aStoryDataSet.push(storyArray['issueData'][i]["passed"]);
-            aStoryDataSet.push(storyArray['issueData'][i]["planned"]);
-            aStoryDataSet.push(storyArray['issueData'][i]["unplanned"]);
-            usTableDataSet.push(aStoryDataSet);
-          }
-
-          usIndividualTable = $("#" + customTableId).DataTable({
-        	 "autoWidth": true,
-            paging: false,
-            data: usTableDataSet,
-            columns: [{
-              title: "User Story"
-            },{
-              title: "SUMMARY"
-            },{
-              title: "PRIORITY"
-            }, {
-              title: "UNEXECUTED",
-              "render": function(data, displayOrType, rowData, setting){
-              	return createIssueLinks(data, displayOrType, rowData, setting);
-              }
-            }, {
-              title: "FAILED",
-              "render": function(data, displayOrType, rowData, setting){
-              	return createIssueLinks(data, displayOrType, rowData, setting);
-              }
-            }, {
-              title: "WIP",
-              "render": function(data, displayOrType, rowData, setting){
-              	return createIssueLinks(data, displayOrType, rowData, setting);
-              }
-            }, {
-              title: "BLOCKED",
-              "render": function(data, displayOrType, rowData, setting){
-              	return createIssueLinks(data, displayOrType, rowData, setting);
-              }
-            }, {
-              title: "PASSED",
-              "render": function(data, displayOrType, rowData, setting){
-              	return createIssueLinks(data, displayOrType, rowData, setting);
-              }
-            }, {
-              title: "PLANNED",
-              "render": function(data, displayOrType, rowData, setting){
-              	return createIssueLinks(data, displayOrType, rowData, setting);
-              }
-            }, {
-              title: "UNPLANNED",
-              "render": function(data, displayOrType, rowData, setting){
-              	return createIssueLinks(data, displayOrType, rowData, setting);
-              }
-            }]
-          });
-          usIndividualTable.columns(columnList).visible(false);
-          index++;
-        }
-      });
+    	$("#us-update-btn").prop("disabled", false);
       showUsTable();
     });
 

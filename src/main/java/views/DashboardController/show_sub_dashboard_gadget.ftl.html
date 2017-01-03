@@ -60,7 +60,7 @@
 								<tr>
 									<td class="col-md-6"><label>Epic Link</label></td>
 									<td class="col-md-6">
-										<div id="epic-link-container">
+										<div id="epic-link-container" style='display:none;'>
 											<div id="epic-link-loader" align="center"
 												style="display: none">
 												<div class="loader"></div>
@@ -70,7 +70,7 @@
 										</div>
 										<div class="col-md-12" align="center"
 											style="padding-top: 10px;">
-											<label><input type="checkbox" id="epicCheckAll">Select
+											<label><input type="checkbox" id="epicCheckAll" checked>Select
 												All</label>
 										</div>
 									</td>
@@ -97,8 +97,6 @@
 					</div>
 					<#if dashboard.owner == alias>
 					<button type="button" id="epic-add-gadget" class="btn btn-success">Update</button>
-					<button type="button" id="epic-get-data" class="btn btn-success">Draw
-						Table</button>
 					</#if>
 				</form>
 			</div>
@@ -196,7 +194,7 @@
 								<tr>
 									<td class="col-md-6"><label>Epic Link</label></td>
 									<td class="col-md-6">
-										<div id="us-epic-container">
+										<div id="us-epic-container" style="display: none;">
 											<div id="us-epic-loader" align="center"
 												style="display: none;">
 												<div class="loader"></div>
@@ -234,7 +232,7 @@
 										</div>
 										<div class="col-md-12" align="center"
 											style="padding-top: 10px;">
-											<label><input type="checkbox" id="usCheckAllEpic">Select
+											<label><input type="checkbox" id="usCheckAllEpic" checked>Select
 												All</label>
 
 										</div>
@@ -245,7 +243,7 @@
 								<tr>
 									<td class="col-md-6"><label>User Story</label></td>
 									<td class="col-md-6">
-										<div id="us-container">
+										<div id="us-container" style="display: none;">
 											<select multiple class="form-control" id="usMultiSelect">
 											</select>
 
@@ -255,7 +253,7 @@
 										</div>
 										<div class="col-md-12" align="center"
 											style="padding-top: 10px;">
-											<label><input type="checkbox" id="usCheckAllStory">Select
+											<label><input type="checkbox" id="usCheckAllStory" checked>Select
 												All</label>
 										</div>
 									</td>
@@ -282,8 +280,6 @@
 					</div>
 					<#if dashboard.owner == alias>
 					<button type="button" id="us-update-btn" class="btn btn-success">Update</button>
-					<button type="button" id="us-draw-table-btn"
-						class="btn btn-success">Draw Table</button>
 					</#if>
 				</form>
 			</div>
@@ -352,6 +348,7 @@
 								<tr>
 									<td class="col-md-6"><label>Test Cycle</label></td>
 									<td class="col-md-6">
+										<div id="assignee-cycle-container" style="display: none;">
 										<div id="assignee-cycle-loader" align="center" class="col-md-12"
 											style="display: none" align="center">
 											<div class="loader"></div>
@@ -388,10 +385,11 @@
 												</select>
 											</div>
 										</div>
+										</div>
 										<div class="col-md-12" align="center"
 											style="padding-top: 10px;">
 											<label><input type="checkbox"
-												id="assigneeCheckAllCycle">Select All</label>
+												id="assigneeCheckAllCycle" checked>Select All</label>
 										</div>
 								</tr>
 
@@ -399,7 +397,7 @@
 								<tr>
 									<td class="col-md-6"><label>Assignee</label></td>
 									<td class="col-md-6">
-										<div id="assignee-container">
+										<div id="assignee-container" style="display:none;">
 											<div id="assignee-loader" class="col-md-12"
 												style="display: none" align="center">
 												<div class="loader"></div>
@@ -410,7 +408,7 @@
 										</div>
 										<div class="col-md-12" align="center"
 											style="padding-top: 10px;">
-											<label><input type="checkbox" id="assigneeCheckAll">Select
+											<label><input type="checkbox" id="assigneeCheckAll" checked disabled>Select
 												All</label>
 										</div>
 									</td>
@@ -432,8 +430,6 @@
 					</div>
 					<#if dashboard.owner == alias>
 					<button id="assignee-update-btn" class="btn btn-success">Update</button>
-					<button id="assignee-draw-table-btn" class="btn btn-success">Draw
-						Table</button>
 					</#if>
 				</form>
 			</div>
@@ -513,7 +509,7 @@
 										</div>
 										<div class="col-md-12" align="center"
 											style="padding-top: 10px;">
-											<label><input type="checkbox" id="cycleCheckAll">Select
+											<label><input type="checkbox" id="cycleCheckAll" checked>Select
 												All</label>
 										</div>
 									</td>
@@ -536,13 +532,11 @@
 					</div>
 					<#if dashboard.owner == alias>
 					<button id="cycle-update-btn" class="btn btn-success">Update</button>
-					<button id="cycle-draw-table-btn" class="btn btn-success">Draw
-						Table</button>
 					</#if>
 				</form>
 			</div>
 			<div id="cycle-table-container" align="center" class="col-md-12" style="display: none">
-				<table id="cycle-table" >
+				<table id="cycle-table" class="display">
 					<thead>
 						<tr>
 							<th>Cycle</th>

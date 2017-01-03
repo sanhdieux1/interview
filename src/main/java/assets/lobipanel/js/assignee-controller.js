@@ -48,58 +48,68 @@ $("#assignee-remove-all-cycle-btn").click(function() {
   $("#assigneeCycle option").remove();
 });
 
-$("#assignee-update-btn").click(
-  function() {
-    var object = {};
-    var options;
-    var values;
-    var jsonString;
-    if(null == $("#dashboardId").val()){
-  	  alert("No valid dashboard id provided.");
-  	  return;
-    }
-    else if ($("#assigneeProject").val() == "" || $("#assigneeProject").val() == null || $("#assigneeRelease").val() == "" || $("#assigneeRelease").val() == null) {
-      $("#warning-message").val(
-        "Please select project or release for this gadget.");
-      $("dashboard-alert").fadeIn();
-      return;
-    } else if ($("#assigneeProduct").val() == null) {
-      alert("No product selected");
-      return;
-    } else if ($("#assigneeCycle option").length == 0 && !$("#assigneeCheckAllCycle").prop("checked")) {
-      alert("No cycle selected");
-      return;
-    } else if ($("#assigneeMultiSelect").val() == null && !$("#assigneeCheckAll").prop("checked")) {
-      alert("No assignee selected");
-      return;
-    } else if ($("#assigneeMetricMultiSelect").val() == null) {
-      alert("No test metric selected");
-      return;
-    }
-    object['dashboardId'] = $("#dashboardId").val();
-    options = $("#assigneeCycle option");
-    values = $.map(options, function(option) {
-      return option.value;
-    });
-    
-    object['id'] = TEST_ASSIGNEE_ID;
-    object['projectName'] = $("#assigneeProject").val();
-    object['release'] = $("#assigneeRelease").val();
-    object['products'] = [$("#assigneeProduct").val()];
-    object['metrics'] = $("#assigneeMetricMultiSelect").val();
+$("#assignee-update-btn").click(function() {
+  $(this).prop("disabled", true);
+  var jsonString = createJsonStringFromAssigneeInput();
+  updateAssigneeGadget(jsonString);
+  callAjaxOnAssigneeTable();
+});
 
-    if ($("#assigneeCheckAllCycle").prop("checked")) {
-      object['selectAllCycle'] = true;
-    } else {
-      object['cycles'] = values;
-    }
-    if ($("#assigneeCheckAll").prop("checked")) {
-      object['selectAllAssignee'] = true;
-    } else {
-      object['assignee'] = $("#assigneeMultiSelect").val();
-    }
+function createJsonStringFromAssigneeInput() {
+  var object = {};
+  var options;
+  var values;
+  var jsonString;
+  if (null == $("#dashboardId").val()) {
+    alert("No valid dashboard id provided.");
+    return;
+  } else if ($("#assigneeProject").val() == "" || $("#assigneeProject").val() == null || $("#assigneeRelease").val() == "" || $("#assigneeRelease").val() == null) {
+    $("#warning-message").val(
+      "Please select project or release for this gadget.");
+    $("dashboard-alert").fadeIn();
+    return;
+  } else if ($("#assigneeProduct").val() == null) {
+    alert("No product selected");
+    return;
+  } else if ($("#assigneeCycle option").length == 0 && !$("#assigneeCheckAllCycle").prop("checked")) {
+    alert("No cycle selected");
+    return;
+  } else if ($("#assigneeMultiSelect").val() == null && !$("#assigneeCheckAll").prop("checked")) {
+    alert("No assignee selected");
+    return;
+  } else if ($("#assigneeMetricMultiSelect").val() == null) {
+    alert("No test metric selected");
+    return;
+  }
+  object['dashboardId'] = $("#dashboardId").val();
+  options = $("#assigneeCycle option");
+  values = $.map(options, function(option) {
+    return option.value;
+  });
 
-    jsonString = JSON.stringify(object);
+  object['id'] = TEST_ASSIGNEE_ID;
+  object['projectName'] = $("#assigneeProject").val();
+  object['release'] = $("#assigneeRelease").val();
+  object['products'] = [$("#assigneeProduct").val()];
+  object['metrics'] = $("#assigneeMetricMultiSelect").val();
+
+  if ($("#assigneeCheckAllCycle").prop("checked")) {
+    object['selectAllTestCycle'] = true;
+  } else {
+    object['cycles'] = values;
+  }
+  if ($("#assigneeCheckAll").prop("checked")) {
+    object['selectAllAssignee'] = true;
+  } else {
+    object['assignee'] = $("#assigneeMultiSelect").val();
+  }
+
+  jsonString = JSON.stringify(object);
+  return jsonString;
+}
+
+function updateAssigneeGadget(jsonString) {
+  if (jsonString != null) {
     $.ajax({
       url: SAVE_GADGET_URI,
       method: 'POST',
@@ -112,7 +122,8 @@ $("#assignee-update-btn").click(
       },
       error: function(res) {
         alert("Error while updating object using Ajax");
-        console.log(res);
+        $("#assignee-update-btn").prop("disabled", false);
+        showAssigneeTable();
       },
       success: function(data) {
         if (debugAjaxResponse(data)) {
@@ -121,23 +132,23 @@ $("#assignee-update-btn").click(
         alert("Gadget updated succesfully");
       }
     }).done(function(returnMessage) {
-
       console.log(jsonString);
-      showAssigneeTable();
     });
+  }
+}
+
+$("#assignee-draw-table-btn").click(
+  function() {
+    if (TEST_US_ID != null) {
+      drawAssigneeTable(TEST_ASSIGNEE_ID, $(
+        "#assigneeMetricMultiSelect").val());
+    } else {
+      callAjaxOnAssigneeTable();
+    }
   });
 
-$("#assignee-draw-table-btn").click(function() {
-	if(TEST_US_ID != null){
-		drawAssigneeTable(TEST_ASSIGNEE_ID, $("#assigneeMetricMultiSelect").val());
-	}
-	else{
-		callAjaxOnAssigneeTable();
-	}
-});
-
 $("#assigneeCheckAll").click(function() {
-  if ($(this).prop("checked")) {
+  if ($(this).prop("checked") == true) {
     $("#assignee-container").fadeOut();
   } else {
     $("#assignee-container").fadeIn();
@@ -146,43 +157,19 @@ $("#assigneeCheckAll").click(function() {
 
 $("#assigneeCheckAllCycle").click(function() {
   if ($(this).prop("checked")) {
-    $("#assignee-cycle-available-div").fadeOut();
+    hideAssigneeCycle();
+    $("#assignee-cycle-loader").hide();
     addAllCycle();
   } else {
-    $("#assignee-cycle-available-div").fadeIn();
+    $("#assignee-cycle-container").fadeIn();
+    showAssigneeCycle();
   }
 });
 
 function drawAssigneeGadget(gadgetList) {
-
   for (var i = 0; i < gadgetList.length; i++) {
-    if (gadgetList[i]["type"] == "ASSIGNEE_TEST_EXECUTION") {
-      console.log("At gadget List");
-      if (gadgetList[i]["projectName"] != "" && gadgetList[i]["projectName"] != null) {
-        $("#assigneeProject").val(gadgetList[i]["projectName"]);
-      }
-
-      if (gadgetList[i]["release"] != "" && gadgetList[i]["release"] != null) {
-        $("#assigneeRelease").val(gadgetList[i]["release"]);
-      }
-
-      if (gadgetList[i]["products"] != "" && gadgetList[i]["products"] != null) {
-        $("#assigneeProduct").val(gadgetList[i]["products"]);
-      }
-
-      if (gadgetList[i]["assignee"] != "" && gadgetList[i]["assignee"] != null) {
-        appendToSelect(true, gadgetList[i]["assignee"],
-          "#assigneeMultiSelect");
-        $("#assigneeMultiSelect").val(gadgetList[i]["assignee"]);
-      }
-
-      if (gadgetList[i]["metrics"] != "" && gadgetList[i]["metrics"] != null) {
-        $("#assigneeMetricMultiSelect").val(gadgetList[i]["metrics"]);
-      }
-      if (gadgetList[i]["cycles"] != "" && gadgetList[i]["cycles"] != null) {
-        appendToSelect(true, gadgetList[i]["cycles"], "#assigneeCycle");
-        $("#assigneeCycle").val(gadgetList[i]["cycles"]);
-      }
+    if (gadgetList[i]["type"] == ASSIGNEE_TYPE) {
+      TEST_ASSIGNEE_ID = gadgetList[i]["id"];
       console.log("prepare to draw table");
       drawAssigneeTable(gadgetList[i]["id"], gadgetList[i]["metrics"]);
       break;
@@ -192,10 +179,13 @@ function drawAssigneeGadget(gadgetList) {
 
 function drawAssigneeTable(gadgetId, metricArray) {
   var columnList = getColumnArray(metricArray, true);
-  $("#assignee-table-container").html("");
-
   var jsonObjectForAssigneeTable;
-  $
+
+  if (GLOBAL_ASSIGNEE_TABLES_AJAX.loading == true) {
+    GLOBAL_ASSIGNEE_TABLES_AJAX.ajax.abort();
+  }
+
+  GLOBAL_ASSIGNEE_TABLES_AJAX.ajax = $
     .ajax({
       url: "/gadget/getData?",
       method: "GET",
@@ -203,20 +193,20 @@ function drawAssigneeTable(gadgetId, metricArray) {
         id: gadgetId
       },
       beforeSend: function() {
+        GLOBAL_ASSIGNEE_TABLES_AJAX.loading = true;
         hideAssigneeTable();
       },
       error: function(response) {
-        alert("Failed to draw table");
         console.log(response);
-        showAssigneeTable();
-      }
-    })
-    .done(
-      function(responseData) {
+      },
+      success: function(responseData) {
+        GLOBAL_ASSIGNEE_TABLES_AJAX.loading = false;
         var index = 0;
+        $("#assignee-table-container").html("");
         if (debugAjaxResponse(responseData)) {
           return;
         }
+
         console.log("Get individual data ok");
 
         jsonObjectForAssigneeTable = responseData;
@@ -235,8 +225,9 @@ function drawAssigneeTable(gadgetId, metricArray) {
                   customTableId,
                   cycleKey,
                   "#assignee-table-container");
-                $("#" + customTableId).append(
-                  TEMPLATE_HEADER_FOOTER_1);
+                $("#" + customTableId)
+                  .append(
+                    TEMPLATE_HEADER_FOOTER_1);
 
                 console
                   .log("Pass each function");
@@ -266,34 +257,74 @@ function drawAssigneeTable(gadgetId, metricArray) {
                 assigneeIndividualTable = $(
                     "#" + customTableId)
                   .DataTable({
-                    paging: false,
+                    bAutoWidth: false,
                     data: assigneeTableDataSet,
                     columns: [{
                       title: "Assignee"
                     }, {
                       title: "UNEXECUTED",
-                      "render": function(data, displayOrType, rowData, setting) {
-                        return createIssueLinks(data, displayOrType, rowData, setting);
+                      "render": function(
+                        data,
+                        displayOrType,
+                        rowData,
+                        setting) {
+                        return createIssueLinks(
+                          data,
+                          displayOrType,
+                          rowData,
+                          setting);
                       }
                     }, {
                       title: "FAILED",
-                      "render": function(data, displayOrType, rowData, setting) {
-                        return createIssueLinks(data, displayOrType, rowData, setting);
+                      "render": function(
+                        data,
+                        displayOrType,
+                        rowData,
+                        setting) {
+                        return createIssueLinks(
+                          data,
+                          displayOrType,
+                          rowData,
+                          setting);
                       }
                     }, {
                       title: "WIP",
-                      "render": function(data, displayOrType, rowData, setting) {
-                        return createIssueLinks(data, displayOrType, rowData, setting);
+                      "render": function(
+                        data,
+                        displayOrType,
+                        rowData,
+                        setting) {
+                        return createIssueLinks(
+                          data,
+                          displayOrType,
+                          rowData,
+                          setting);
                       }
                     }, {
                       title: "BLOCKED",
-                      "render": function(data, displayOrType, rowData, setting) {
-                        return createIssueLinks(data, displayOrType, rowData, setting);
+                      "render": function(
+                        data,
+                        displayOrType,
+                        rowData,
+                        setting) {
+                        return createIssueLinks(
+                          data,
+                          displayOrType,
+                          rowData,
+                          setting);
                       }
                     }, {
                       title: "PASSED",
-                      "render": function(data, displayOrType, rowData, setting) {
-                        return createIssueLinks(data, displayOrType, rowData, setting);
+                      "render": function(
+                        data,
+                        displayOrType,
+                        rowData,
+                        setting) {
+                        return createIssueLinks(
+                          data,
+                          displayOrType,
+                          rowData,
+                          setting);
                       }
                     }]
                   });
@@ -303,17 +334,19 @@ function drawAssigneeTable(gadgetId, metricArray) {
                 index++;
               }
             });
-        showAssigneeTable();
-
-      });
+      }
+    }).done(function(responseData) {
+      $("#assignee-update-btn").prop("disabled", false);
+      showAssigneeTable();
+    });
 }
 
 function callAjaxOnAssigneeTable() {
   $.ajax({
-	  url : GET_GADGETS_URI,
-		data: {
-			dashboardId: $("#dashboardId").val()
-		},
+    url: GET_GADGETS_URI,
+    data: {
+      dashboardId: $("#dashboardId").val()
+    },
     success: function(gadgetList) {
       if (debugAjaxResponse(gadgetList)) {
         return;
@@ -322,6 +355,7 @@ function callAjaxOnAssigneeTable() {
     },
     error: function(response) {
       alert("Error while drawing assignee table");
+      $("#assignee-update-btn").prop("disabled", false);
     },
     beforeSend: function() {
       hideAssigneeTable();
