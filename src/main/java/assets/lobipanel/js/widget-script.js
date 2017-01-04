@@ -250,6 +250,7 @@ function drawGadgets(gadgetList) {
 // On document ready, append projects list to 4 widget project field
 $(document).ready(function() {
 	var productPage;
+	var connectErrorFlag = false;
 	if("dashboard" != window.location.href.split('/')[3] ){
 		return;
 	}

@@ -192,10 +192,11 @@ function drawEpicTable(gadgetId, metricArray) {
 						},
 						dataSrc : function(responseJson) {
 							var tempArray = [];
+							console.log(responseJson);
 							if (debugAjaxResponse(responseJson)) {
 								$("#epic-add-gadget").prop("disabled", false);
 								showEpicTable();
-								return;
+								return [];
 							}
 
 							$.each(responseJson["data"], function(k1, v1) {

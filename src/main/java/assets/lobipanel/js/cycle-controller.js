@@ -144,7 +144,7 @@ function drawCycleTable(gadgetId, metricArray) {
             if (debugAjaxResponse(responseJson)) {
             	$("#cycle-update-btn").prop("disabled", false);
                 showCycleTable();
-              return;
+              return [];
             }
             var tempArray = [];
             $.each(responseJson["data"], function(k1, v1) {
