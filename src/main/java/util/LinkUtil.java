@@ -9,6 +9,7 @@ import java.net.URL;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.log4j.Logger;
+import org.jsoup.Connection;
 import org.jsoup.Connection.Response;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -47,7 +48,7 @@ public class LinkUtil {
      *            Constant.PROXY_PORT
      * @return doc
      */
-    public Document getConnectionWithProxy(String link, String ip, int port) {
+    public Document getConnectionWithProxy(String link) {
         Document doc = null;
         try {
             URL url = new URL(link);
@@ -75,7 +76,7 @@ public class LinkUtil {
             doc = Jsoup.parse(String.valueOf(tmp));
         } catch (IOException e) {
             logger.error(
-                    String.format("Connect %s using proxy %s:%s with error %s", link, ip, port, e));
+                    String.format("Connect %s with error %s", link, e));
         }
         return doc;
     }
@@ -86,15 +87,17 @@ public class LinkUtil {
             String authString = username + ":" + password;
             String token = new String(Base64.encodeBase64(authString.getBytes()));
             try {
-                respond = Jsoup.connect(Constant.LINK_CRUCIBLE)
+                Connection req = Jsoup.connect(Constant.LINK_CRUCIBLE)
                         .header("authorization", "Basic " + token).timeout(PropertiesUtil.getInt(Constant.PARAMERTER_TIMEOUT, 60000))
                         .ignoreHttpErrors(true)
-                        .ignoreContentType(true)
-                        .execute();
+                        .ignoreContentType(true);
+                
+                respond = req.execute();
             } catch (IOException e) {
                 logger.error("Cannot verify user",e);
                 return false;
             }
+            logger.info("isUserAndPasswordValid:"+respond.header("X-AUSERNAME").equals(username));
             return respond.header("X-AUSERNAME").equals(username);
         }
         return false;

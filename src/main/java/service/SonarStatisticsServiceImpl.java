@@ -87,8 +87,7 @@ public class SonarStatisticsServiceImpl implements SonarStatisticsService {
                 for (String sonarKey : sonarKeys) {
                     logger.info(String.format(Constant.LINK_GET_SONAR_STATISTIC, metric, sonarKey));
                     doc = LinkUtil.getInstance().getConnectionWithProxy(
-                            String.format(Constant.LINK_GET_SONAR_STATISTIC, metric, sonarKey),
-                            Constant.PROXY_IP, Constant.PROXY_PORT);
+                            String.format(Constant.LINK_GET_SONAR_STATISTIC, metric, sonarKey));
                     logger.info("GET LINK SONAR "
                             + String.format(Constant.LINK_GET_SONAR_STATISTIC, metric, sonarKey));
                     if (doc == null) {
@@ -101,8 +100,7 @@ public class SonarStatisticsServiceImpl implements SonarStatisticsService {
                         JSONArray array = (JSONArray) object;
                         if (array.size() == 0) {
                             doc = LinkUtil.getInstance().getConnectionWithProxy(
-                                    String.format(Constant.LINK_GET_SONAR_STATISTIC, "", sonarKey),
-                                    Constant.PROXY_IP, Constant.PROXY_PORT);
+                                    String.format(Constant.LINK_GET_SONAR_STATISTIC, "", sonarKey));
                             json = doc.body().text();
                             Object object2 = parser.parse(json);
                             JSONArray array2 = (JSONArray) object2;
@@ -203,8 +201,7 @@ public class SonarStatisticsServiceImpl implements SonarStatisticsService {
     @Override
     public Map<String, Object> getPeriods() {
         Map<String, Object> periods = new TreeMap<>();
-        Document doc = LinkUtil.getInstance().getConnectionWithProxy(Constant.LINK_GET_JIRA_PERIODS,
-                Constant.PROXY_IP, Constant.PROXY_PORT);
+        Document doc = LinkUtil.getInstance().getConnectionWithProxy(Constant.LINK_GET_JIRA_PERIODS);
         if (doc != null) {
             String json = doc.body().text();
             JSONParser parser = new JSONParser();
