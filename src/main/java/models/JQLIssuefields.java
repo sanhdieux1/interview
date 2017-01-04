@@ -10,7 +10,7 @@ public class JQLIssuefields {
     private JQLIssuetypeVO issuetype;
     private List<JQLIssueLinkVO> issuelinks;
     private PriorityVO priority;
-    // Unpland
+    // pland
     private int customfield_14809;
 
     private String summary;

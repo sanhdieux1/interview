@@ -3,13 +3,15 @@ package models;
 import java.util.ArrayList;
 import java.util.List;
 
+import models.main.ElementGadGetData;
+
 public class ExecutionIssueResultWapper {
     private volatile List<ExecutionIssueVO> executionsVO = new ArrayList<>();
-    private int planned;
+    private ElementGadGetData planned = new ElementGadGetData();
     private APIIssueVO issue;
 
     public void increasePland(int number) {
-        planned += number;
+        planned.increase(number);
     }
 
     public APIIssueVO getIssue() {
@@ -28,11 +30,11 @@ public class ExecutionIssueResultWapper {
         this.executionsVO = executionsVO;
     }
 
-    public int getPlanned() {
+    public ElementGadGetData getPlanned() {
         return planned;
     }
 
-    public void setPlanned(int planned) {
+    public void setPlanned(ElementGadGetData planned) {
         this.planned = planned;
     }
 

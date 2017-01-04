@@ -76,7 +76,8 @@ public class EpicUtility {
             ExecutionIssueResultWapper executionIssues = findAllExecutionIssueInEpic(epic.getKey(), cookies);
             GadgetData gadgetData = GadgetUtility.getInstance().convertToGadgetData(executionIssues.getExecutionsVO());
             gadgetData.setKey(epic);
-            gadgetData.increasePlanned(executionIssues.getPlanned());
+            gadgetData.increasePlanned(executionIssues.getPlanned().getTotal());
+            gadgetData.getPlanned().getIssues().addAll(executionIssues.getPlanned().getIssues());
             result.add(gadgetData);
         }
         GadgetUtility.getInstance().sortData(result);
@@ -86,7 +87,12 @@ public class EpicUtility {
     public ExecutionIssueResultWapper findAllExecutionIssueInEpic(String epic,  Map<String, String> cookies) throws APIException {
         ExecutionIssueResultWapper resultWapper = new ExecutionIssueResultWapper();
         List<JQLIssueVO> issues = new ArrayList<>();
-        issues.addAll(findAllIssuesInEpicLink(epic, cookies));
+        
+//        issues.addAll(findAllIssuesInEpicLink(epic, cookies));
+        List<JQLIssueVO> issuesInEpic = findAllIssuesInEpicLink(epic, cookies);
+        List<JQLIssueVO> storyInEpic = issuesInEpic.stream().filter(i -> Type.STORY.toString().equalsIgnoreCase(i.getFields().getIssuetype().getName())).collect(Collectors.toList());
+        
+        issues.addAll(storyInEpic);
         issues.addAll(findAllTestedIssueForEpic(epic, cookies));
         if(issues == null || issues.isEmpty()){
             return resultWapper;
@@ -109,7 +115,10 @@ public class EpicUtility {
         for (ExecutionIssueResultWapper wapper : resultTask){
             if(wapper != null){
                 resultWapper.getExecutionsVO().addAll(wapper.getExecutionsVO());
-                resultWapper.increasePland(wapper.getPlanned());
+                if(wapper.getIssue() != null && Type.STORY.equals(wapper.getIssue().getType())){
+                    resultWapper.increasePland(wapper.getPlanned().getTotal());
+                    resultWapper.getPlanned().getIssues().addAll(wapper.getPlanned().getIssues());
+                }
             }
         }
         return resultWapper;

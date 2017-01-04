@@ -28,12 +28,12 @@ public class TestExecutionCallable implements Callable<ExecutionIssueResultWappe
     @Override
     public ExecutionIssueResultWapper call() throws Exception {
         ExecutionIssueResultWapper resultWapper = new ExecutionIssueResultWapper();
-        resultWapper.setPlanned(issue.getFields().getCustomfield_14809());
         APIIssueVO apiIssue = new APIIssueVO();
         apiIssue.setKey(issue.getKey());
         apiIssue.setSelf(issue.getSelf());
         apiIssue.setSummary(issue.getFields().getSummary());
         apiIssue.setPriority(issue.getFields().getPriority());
+        apiIssue.setType(type);
         
         resultWapper.setIssue(apiIssue);
         if(Type.TEST.equals(type)){
@@ -43,7 +43,8 @@ public class TestExecutionCallable implements Callable<ExecutionIssueResultWappe
             }
         } else if(Type.STORY.equals(type)){
             List<ExecutionIssueVO> executionIssues = StoryUtility.getInstance().findAllTestExecutionInStory(issue, cookies);
-            resultWapper.setPlanned(issue.getFields().getCustomfield_14809());
+            resultWapper.getPlanned().increase(issue.getFields().getCustomfield_14809());
+            resultWapper.getPlanned().getIssues().add(issue.getKey());
             if(executionIssues != null && !executionIssues.isEmpty()){
                 resultWapper.getExecutionsVO().addAll(executionIssues);
             }

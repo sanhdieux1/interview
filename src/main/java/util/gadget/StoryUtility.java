@@ -160,7 +160,8 @@ public class StoryUtility {
             List<GadgetData> storyDatas = new ArrayList<>();
             for (ExecutionIssueResultWapper wapper : results){
                 GadgetData data = GadgetUtility.getInstance().convertToGadgetData(wapper.getExecutionsVO());
-                data.increasePlanned(wapper.getPlanned());
+                data.increasePlanned(wapper.getPlanned().getTotal());
+                data.getPlanned().getIssues().addAll(wapper.getPlanned().getIssues());
                 data.setKey(wapper.getIssue());
                 storyDatas.add(data);
             }

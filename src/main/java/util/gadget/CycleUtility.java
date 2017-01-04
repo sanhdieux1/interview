@@ -13,7 +13,7 @@ import models.ExecutionIssueResultWapper;
 import models.exception.APIException;
 import models.gadget.CycleVsTestExecution;
 import models.main.GadgetData;
-import models.main.Release;
+import util.AdminUtility;
 
 public class CycleUtility {
     final static LoggerWapper logger = LoggerWapper.getLogger(CycleUtility.class);
@@ -30,9 +30,8 @@ public class CycleUtility {
         List<GadgetData> returnData = new ArrayList<>();
         Set<String> cycles = cycleGadget.getCycles();
         String project = cycleGadget.getProjectName();
-        Release release = cycleGadget.getRelease();
         if(cycleGadget.isSelectAllCycle()){
-            cycles = AssigneeUtility.getInstance().getListCycleName(project, release, cycleGadget.getProducts(), cookies);
+            cycles = AdminUtility.getInstance().getAllCycle();
         }
         List<CycleTestCallable> tasks = new ArrayList<>();
         if(cycles != null && !cycles.isEmpty()){

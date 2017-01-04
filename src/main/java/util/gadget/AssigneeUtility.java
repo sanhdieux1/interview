@@ -27,6 +27,7 @@ import models.main.GadgetDataWapper;
 import models.main.JQLSearchResult;
 import models.main.Release;
 import service.HTTPClientUtil;
+import util.AdminUtility;
 import util.Constant;
 import util.JSONUtil;
 import util.PropertiesUtil;
@@ -54,7 +55,7 @@ public class AssigneeUtility {
         Set<String> cycles = assigneeGadget.getCycles();
 
         if(assigneeGadget.isSelectAllTestCycle()){
-            cycles = getListCycleName(projectName, assigneeGadget.getRelease(), assigneeGadget.getProducts(), cookies);
+            cycles = AdminUtility.getInstance().getAllCycle();
         }
         if(cycles != null && !cycles.isEmpty()){
             for (String cycle : cycles){
