@@ -158,8 +158,8 @@ function callAjaxToUpdateUsGadget(jsonString) {
         }
         else{
         	alert("Gadget updated succesfully");
-        	TEST_CYCLE_ID = data["data"];
-        	drawUsTable(TEST_CYCLE_ID, $("#usMetricMultiSelect").val());
+        	TEST_US_ID = data["data"];
+        	drawUsTable(TEST_US_ID, $("#usMetricMultiSelect").val());
         }
         
       }

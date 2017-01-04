@@ -138,6 +138,7 @@ function updateAssigneeGadget(jsonString) {
         }
         else{
         	alert("Gadget updated succesfully")
+        	TEST_ASSIGNEE_ID = data["data"];
         	drawAssigneeTable(data["data"], $("#assigneeMetricMultiSelect").val());
         }
         
