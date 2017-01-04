@@ -3,6 +3,7 @@ var TEMPLATE_HEADER_FOOTER = "<thead><tr><th>User Story</th><th>SUMMARY</th><th>
 var TEMPLATE_HEADER_FOOTER_1 = "<thead><tr><th>Assignee</th><th>UNEXECUTED</th><th>FAILED</th><th>WIP</th><th>BLOCKED</th><th>PASSED</th></tr></thead><tfoot><tr><th>Assignee</th><th>UNEXECUTED</th><th>FAILED</th><th>WIP</th><th>BLOCKED</th><th>PASSED</th></tr></tfoot>";
 var GLOBAL_CYCLE_TABLE = null;
 var GREENHOPPER_ISSUE_API_LINK = 'https://greenhopper.app.alcatel-lucent.com/issues/?jql=';
+var GREENHOPPER_BROWSE_ISSUE_LINK = "https://greenhopper.app.alcatel-lucent.com/browse/";
 var IS_TESTING = true;
 var GLOBAL_US_TABLES_AJAX = {"ajax": null, "loading": false};
 var GLOBAL_ASSIGNEE_TABLES_AJAX = {"ajax": null, "loading": false};
@@ -19,8 +20,6 @@ var US_TYPE = "STORY_TEST_EXECUTION";
 var ASSIGNEE_TYPE = "ASSIGNEE_TEST_EXECUTION";
 var CYCLE_TYPE = "TEST_CYCLE_TEST_EXECUTION";
 var GET_EXISTING_CYCLE_URI = "/cycleExisting";
-var US_TABLE_LOADING = false;
-var ASSIGNEE_TABLE_LOADING = false;
 var TEST_EPIC_ID = null;
 var TEST_US_ID = null;
 var TEST_ASSIGNEE_ID = null;
@@ -145,18 +144,7 @@ function drawGadgets(gadgetList) {
 			if (gadgetList[i]["metrics"] != null) {
 				$("#usMetricMultiSelect").val(gadgetList[i]["metrics"]);
 			}
-			if(gadgetList[i]["selectAllStory"] != false){
-				$("#usCheckAllStory").prop("checked", true);
-				$("#us-container").fadeOut();
-			}
-			else if (gadgetList[i]["stories"] != null) {
-				$("#usCheckAllStory").prop("checked", false);
-				$("#us-container").fadeIn();
-				$("#us-us-loader").hide();
-				appendToSelect(true, gadgetList[i]["stories"], "#usMultiSelect");
-				$("#usMultiSelect").val(gadgetList[i]["stories"]);
-			}
-
+			
 			if(gadgetList[i]["selectAllEpic"] != false){
 				$("#usCheckAllEpic").prop("checked", true);
 				$("#us-epic-container").fadeOut();
@@ -165,9 +153,20 @@ function drawGadgets(gadgetList) {
 				$("#usCheckAllEpic").prop("checked", false);
 				$("#us-epic-container").fadeIn();
 				$("#us-epic-loader").hide();
-				appendToSelect(true, gadgetList[i]["epic"], "#usEpic");
-				$("#usEpic").val(gadgetList[i]["epic"]);
+				callAjaxOnUsProjectAndRelease(gadgetList[i]["epic"], gadgetList[i]["stories"]);
 			}
+			
+			if(gadgetList[i]["selectAllStory"] != false){
+				$("#usCheckAllStory").prop("checked", true);
+				$("#us-container").fadeOut();
+			}
+			else if (gadgetList[i]["stories"] != null) {
+				$("#usCheckAllStory").prop("checked", false);
+				$("#us-container").fadeIn();
+				$("#us-us-loader").hide();
+			}
+
+			
 			console.log("prepare to draw table");
 			console.log(gadgetList[i]["id"]);
 			drawUsTable(gadgetList[i]["id"], gadgetList[i]["metrics"]);
@@ -464,6 +463,10 @@ function createIssueLinks(data, displayOrType, rowData, setting){
 		return htmlString += ')">' + data["total"] + '</a>';
 	}
 	return data["total"];
+}
+
+function createIssueLinkForTitle(data){
+	return '<a href="'+GREENHOPPER_BROWSE_ISSUE_LINK + data["key"] + '">'+data["key"]+'</a>';
 }
 
 function debugError(xhr, textStatus, error){

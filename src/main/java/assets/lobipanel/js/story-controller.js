@@ -280,7 +280,7 @@ function drawUsTable(gadgetId, metricArray) {
 
           for (var i = 0; i < storyArray['issueData'].length; i++) {
             var aStoryDataSet = [];
-            aStoryDataSet.push(storyArray['issueData'][i]["key"]["key"]);
+            aStoryDataSet.push(storyArray['issueData'][i]["key"]);
             aStoryDataSet.push(storyArray['issueData'][i]["key"]["summary"]);
             aStoryDataSet.push(storyArray['issueData'][i]["key"]["priority"]["name"]);
             aStoryDataSet.push(storyArray['issueData'][i]["unexecuted"]);
@@ -297,7 +297,10 @@ function drawUsTable(gadgetId, metricArray) {
             bAutoWidth: false,
             data: usTableDataSet,
             columns: [{
-              title: "User Story"
+              title: "User Story",
+              "render": function(data, displayOrType, rowData, setting) {
+            	  return createIssueLinkForTitle(data);
+              }
             }, {
               title: "SUMMARY"
             }, {
@@ -388,13 +391,14 @@ function callAjaxOnUsProjectAndRelease(selectList, usSelectList) {
         return;
       }
       data.sort();
-      
       if (!$("#usCheckAllEpic").prop("checked")) {
     	  if(selectList != null){
-        	  $('#usEpicAvailable').filter(function () {
+    		  appendToSelect(true, data, "#usEpicAvailable");
+        	  $("#usEpicAvailable option").filter(function () {
         	     return $.inArray(this.value, selectList) !== -1
         	  }).remove();
-        	  $('#usEpic').val(selectList);
+        	  
+    		  appendToSelect(true,selectList, "#usEpic");
           }
     	  else{
     		  appendToSelect(true, data, "#usEpicAvailable");

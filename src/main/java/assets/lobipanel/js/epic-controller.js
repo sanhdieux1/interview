@@ -31,7 +31,7 @@ $("#epicCheckAll").click(function() {
 		$("#epic-link-container").fadeOut();
 	} else {
 		$("#epic-link-container").fadeIn();
-		if($("#epicMultiSelect optionn").length == 0){
+		if($("#epicMultiSelect option").length == 0){
 			callAjaxOnEpicProjectAndRelease(null);
 		}
 		
@@ -209,7 +209,11 @@ function drawEpicTable(gadgetId, metricArray) {
 					},
 					"columns" : [
 							{
-								"data" : "key.key"
+								"data" : "key",
+								"render": function(data, displayOrType,
+										rowData, setting){
+									return createIssueLinkForTitle(data);
+								}
 							},
 							{
 								"data" : "key.summary"

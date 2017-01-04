@@ -173,12 +173,13 @@ $("#assigneeCheckAll").click(function() {
 
 $("#assigneeCheckAllCycle").click(function() {
   if ($(this).prop("checked")) {
-    hideAssigneeCycle();
-    $("#assignee-cycle-loader").hide();
+    $("#assignee-cycle-container").fadeOut();
     addAllCycle();
   } else {
     $("#assignee-cycle-container").fadeIn();
-    getExistingCycleAssigneeWidget();
+    if($("#assigneeCycle option").length == 0 && $("#assigneeCycleAvailable option").length == 0){
+    	getExistingCycleAssigneeWidget();
+    }
   }
 });
 

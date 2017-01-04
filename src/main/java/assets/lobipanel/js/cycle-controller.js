@@ -21,7 +21,10 @@ $("#cycleCheckAll").click(function() {
     $("#cycle-container").fadeOut();
   } else {
     $("#cycle-container").fadeIn();
-    getExistingCycleList();
+    if($("#cycleMultiSelect option").length == 0){
+    	getExistingCycleList();
+    }
+    
   }
 });
 
