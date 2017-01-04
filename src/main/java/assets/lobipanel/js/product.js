@@ -129,8 +129,6 @@ function createEvent() {
         var releaseValue = $("#release").val();
         var productValue = $("#product").val();
         var productValues =[productValue];
-        console.log(productValues);
-        console.log(releaseValue);
         
         $("#suggest").html('');
         $("#loader").addClass("loader");
@@ -151,11 +149,14 @@ function createEvent() {
                         $("#suggest").append('<option>' + data[i] + '</option>');
                     }
                     $("#searchComponent").removeAttr("disabled");
+                }else{
+                    if(data.type == "error"){
+                        alert(data.data);
+                    }
                 }
                 $("#loader").removeClass("loader");
             },
             error : function(data) {
-                alert(data);
                 $("#loader").removeClass("loader");
             }
         });

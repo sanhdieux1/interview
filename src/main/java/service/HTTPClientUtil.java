@@ -59,6 +59,7 @@ public class HTTPClientUtil {
         return null;
     }
 
+    @SuppressWarnings("unused")
     private void login(CloseableHttpClient httpclient) throws URISyntaxException, ClientProtocolException, IOException {
         URI uri = new URI(loginURL);
         RequestBuilder requestBuilder = RequestBuilder.post().setUri(uri).addParameter("os_username", "hcongle").addParameter("os_password", "hcl49#Tma");
@@ -85,7 +86,7 @@ public class HTTPClientUtil {
             Proxy proxy = getProxy();
             logger.fastDebug("Login to %s , proxy:%s", loginURL, proxy.toString());
             Connection req = Jsoup.connect(loginURL).ignoreHttpErrors(true).ignoreContentType(true).data("os_username", username).data("os_password", password)
-                    .timeout(PropertiesUtil.getInt(Constant.PARAMERTER_TIMEOUT, 70000)).method(Connection.Method.POST);
+                    .timeout(PropertiesUtil.getInt(Constant.PARAMERTER_TIMEOUT, 10000)).method(Connection.Method.POST);
             if(proxy != null){
                 req.proxy(proxy);
             }
@@ -109,7 +110,7 @@ public class HTTPClientUtil {
 
         String url = scheme + ":" + SLASH + SLASH + host + path;
         Connection connection = Jsoup.connect(url).ignoreHttpErrors(true).ignoreContentType(true).timeout(timeout).maxBodySize(0).method(Connection.Method.GET);
-        if(!cookies.isEmpty()){
+        if(cookies!=null && !cookies.isEmpty()){
             connection.cookies(cookies);
         } else{
             throw new APIException("Login session not available, need re-login to greenhopper");

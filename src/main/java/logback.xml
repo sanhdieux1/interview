@@ -52,6 +52,13 @@
         <appender-ref ref="STDOUT" />
         <appender-ref ref="ROLLING" />
     </root>
+    
+    <logger name="controllers" level="TRACE">
+        <appender-ref ref="FILE" />
+    </logger>
+    <logger name="filter" level="TRACE">
+        <appender-ref ref="FILE" />
+    </logger>
     <logger name="service" level="TRACE">
         <appender-ref ref="FILE" />
     </logger>

@@ -41,6 +41,7 @@ public class AssigneeController {
     }
 
     public Result getListCycleName(@Param("project") String projectName, @Param("release") String release, @Param("products") String productArrays, Context context) {
+        logger.fasttrace("getListCycleName(%s,%s,%s)", projectName, release, productArrays);
         try{
             List<String> productList = JSONUtil.getInstance().convertJSONtoListObject(productArrays, String.class);
             Set<String> products = null;
@@ -54,6 +55,7 @@ public class AssigneeController {
     }
     
     public Result getListExistingCycle(Context context) {
+        logger.fasttrace("getListExistingCycle()");
         Set<String> cycles = AdminUtility.getInstance().getAllCycle();
         return Results.json().render(cycles);
     }

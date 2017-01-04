@@ -12,7 +12,6 @@ import manament.log.LoggerWapper;
 import models.exception.APIException;
 import util.Constant;
 import util.PropertiesUtil;
-import util.gadget.EpicUtility;
 
 public class ExecutorManagement {
     final static LoggerWapper logger = LoggerWapper.getLogger(ExecutorManagement.class);

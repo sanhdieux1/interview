@@ -28,6 +28,7 @@ public class EpicController {
 
     public Result getEpicLinks(@Param("project") String project, @Param("release") String release, @Param("products") String productArrays, Context context) {
         try{
+            logger.fasttrace("getEpicLinks(%s,%s,%s)",project, release, productArrays);
             List<String> products = JSONUtil.getInstance().convertJSONtoListObject(productArrays, String.class);
             return handler.getEpicLinks(project, release, products, ResultsUtil.getSessionInfo(context));
         } catch (APIException e){

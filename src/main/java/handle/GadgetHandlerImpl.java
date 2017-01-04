@@ -25,6 +25,7 @@ import models.main.GadgetDataWapper;
 import ninja.Context;
 import ninja.Result;
 import ninja.Results;
+import util.Constant;
 import util.JSONUtil;
 import util.gadget.GadgetUtility;
 
@@ -46,7 +47,7 @@ public class GadgetHandlerImpl extends GadgetHandler {
         if(data == null){
             throw new APIException("data cannot be null");
         }
-        String username = (String) context.getSession().get("username");
+        String username = (String) context.getSession().get(Constant.USERNAME);
         // String friendlyname = (String) context.getAttribute("alias");
         List<String> errorMessages = new ArrayList<>();
         if(Gadget.Type.EPIC_US_TEST_EXECUTION.equals(gadgetType)){
