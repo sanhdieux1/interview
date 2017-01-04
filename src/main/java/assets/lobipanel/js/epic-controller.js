@@ -1,40 +1,41 @@
 /*
- * This script deals with epic controller, setting up jquery on change, click, etc...
+ * Set listeners for project, release, product select option.
  */
 
-// When epic project input is changed
 $("#epicProject").change(function() {
-	callAjaxOnEpicProjectAndRelease();
+	callAjaxOnEpicProjectAndRelease(null);
 });
-// When epic release input is changed
+
 $("#epicRelease").change(function() {
-	callAjaxOnEpicProjectAndRelease();
+	callAjaxOnEpicProjectAndRelease(null);
 });
 
 $("#epicProduct").change(function() {
-	callAjaxOnEpicProjectAndRelease();
+	callAjaxOnEpicProjectAndRelease(null);
 });
 
-// when Update button for epic gadget is clicked
+/*
+ * Set listener for update button
+ */
 $("#epic-add-gadget").click(function() {
 	$(this).prop("disabled",true);
 	var jsonString = createJsonStringObjectFromEpicInput();
 	callAjaxToUpdateGadget(jsonString);
 });
 
-// When epic gadget "select all" is clicked
+/*
+ * Set listener for input check option.
+ */
 $("#epicCheckAll").click(function() {
 	if ($(this).prop("checked")) {
 		$("#epic-link-container").fadeOut();
 	} else {
 		$("#epic-link-container").fadeIn();
-		callAjaxOnEpicProjectAndRelease();
+		callAjaxOnEpicProjectAndRelease(null);
 	}
 });
 
-
-//Send ajax once project or release input changed on gui
-function callAjaxOnEpicProjectAndRelease() {
+function callAjaxOnEpicProjectAndRelease(selectList) {
 	if ($("#epicProject").val() == null || $("#epicRelease").val() == null
 			|| $("#epicProduct").val() == null) {
 		return;
@@ -56,8 +57,14 @@ function callAjaxOnEpicProjectAndRelease() {
 				if (debugAjaxResponse(data)) {
 					return;
 				}
-				data.sort();
-				appendToSelect(true, data, "#epicMultiSelect");
+				else{
+					data.sort();
+					appendToSelect(true, data, "#epicMultiSelect");
+					if(selectList != null){
+						$("#epicMultiSelect").val(selectList);
+					}
+				}
+				
 			}
 		}).always(function(data) {
 			showEpicLinks();
@@ -124,6 +131,8 @@ function callAjaxToUpdateGadget(jsonString) {
 			},
 			success : function(data) {
 				if (debugAjaxResponse(data)) {
+					$("#epic-add-gadget").prop("disabled", false);
+					showEpicTable();
 					return;
 				}
 				else{
@@ -158,8 +167,15 @@ function drawEpicTable(gadgetId, metricArray) {
 		
 	} else {
 		hideEpicTable();
-		console.log("DRAW EPIC TABLE: "+gadgetId);
-		GLOBAL_EPIC_TABLE = $('#epic-table').DataTable(
+		console.log("DRAW EPIC TABLE: " + gadgetId);
+		GLOBAL_EPIC_TABLE = $('#epic-table').on(
+				'error.dt',
+				function(e, settings, techNote, message) {
+					console.log('An error has been reported by DataTables: ',
+							message);
+					$("#epic-add-gadget").prop("disabled", false);
+					showEpicTable();
+				}).DataTable(
 				{
 					"fnDrawCallback" : function(oSettings) {
 						$("#epic-add-gadget").prop("disabled", false);
@@ -174,6 +190,8 @@ function drawEpicTable(gadgetId, metricArray) {
 						dataSrc : function(responseJson) {
 							var tempArray = [];
 							if (debugAjaxResponse(responseJson)) {
+								$("#epic-add-gadget").prop("disabled", false);
+								showEpicTable();
 								return;
 							}
 

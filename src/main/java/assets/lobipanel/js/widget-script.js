@@ -18,6 +18,7 @@ var EPIC_TYPE = "EPIC_US_TEST_EXECUTION";
 var US_TYPE = "STORY_TEST_EXECUTION";
 var ASSIGNEE_TYPE = "ASSIGNEE_TEST_EXECUTION";
 var CYCLE_TYPE = "TEST_CYCLE_TEST_EXECUTION";
+var GET_EXISTING_CYCLE_URI = "/cycleExisting";
 var US_TABLE_LOADING = false;
 var ASSIGNEE_TABLE_LOADING = false;
 var TEST_EPIC_ID = null;
@@ -109,13 +110,11 @@ function drawGadgets(gadgetList) {
 				$("#epicProduct").val(gadgetList[i]["products"]);
 			}
 
-			if (gadgetList[i]["release"] != ""
-					&& gadgetList[i]["release"] != null) {
+			if (gadgetList[i]["release"] != null) {
 				$("#epicRelease").val(gadgetList[i]["release"]);
 			}
 
-			if (gadgetList[i]["metrics"] != ""
-					&& gadgetList[i]["metrics"] != null) {
+			if (gadgetList[i]["metrics"] != null) {
 				$("#epicMetricMultiSelect").val(gadgetList[i]["metrics"]);
 			}
 			if (gadgetList[i]["selectAll"] == true) {
@@ -125,38 +124,32 @@ function drawGadgets(gadgetList) {
 				$("#epicCheckAll").prop("checked", false);
 				$("#epic-link-container").show();
 				$("#epic-link-loader").hide();
-				appendToSelect(true, gadgetList[i]["epic"], "#epicMultiSelect");
-				$("#epicMultiSelect").val(gadgetList[i]["epic"]);
+				callAjaxOnEpicProjectAndRelease(gadgetList[i]["epic"]);
 			}
 			drawEpicTable(gadgetList[i]["id"], gadgetList[i]["metrics"]);
 		} else if (US_TYPE == gadgetList[i]["type"]) {
 			TEST_US_ID = gadgetList[i]["id"];
 			$("#us-test-execution-div").show();
-			if (gadgetList[i]["projectName"] != ""
-					&& gadgetList[i]["projectName"] != null) {
+			if (gadgetList[i]["projectName"] != null) {
 				$("#usProject").val(gadgetList[i]["projectName"]);
 			}
 
-			if (gadgetList[i]["release"] != ""
-					&& gadgetList[i]["release"] != null) {
+			if (gadgetList[i]["release"] != null) {
 				$("#usRelease").val(gadgetList[i]["release"]);
 			}
 
-			if (gadgetList[i]["products"] != ""
-					&& gadgetList[i]["products"] != null) {
+			if (gadgetList[i]["products"] != null) {
 				$("#usProduct").val(gadgetList[i]["products"]);
 			}
 			
-			if (gadgetList[i]["metrics"] != ""
-				&& gadgetList[i]["metrics"] != null) {
+			if (gadgetList[i]["metrics"] != null) {
 				$("#usMetricMultiSelect").val(gadgetList[i]["metrics"]);
 			}
 			if(gadgetList[i]["selectAllStory"] != false){
 				$("#usCheckAllStory").prop("checked", true);
 				$("#us-container").fadeOut();
 			}
-			else if (gadgetList[i]["stories"] != ""
-					&& gadgetList[i]["stories"] != null) {
+			else if (gadgetList[i]["stories"] != null) {
 				$("#usCheckAllStory").prop("checked", false);
 				$("#us-container").fadeIn();
 				$("#us-us-loader").hide();
@@ -168,7 +161,7 @@ function drawGadgets(gadgetList) {
 				$("#usCheckAllEpic").prop("checked", true);
 				$("#us-epic-container").fadeOut();
 			}
-			else if (gadgetList[i]["epic"] != "" && gadgetList[i]["epic"] != null) {
+			else if (gadgetList[i]["epic"] != null) {
 				$("#usCheckAllEpic").prop("checked", false);
 				$("#us-epic-container").fadeIn();
 				$("#us-epic-loader").hide();
@@ -181,38 +174,32 @@ function drawGadgets(gadgetList) {
 		} else if (ASSIGNEE_TYPE == gadgetList[i]["type"]) {
 			TEST_ASSIGNEE_ID = gadgetList[i]["id"];
 			$("#assignee-test-execution-div").show();
-			if (gadgetList[i]["projectName"] != ""
-					&& gadgetList[i]["projectName"] != null) {
+			if (gadgetList[i]["projectName"] != null) {
 				$("#assigneeProject").val(gadgetList[i]["projectName"]);
 			}
 
-			if (gadgetList[i]["release"] != ""
-					&& gadgetList[i]["release"] != null) {
+			if (gadgetList[i]["release"] != null) {
 				$("#assigneeRelease").val(gadgetList[i]["release"]);
 			}
 
-			if (gadgetList[i]["products"] != ""
-					&& gadgetList[i]["products"] != null) {
+			if (gadgetList[i]["products"] != null) {
 				$("#assigneeProduct").val(gadgetList[i]["products"]);
 			}
 
-			if (gadgetList[i]["assignee"] != ""
-					&& gadgetList[i]["assignee"] != null) {
+			if (gadgetList[i]["assignee"] != null) {
 				appendToSelect(true, gadgetList[i]["assignee"],
 						"#assigneeMultiSelect");
 				$("#assigneeMultiSelect").val(gadgetList[i]["assignee"]);
 			}
 
-			if (gadgetList[i]["metrics"] != ""
-					&& gadgetList[i]["metrics"] != null) {
+			if (gadgetList[i]["metrics"] != null) {
 				$("#assigneeMetricMultiSelect").val(gadgetList[i]["metrics"]);
 			}
 			if(gadgetList[i]["selectAllTestCycle"] != false){
 				$("#assigneeCheckAllCycle").prop("checked", true);
 				$("#assignee-cycle-container").fadeOut();
 			}
-			else if (gadgetList[i]["cycles"] != ""
-					&& gadgetList[i]["cycles"] != null) {
+			else if (gadgetList[i]["cycles"] != null) {
 				$("#assigneeCheckAllCycle").prop("checked", true);
 				$("#assignee-cycle-container").fadeOut();
 				$("#assignee-cycle-container").hide();
@@ -303,6 +290,8 @@ $(document).ready(function() {
 			}
 		}
 	});
+	getExistingCycleAssigneeWidget();
+	getExistingCycleList();
 	
 	productPage = location.protocol + "//" + location.host+ "/product";
 	console.log(productPage);

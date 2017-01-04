@@ -1,15 +1,21 @@
+/*
+ * Set listeners for project, release, product select option
+ */
+
 $("#usProject").change(function() {
-  callAjaxOnUsProjectAndRelease();
+  callAjaxOnUsProjectAndRelease(null);
 });
 
 $("#usRelease").change(function() {
-  callAjaxOnUsProjectAndRelease();
+  callAjaxOnUsProjectAndRelease(null);
 });
 
 $("#usProduct").change(function() {
-  callAjaxOnUsProjectAndRelease();
+  callAjaxOnUsProjectAndRelease(null);
 });
-
+/*
+ * Set listeners for add, remove, add all, remove all epic links buttons
+ */
 $("#us-add-epic-btn").click(function() {
   var options = $("#usEpicAvailable option:selected").clone();
   if (options.length == 0) {
@@ -17,7 +23,7 @@ $("#us-add-epic-btn").click(function() {
   }
   $("#usEpic").append(options);
   $("#usEpicAvailable option:selected").remove();
-  reloadUSList();
+  reloadUSList(null);
 });
 
 $("#us-add-all-epic-btn").click(function() {
@@ -31,13 +37,17 @@ $("#us-remove-epic-btn").click(function() {
   }
   $("#usEpicAvailable").append(options);
   $("#usEpic option:selected").remove();
-  reloadUSList();
+  reloadUSList(null);
 });
 
 $("#us-remove-all-epic-btn").click(function() {
   removeAllEpic();
 });
 
+
+/*
+ * Set listener for update button
+ */
 $("#us-update-btn").click(
   function() {
     $(this).prop("disabled", true);
@@ -45,19 +55,26 @@ $("#us-update-btn").click(
     callAjaxToUpdateUsGadget(jsonString);
   });
 
-
+/*
+ * Not used anymore, can be removed
+ */
 $("#usEpicSelectAll").change(function() {
   $("#us-epic-available-div").fadeOut();
   $("#us-epic-available-div").fadeIn();
 });
 
+/*
+ * Set listeners for input check option
+ */
 $("#usCheckAllEpic").click(function() {
   if ($(this).prop("checked")) {
     $("#us-epic-container").fadeOut();
     addAllEpic();
   } else {
     $("#us-epic-container").fadeIn();
-    callAjaxOnUsProjectAndRelease();
+    if($("#usEpicAvailable option").length == 0 && $("#usEpic option").length == 0){
+    	callAjaxOnUsProjectAndRelease(null);
+    }
   }
 });
 
@@ -66,9 +83,6 @@ $("#usCheckAllStory").click(function() {
     $("#us-container").fadeOut();
   } else {
     $("#us-container").fadeIn();
-    if (!$("#usCheckAllEpic").prop("checked")) {
-      callAjaxOnUsProjectAndRelease();
-    }
   }
 });
 
@@ -154,6 +168,8 @@ function callAjaxToUpdateUsGadget(jsonString) {
       },
       success: function(data) {
         if (debugAjaxResponse(data)) {
+        	$("#us-update-btn").prop("disabled", false);
+        	showUsTable();
           return;
         }
         else{
@@ -169,7 +185,7 @@ function callAjaxToUpdateUsGadget(jsonString) {
   }
 }
 
-function reloadUSList() {
+function reloadUSList(selectList) {
   if ($("#usCheckAllStory").prop("checked,true")) {
     return;
   } else if ($("#usEpic option").length == 0) {
@@ -206,6 +222,10 @@ function reloadUSList() {
             '#usMultiSelect');
         }
       })
+      if(selectList != null){
+    	  $('#usMultiSelect').val(selectList);  
+      }
+      
     }
   }).always(
     function(data) {
@@ -237,6 +257,8 @@ function drawUsTable(gadgetId, metricArray) {
     },
     success: function(responseData) {
     	if (debugAjaxResponse(responseData)) {
+    		$("#us-update-btn").prop("disabled", false);
+        	showUsTable();
             return;
           }
       $("#us-table-container").html("");
@@ -331,7 +353,7 @@ function drawUsTable(gadgetId, metricArray) {
 
 }
 
-function callAjaxOnUsProjectAndRelease() {
+function callAjaxOnUsProjectAndRelease(selectList, usSelectList) {
   if ($("#usProject").val() == null || $("#usRelease").val() == null || $("#usProduct").val() == null) {
     return;
   }
@@ -366,15 +388,26 @@ function callAjaxOnUsProjectAndRelease() {
         return;
       }
       data.sort();
+      
       if (!$("#usCheckAllEpic").prop("checked")) {
-        appendToSelect(true, data, "#usEpicAvailable");
-        $('#usEpic').find('option').remove().end();
-        showUsEpic();
-      } else if ($("#usCheckAllEpic").prop("checked") && !$("#usCheckAllStory").prop("checked")) {
+    	  if(selectList != null){
+        	  $('#usEpicAvailable').filter(function () {
+        	     return $.inArray(this.value, selectList) !== -1
+        	  }).remove();
+        	  $('#usEpic').val(selectList);
+          }
+    	  else{
+    		  appendToSelect(true, data, "#usEpicAvailable");
+    	      $('#usEpic').find('option').remove().end();
+    	      
+    	  }
+    	  showUsEpic();
+      } else if ($("#usCheckAllEpic").prop("checked")) {
         $('#usEpicAvailable').find('option').remove().end();
         appendToSelect(true, data, "#usEpic");
-        reloadUSList();
       }
+      
+      reloadUSList(usSelectList);
     }
   });
 }
@@ -386,7 +419,7 @@ function addEpic() {
   }
   $("#usEpic").append(options);
   $("#usEpicAvailable option:selected").remove();
-  reloadUSList();
+  reloadUSList(null);
 }
 
 function removeEpic() {
@@ -396,7 +429,7 @@ function removeEpic() {
   }
   $("#usEpicAvailable").append(options);
   $("#usEpic option:selected").remove();
-  reloadUSList();
+  reloadUSList(null);
 }
 
 
@@ -407,7 +440,7 @@ function addAllEpic() {
   }
   $("#usEpic").append(options);
   $("#usEpicAvailable option").remove();
-  reloadUSList();
+  reloadUSList(null);
 }
 
 function removeAllEpic() {
@@ -417,7 +450,7 @@ function removeAllEpic() {
   }
   $("#usEpicAvailable").append(options);
   $("#usEpic option").remove();
-  reloadUSList();
+  reloadUSList(null);
 }
 
 function showUsEpic() {

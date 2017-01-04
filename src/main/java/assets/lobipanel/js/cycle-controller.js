@@ -1,14 +1,13 @@
 $("#cycleProject").change(function() {
-  callAjaxOnCycleProjectAndRelease();
-
+  
 });
 
 $("#cycleRelease").change(function() {
-  callAjaxOnCycleProjectAndRelease();
+  
 });
 
 $("#cycleProduct").change(function() {
-  callAjaxOnCycleProjectAndRelease();
+  
 });
 
 $("#cycle-update-btn").click(function() {
@@ -22,7 +21,7 @@ $("#cycleCheckAll").click(function() {
     $("#cycle-container").fadeOut();
   } else {
     $("#cycle-container").fadeIn();
-    callAjaxOnCycleProjectAndRelease();
+    getExistingCycleList();
   }
 });
 
@@ -90,6 +89,8 @@ function callAjaxToUpdateCycle(jsonString) {
       },
       success: function(data) {
         if (debugAjaxResponse(data)) {
+        	$("#cycle-update-btn").prop("disabled", false);
+            showCycleTable();
           return;
         }
         else{
@@ -118,7 +119,14 @@ function drawCycleTable(gadgetId, metricArray) {
     GLOBAL_CYCLE_TABLE.columns(columnList).visible(false);
   } else {
 	  hideCycleTable();
-      GLOBAL_CYCLE_TABLE = $('#cycle-table').DataTable({
+      GLOBAL_CYCLE_TABLE = $('#cycle-table').on(
+				'error.dt',
+				function(e, settings, techNote, message) {
+					console.log('An error has been reported by DataTables: ',
+							message);
+					$("#cycle-update-btn").prop("disabled", false);
+					showCycleTable();
+				}).DataTable({
         "fnDrawCallback": function(oSettings) {
           $("#cycle-update-btn").prop("disabled", false);
           showCycleTable();
@@ -131,6 +139,8 @@ function drawCycleTable(gadgetId, metricArray) {
           },
           dataSrc: function(responseJson) {
             if (debugAjaxResponse(responseJson)) {
+            	$("#cycle-update-btn").prop("disabled", false);
+                showCycleTable();
               return;
             }
             var tempArray = [];
@@ -197,8 +207,11 @@ function callAjaxOnCycleProjectAndRelease() {
         if (debugAjaxResponse(data)) {
           return;
         }
-        data.sort();
-        appendToSelect(true, data, "#cycleMultiSelect");
+        else{
+        	data.sort();
+            appendToSelect(true, data, "#cycleMultiSelect");
+        }
+        
       },
       error: function(xhr, textStatus, error) {
     	  debugError(xhr, textStatus, error);
@@ -207,6 +220,29 @@ function callAjaxOnCycleProjectAndRelease() {
       showCycleSelect();
     });
   }
+}
+
+function getExistingCycleList(){
+	if (!$("#cycleCheckAll").prop("checked")) {
+	    $.ajax({
+	      url: GET_EXISTING_CYCLE_URI,
+	      beforeSend: function() {
+	        hideCycleSelect();
+	      },
+	      success: function(data) {
+	        if (debugAjaxResponse(data)) {
+	          return;
+	        }
+	        data.sort();
+	        appendToSelect(true, data, "#cycleMultiSelect");
+	      },
+	      error: function(xhr, textStatus, error) {
+	    	  debugError(xhr, textStatus, error);
+	      }
+	    }).always(function() {
+	      showCycleSelect();
+	    });
+	  }
 }
 
 function hideCycleSelect() {
