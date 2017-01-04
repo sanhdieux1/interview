@@ -20,8 +20,6 @@ $("#epic-add-gadget").click(function() {
 	$(this).prop("disabled",true);
 	var jsonString = createJsonStringObjectFromEpicInput();
 	callAjaxToUpdateGadget(jsonString);
-	callAjaxOnEpicTable();
-	
 });
 
 // When epic gadget "select all" is clicked
@@ -33,30 +31,7 @@ $("#epicCheckAll").click(function() {
 		callAjaxOnEpicProjectAndRelease();
 	}
 });
-// Send ajax to get a list of epic gadgets
-function callAjaxOnEpicTable() {
-	$.ajax({
-		url : GET_GADGETS_URI,
-		data : {
-			dashboardId : $("#dashboardId").val()
-		},
-		beforeSend : function() {
-			hideEpicTable();
-		},
-		error : function(xhr, textStatus, error) {
-			debugError(xhr, textStatus, error);
-			$("#epic-add-gadget").prop("disabled",false);
-			showEpicTable();
-		},
-		success : function(gadgetList) {
-			if (debugAjaxResponse(gadgetList)) {
-				return;
-			}
-			console.log(gadgetList);
-			drawEpicGadget(gadgetList);
-		}
-	});
-}
+
 
 //Send ajax once project or release input changed on gui
 function callAjaxOnEpicProjectAndRelease() {
@@ -94,22 +69,28 @@ function createJsonStringObjectFromEpicInput() {
 	var object = {};
 	if (null == $("#dashboardId").val()) {
 		alert("No valid dashboard id provided.");
+		$("#epic-add-gadget").prop("disabled", false);
 		return;
 	} else if ($("#epicProject").val() == null) {
 		alert("No project selected");
+		$("#epic-add-gadget").prop("disabled", false);
 		return;
 	} else if ($("#epicRelease").val() == null) {
 		alert("No release selected");
+		$("#epic-add-gadget").prop("disabled", false);
 		return;
 	} else if ($("#epicProduct").val() == null) {
-		alert("No release selected");
+		alert("No product selected");
+		$("#epic-add-gadget").prop("disabled", false);
 		return;
 	} else if ($("#epicMultiSelect").val() == null
 			&& !$("#epicCheckAll").prop("checked")) {
 		alert("No epic links selected");
+		$("#epic-add-gadget").prop("disabled", false);
 		return;
 	} else if ($("#epicMetricMultiSelect") == null) {
 		alert("No test metric selected");
+		$("#epic-add-gadget").prop("disabled", false);
 		return;
 	}
 	object['id'] = TEST_EPIC_ID;
@@ -138,44 +119,46 @@ function callAjaxToUpdateGadget(jsonString) {
 				type : 'EPIC_US_TEST_EXECUTION',
 				data : jsonString
 			},
+			beforeSend: function(){
+				hideEpicTable();
+			},
 			success : function(data) {
 				if (debugAjaxResponse(data)) {
 					return;
 				}
-				alert("Gadget updated succesfully");
+				else{
+					alert("Gadget updated succesfully");
+					TEST_EPIC_ID = data["data"];
+					drawEpicTable(TEST_EPIC_ID, $("#epicMetricMultiSelect").val());
+				}
+				
 			},
 			error: function(xhr, textStatus, error){
 				 debugError(xhr, textStatus, error);
 				$("#epic-add-gadget").prop("disabled",false);
+				showEpicTable();
 			}
 		});
 	}
 }
 
-// Draw epic gadget
-function drawEpicGadget(gadgetList) {
-	for (var i = 0; i < gadgetList.length; i++) {
-		if (gadgetList[i]["type"] == EPIC_TYPE) {
-			TEST_EPIC_ID = gadgetList[i]["id"];
-			console.log(gadgetList[i]["id"]);
-			drawEpicTable(gadgetList[i]["id"], gadgetList[i]["metrics"]);
-			break;
-		}
-	}
-}
 
 function drawEpicTable(gadgetId, metricArray) {
 	var columnList = getColumnArray(metricArray, false);
+	console.log(gadgetId);
 	resetTableColumns(GLOBAL_EPIC_TABLE, false);
 	if (GLOBAL_EPIC_TABLE != null) {
 		console.log(GLOBAL_EPIC_TABLE);
 		hideEpicTable();
 		GLOBAL_EPIC_TABLE.ajax.reload(function() {
 			showEpicTable();
+			$("#epic-add-gadget").prop("disabled", false);
 		});
 		GLOBAL_EPIC_TABLE.columns(columnList).visible(false);
+		
 	} else {
 		hideEpicTable();
+		console.log("DRAW EPIC TABLE: "+gadgetId);
 		GLOBAL_EPIC_TABLE = $('#epic-table').DataTable(
 				{
 					"fnDrawCallback" : function(oSettings) {
@@ -184,9 +167,9 @@ function drawEpicTable(gadgetId, metricArray) {
 					},
 					bAutoWidth : false,
 					"ajax" : {
-						url : "/gadget/getData",
+						url : GET_DATA_URI,
 						data : {
-							"id" : gadgetId
+							id : gadgetId
 						},
 						dataSrc : function(responseJson) {
 							var tempArray = [];

@@ -52,7 +52,6 @@ $("#assignee-update-btn").click(function() {
   $(this).prop("disabled", true);
   var jsonString = createJsonStringFromAssigneeInput();
   updateAssigneeGadget(jsonString);
-  callAjaxOnAssigneeTable();
 });
 
 function createJsonStringFromAssigneeInput() {
@@ -62,23 +61,31 @@ function createJsonStringFromAssigneeInput() {
   var jsonString;
   if (null == $("#dashboardId").val()) {
     alert("No valid dashboard id provided.");
+    $("#assignee-update-btn").prop("disabled", false);
     return;
-  } else if ($("#assigneeProject").val() == "" || $("#assigneeProject").val() == null || $("#assigneeRelease").val() == "" || $("#assigneeRelease").val() == null) {
-    $("#warning-message").val(
-      "Please select project or release for this gadget.");
-    $("dashboard-alert").fadeIn();
+  } else if ($("#assigneeProject").val() == null) {
+	  alert("No project selected");
+	  $("#assignee-update-btn").prop("disabled", false);
     return;
+  }else if ($("#assigneeRelease").val() == null) {
+	  alert("No release selected");
+	  $("#assignee-update-btn").prop("disabled", false);
+	  return;
   } else if ($("#assigneeProduct").val() == null) {
     alert("No product selected");
+    $("#assignee-update-btn").prop("disabled", false);
     return;
   } else if ($("#assigneeCycle option").length == 0 && !$("#assigneeCheckAllCycle").prop("checked")) {
+	  $("#assignee-update-btn").prop("disabled", false);
     alert("No cycle selected");
     return;
   } else if ($("#assigneeMultiSelect").val() == null && !$("#assigneeCheckAll").prop("checked")) {
     alert("No assignee selected");
+    $("#assignee-update-btn").prop("disabled", false);
     return;
   } else if ($("#assigneeMetricMultiSelect").val() == null) {
     alert("No test metric selected");
+    $("#assignee-update-btn").prop("disabled", false);
     return;
   }
   object['dashboardId'] = $("#dashboardId").val();
@@ -129,7 +136,11 @@ function updateAssigneeGadget(jsonString) {
         if (debugAjaxResponse(data)) {
           return;
         }
-        alert("Gadget updated succesfully");
+        else{
+        	alert("Gadget updated succesfully")
+        	drawAssigneeTable(data["data"], $("#assigneeMetricMultiSelect").val());
+        }
+        
       }
     }).always(function(returnMessage) {
       console.log(jsonString);
@@ -165,17 +176,6 @@ $("#assigneeCheckAllCycle").click(function() {
     callAjaxOnAssigneeProjectAndRelease();
   }
 });
-
-function drawAssigneeGadget(gadgetList) {
-  for (var i = 0; i < gadgetList.length; i++) {
-    if (gadgetList[i]["type"] == ASSIGNEE_TYPE) {
-      TEST_ASSIGNEE_ID = gadgetList[i]["id"];
-      console.log("prepare to draw table");
-      drawAssigneeTable(gadgetList[i]["id"], gadgetList[i]["metrics"]);
-      break;
-    }
-  }
-}
 
 function drawAssigneeTable(gadgetId, metricArray) {
   var columnList = getColumnArray(metricArray, true);

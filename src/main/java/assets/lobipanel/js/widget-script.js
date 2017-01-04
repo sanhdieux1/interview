@@ -98,6 +98,7 @@ function drawGadgets(gadgetList) {
 	for (var i = 0; i < gadgetList.length; i++) {
 		if (EPIC_TYPE == gadgetList[i]["type"]) {
 			$("#epic-test-execution-div").show();
+			hideEpicTable();
 			TEST_EPIC_ID = gadgetList[i]["id"];
 			if (gadgetList[i]["projectName"] != ""
 					&& gadgetList[i]["projectName"] != null) {
@@ -175,6 +176,7 @@ function drawGadgets(gadgetList) {
 				$("#usEpic").val(gadgetList[i]["epic"]);
 			}
 			console.log("prepare to draw table");
+			console.log(gadgetList[i]["id"]);
 			drawUsTable(gadgetList[i]["id"], gadgetList[i]["metrics"]);
 		} else if (ASSIGNEE_TYPE == gadgetList[i]["type"]) {
 			TEST_ASSIGNEE_ID = gadgetList[i]["id"];

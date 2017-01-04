@@ -15,7 +15,6 @@ $("#cycle-update-btn").click(function() {
   $(this).prop("disabled", true);
   var jsonString = createJsonStringObjectFromCycleInput();
   callAjaxToUpdateCycle(jsonString);
-  callAjaxOnCycleTable();
 });
 
 $("#cycleCheckAll").click(function() {
@@ -31,18 +30,28 @@ function createJsonStringObjectFromCycleInput() {
   var object = {};
   if(null == $("#dashboardId").val()){
 	  alert("No valid dashboard id provided.");
+	  $("#cycle-update-btn").prop("disabled", false);
 	  return;
   }
   else if ($("#cycleProject").val() == null || $("#cycleRelease").val() == null) {
-	  alert("No project or cycle selected");
+	  alert("No project selected");
+	  $("#cycle-update-btn").prop("disabled", false);
+    return;
+  }else if ($("#cycleRelease").val() == null) {
+	  alert("No release selected");
+	  $("#cycle-update-btn").prop("disabled", false);
     return;
   } else if ($("#cycleProduct").val() == null) {
     alert("No Products selected");
+    $("#cycle-update-btn").prop("disabled", false);
+    return;
   } else if ($("#cycleMultiSelect").val() == null && !$("#cycleCheckAll").prop("checked")) {
     alert("No cycle selected");
+    $("#cycle-update-btn").prop("disabled", false);
     return;
   } else if ($("#cycleMetricMultiSelect").val() == null) {
     alert("No metric selected for this widget");
+    $("#cycle-update-btn").prop("disabled", false);
     return;
   }
   
@@ -76,56 +85,24 @@ function callAjaxToUpdateCycle(jsonString) {
       error: function(xhr, textStatus, error) {
     	$(this).prop("disabled", true);
     	debugError(xhr, textStatus, error);
-        $("#cycle-update-btn").prop("disabled",false);
+    	$("#cycle-update-btn").prop("disabled", false);
         showCycleTable();
       },
       success: function(data) {
         if (debugAjaxResponse(data)) {
           return;
         }
-        alert("Gadget updated succesfully");
+        else{
+        	alert("Gadget updated succesfully");
+        	TEST_CYCLE_ID = data["data"];
+        	drawCycleTable(TEST_CYCLE_ID, $("#cycleMetricMultiSelect").val());
+        }
+        
       }
     }).always(function() {
       console.log(jsonString);
     });
   }
-}
-
-function callAjaxOnCycleTable() {
-  $.ajax({
-		  url : GET_GADGETS_URI,
-		data : {
-			dashboardId : $("#dashboardId").val()
-		},
-    success: function(gadgetList) {
-      drawCycleGadget(gadgetList);
-    },
-    error: function(xhr, textStatus, error) {
-      debugError(xhr, textStatus, error);
-      $(this).prop("disabled", true);
-      showCycleTable();
-    },
-    beforeSend: function() {
-      hideCycleTable();
-    }
-  }).always(function(gadgetList) {
-    if (debugAjaxResponse(gadgetList)) {
-      return;
-    }
-    console.log(gadgetList);
-  });
-
-}
-
-function drawCycleGadget(gadgetList) {
-	for (var i = 0; i < gadgetList.length; i++) {
-		if (gadgetList[i]["type"] == CYCLE_TYPE) {
-			TEST_CYCLE_ID = gadgetList[i]["id"];
-			console.log("Prepare to draw table");
-			drawCycleTable(gadgetList[i]["id"], gadgetList[i]["metrics"]);
-			break;
-		}
-	}
 }
 
 function drawCycleTable(gadgetId, metricArray) {
@@ -135,6 +112,7 @@ function drawCycleTable(gadgetId, metricArray) {
     console.log(GLOBAL_CYCLE_TABLE);
     hideCycleTable();
     GLOBAL_CYCLE_TABLE.ajax.reload(function(){
+    	$("#cycle-update-btn").prop("disabled",false);
     	showCycleTable();
     });
     GLOBAL_CYCLE_TABLE.columns(columnList).visible(false);
@@ -196,7 +174,6 @@ function drawCycleTable(gadgetId, metricArray) {
 
       });
       GLOBAL_CYCLE_TABLE.columns(columnList).visible(false);
-      
     }
 }
 

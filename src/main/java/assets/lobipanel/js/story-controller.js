@@ -43,7 +43,6 @@ $("#us-update-btn").click(
     $(this).prop("disabled", true);
     var jsonString = createJsonStringObjectFromUsInputField();
     callAjaxToUpdateUsGadget(jsonString);
-    callAjaxOnUsTable();
   });
 
 
@@ -80,23 +79,30 @@ function createJsonStringObjectFromUsInputField() {
   var jsonString;
   if (null == $("#dashboardId").val()) {
     alert("No valid dashboard id provided.");
+    $("#us-update-btn").prop("disabled", false);
     return;
   } else if ($("#usProject").val() == null) {
     alert("No project selected");
+    $("#us-update-btn").prop("disabled", false);
     return;
   } else if ($("#usRelease").val() == null) {
     alert("No release selected");
+    $("#us-update-btn").prop("disabled", false);
     return;
   } else if ($("#usProduct").val() == null) {
     alert("No product selected");
+    $("us-update-btn").prop("disabled", false);
     return;
   } else if ($("#usEpic option").length == 0 && !$("#usCheckAllEpic").prop("checked")) {
     alert('No epic links selected.');
+    $("#us-update-btn").prop("disabled", false);
     return;
   } else if ($("#usMultiSelect").val() == null && !$("#usCheckAllStory").prop("checked")) {
     alert("No user story selected for the fetched epic links ");
+    $("#us-update-btn").prop("disabled", false);
     return;
   } else if ($("#usMetricMultiSelect").val() == null) {
+	$("#us-update-btn").prop("disabled", false);
     alert("No test metric selected");
     return;
   }
@@ -150,11 +156,15 @@ function callAjaxToUpdateUsGadget(jsonString) {
         if (debugAjaxResponse(data)) {
           return;
         }
-        alert("Gadget updated succesfully");
+        else{
+        	alert("Gadget updated succesfully");
+        	TEST_CYCLE_ID = data["data"];
+        	drawUsTable(TEST_CYCLE_ID, $("#usMetricMultiSelect").val());
+        }
+        
       }
     }).always(function(returnMessage) {
       console.log(jsonString);
-
     });
   }
 }
@@ -204,45 +214,8 @@ function reloadUSList() {
     });
 }
 
-function callAjaxOnUsTable() {
-  if (!US_TABLE_LOADING)
-    $.ajax({
-      url: GET_GADGETS_URI,
-      data: {
-        dashboardId: $("#dashboardId").val()
-      },
-      success: function(gadgetList) {
-        drawUsGadget(gadgetList);
-      },
-      error: function(xhr, textStatus, error) {
-    	  debugError(xhr, textStatus, error);
-        $("#us-update-btn").prop("disabled", false);
-      },
-      beforeSend: function() {
-        US_TABLE_LOADING = true;
-        hideUsTable();
-      }
-    }).always(function(gadgetList) {
-      if (debugAjaxResponse(gadgetList)) {
-        return;
-      }
-      console.log(gadgetList);
-    });
-}
-
-function drawUsGadget(gadgetList) {
-  for (var i = 0; i < gadgetList.length; i++) {
-    if (gadgetList[i]["type"] == US_TYPE) {
-      console.log(gadgetList[i]["id"]);
-      TEST_US_ID = gadgetList[i]["id"];
-      console.log("prepare to draw table");
-      drawUsTable(gadgetList[i]["id"], gadgetList[i]["metrics"]);
-      break;
-    }
-  }
-}
-
 function drawUsTable(gadgetId, metricArray) {
+	console.log("DRAW US TABLE: "+ gadgetId);
   var columnList = getColumnArray(metricArray, false);
   var jsonObjectForUsTable;
   if (GLOBAL_US_TABLES_AJAX.loading == true && GLOBAL_US_TABLES_AJAX.ajax != null) {
@@ -253,7 +226,7 @@ function drawUsTable(gadgetId, metricArray) {
     url: "/gadget/getData?",
     method: "GET",
     data: {
-      id: gadgetId
+      "id": gadgetId
     },
     beforeSend: function() {
       GLOBAL_US_TABLES_AJAX.loading = true;
