@@ -1,7 +1,6 @@
 package util;
 
 public class Constant {
-	public static final int TIMEOUT = 60 * 1000;
 	public static final long EXPIRE_TIME = 24 * 60 * 60 * 1000L;
 
 	public static final int MAX_AGE = 30 * 24 * 60 * 60 * 1000;

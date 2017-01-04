@@ -10,6 +10,7 @@ import ninja.FilterChain;
 import ninja.Result;
 import util.Constant;
 import util.JSONUtil;
+import util.PropertiesUtil;
 
 public class APIFilter implements Filter {
     final static LoggerWapper logger = LoggerWapper.getLogger(APIFilter.class);
@@ -27,7 +28,7 @@ public class APIFilter implements Filter {
                 logger.fastDebug("No cookies are available", e, new Object());
             }
         }
-        return ResultsUtil.convertException(new APIException("Login session not available, need re-login to greenhopper"));
+        return ResultsUtil.convertException(new APIException(PropertiesUtil.getString(Constant.SESSION_ERROR_MESSAGE)));
     }
 
 }

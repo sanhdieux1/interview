@@ -31,7 +31,7 @@ public class LinkUtil {
         Document doc = null;
         try {
             doc = Jsoup.connect(link).header("authorization", "Basic " + token)
-                    .timeout(Constant.TIMEOUT).ignoreContentType(true).get();
+                    .timeout(PropertiesUtil.getInt(Constant.PARAMERTER_TIMEOUT, 60000)).ignoreContentType(true).get();
         } catch (Exception e) {
             logger.error(String.format("Connect %s with error %s", link, e));
         }
@@ -87,7 +87,7 @@ public class LinkUtil {
             String token = new String(Base64.encodeBase64(authString.getBytes()));
             try {
                 respond = Jsoup.connect(Constant.LINK_CRUCIBLE)
-                        .header("authorization", "Basic " + token).timeout(Constant.TIMEOUT)
+                        .header("authorization", "Basic " + token).timeout(PropertiesUtil.getInt(Constant.PARAMERTER_TIMEOUT, 60000))
                         .ignoreHttpErrors(true)
                         .ignoreContentType(true)
                         .execute();
