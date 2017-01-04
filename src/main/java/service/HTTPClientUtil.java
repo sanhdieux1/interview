@@ -122,7 +122,7 @@ public class HTTPClientUtil {
             }
         });
         Proxy proxy = getProxy();
-        logger.fasttrace("getLegacyData(%s , %s) , connecting to %s \nproxy:%s", path, parameters.toString(), url, proxy.toString());
+        logger.fasttrace("getLegacyData(%s , %s) , connecting to %s \nproxy:%s", path, parameters, url, proxy);
         if(proxy != null){
             connection.proxy(proxy);
         }
@@ -155,7 +155,7 @@ public class HTTPClientUtil {
         BufferedReader rd = null;
         try{
             URI uri = builder.build();
-            logger.fasttrace("Connecting to URI %s", uri.toString());
+            logger.fasttrace("Connecting to URI %s", uri);
             HttpGet httpget = new HttpGet(uri);
             RequestConfig config = getProxyConfig();
             if(config != null){

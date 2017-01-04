@@ -93,6 +93,9 @@ public class GadgetUtility extends DatabaseUtility {
     }
 
     public String insertOrUpdate(Gadget gadget) throws APIException {
+        if(gadget == null){
+            throw new APIException("cannot insert gadget:"+ gadget);
+        }
         String id = gadget.getId();
         Gadget existingGadget = null;
         try {

@@ -18,7 +18,6 @@ public class APIFilter implements Filter {
     @Override
     public Result filter(FilterChain filterChain, Context context) {
         String sessionCookies = context.getSession().get(Constant.API_SESSION_INFO);
-        logger.info(sessionCookies);
         if(sessionCookies != null && !sessionCookies.isEmpty()){
             try{
                 SessionInfo sessionInfo = JSONUtil.getInstance().convertJSONtoObject(sessionCookies, SessionInfo.class);

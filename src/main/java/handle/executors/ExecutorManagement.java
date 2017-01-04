@@ -31,7 +31,7 @@ public class ExecutorManagement {
         try{
             return executor.invokeAll(tasks);
         } catch (InterruptedException e){
-            logger.fastDebug("error during invoke", e);
+            logger.error("error during invoke", e);
             throw new APIException("error during invoke", e);
         }
     }
@@ -46,14 +46,19 @@ public class ExecutorManagement {
                     }
                 }
             } catch (InterruptedException e){
-                logger.fastDebug("error during invoke", e);
-                throw new APIException("error during invoke", e);
-            } catch (ExecutionException e){
-                if(e.getCause() instanceof APIException){
-                    logger.fastDebug("error during invoke", e.getCause());
+                if(e.getCause() != null && e.getCause() instanceof APIException){
+                    logger.error(e.getMessage(), e.getCause());
                     throw (APIException) e.getCause();
                 }
-                throw new APIException("error during invoke");
+                logger.error("error during invoke", e);
+                throw new APIException("error during invoke", e);
+            } catch (ExecutionException e){
+                logger.fastDebug("erorrrrrrrrrrrrr", e);
+                if(e.getCause() != null && e.getCause() instanceof APIException){
+                    logger.error(e.getMessage(), e.getCause());
+                    throw (APIException) e.getCause();
+                }
+                throw new APIException("error during invoke", e);
             }
         }
         return returnData;
