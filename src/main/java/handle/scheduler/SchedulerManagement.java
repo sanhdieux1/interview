@@ -34,7 +34,7 @@ public class SchedulerManagement {
     }
     
     public void startClearJob(){
-        int intervalInHours = PropertiesUtil.getInt(Constant.CLEAN_CACHE_TIME, 10);
+        int intervalInHours = PropertiesUtil.getInt(Constant.CLEAN_CACHE_TIME, 1);
         JobDetail clearCache = JobBuilder.newJob(ClearCacheJob.class).withIdentity("CLEAN_CACHE", "API").build();
         Date triggerStartTime = DateUtils.addHours(new Date(), intervalInHours);
         Trigger trigger = TriggerBuilder.newTrigger()

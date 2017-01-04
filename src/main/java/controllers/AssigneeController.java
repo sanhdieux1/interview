@@ -4,11 +4,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import filter.APIFilter;
 import handle.AssigneeHandler;
-import handle.AssigneeHandlerImpl;
 import manament.log.LoggerWapper;
 import models.exception.APIException;
 import models.exception.ResultsUtil;
@@ -25,10 +25,11 @@ import util.JSONUtil;
 @FilterWith(APIFilter.class)
 public class AssigneeController {
     final static LoggerWapper logger = LoggerWapper.getLogger(AssigneeController.class);
+    
+    @Inject
     private AssigneeHandler handler;
 
     public AssigneeController() {
-        handler = new AssigneeHandlerImpl();
     }
 
     public Result getAssigneeList(@Param("project") String projectName, @Param("release") String release, Context context) {

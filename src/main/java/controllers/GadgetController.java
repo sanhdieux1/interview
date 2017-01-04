@@ -2,11 +2,11 @@ package controllers;
 
 import java.util.List;
 
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import filter.APIFilter;
 import handle.GadgetHandler;
-import handle.GadgetHandlerImpl;
 import manament.log.LoggerWapper;
 import models.exception.APIException;
 import models.exception.ResultsUtil;
@@ -21,10 +21,10 @@ import util.JSONUtil;
 @FilterWith(APIFilter.class)
 public class GadgetController {
     final static LoggerWapper logger = LoggerWapper.getLogger(GadgetController.class);
+    @Inject
     private GadgetHandler handler;
 
     public GadgetController() {
-        handler = new GadgetHandlerImpl();
     }
 
     public Result insertOrUpdateGadget(@Param("type") String type, @Param("data") String data, Context context) {

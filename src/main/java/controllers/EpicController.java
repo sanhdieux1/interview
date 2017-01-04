@@ -2,11 +2,11 @@ package controllers;
 
 import java.util.List;
 
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import filter.APIFilter;
 import handle.EpicHandler;
-import handle.EpicHandlerImpl;
 import manament.log.LoggerWapper;
 import models.exception.APIException;
 import models.exception.ResultsUtil;
@@ -20,10 +20,10 @@ import util.JSONUtil;
 @FilterWith(APIFilter.class)
 public class EpicController {
     final static LoggerWapper logger = LoggerWapper.getLogger(EpicController.class);
+    @Inject
     private EpicHandler handler;
 
     public EpicController() {
-        handler = new EpicHandlerImpl();
     }
 
     public Result getEpicLinks(@Param("project") String project, @Param("release") String release, @Param("products") String productArrays, Context context) {
