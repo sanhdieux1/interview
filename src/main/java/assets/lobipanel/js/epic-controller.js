@@ -31,7 +31,10 @@ $("#epicCheckAll").click(function() {
 		$("#epic-link-container").fadeOut();
 	} else {
 		$("#epic-link-container").fadeIn();
-		callAjaxOnEpicProjectAndRelease(null);
+		if($("#epicMultiSelect optionn").length == 0){
+			callAjaxOnEpicProjectAndRelease(null);
+		}
+		
 	}
 });
 
