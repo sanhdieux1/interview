@@ -72,8 +72,8 @@ $("#usCheckAllEpic").click(function() {
     addAllEpic();
   } else {
     $("#us-epic-container").fadeIn();
-    if($("#usEpicAvailable option").length == 0 && $("#usEpic option").length == 0){
-    	callAjaxOnUsProjectAndRelease(null);
+    if ($("#usEpicAvailable option").length == 0 && $("#usEpic option").length == 0) {
+      callAjaxOnUsProjectAndRelease(null);
     }
   }
 });
@@ -95,15 +95,15 @@ function createJsonStringObjectFromUsInputField() {
     alert("No valid dashboard id provided.");
     $("#us-update-btn").prop("disabled", false);
     return;
-  } else if ($("#usProject").val() == null) {
+  } else if ($("#usProject").val() == null || $("#usProject").val() == "") {
     alert("No project selected");
     $("#us-update-btn").prop("disabled", false);
     return;
-  } else if ($("#usRelease").val() == null) {
+  } else if ($("#usRelease").val() == null || $("#usRelease").val() == "") {
     alert("No release selected");
     $("#us-update-btn").prop("disabled", false);
     return;
-  } else if ($("#usProduct").val() == null) {
+  } else if ($("#usProduct").val() == null || $("#usProduct").val() == "") {
     alert("No product selected");
     $("us-update-btn").prop("disabled", false);
     return;
@@ -116,7 +116,7 @@ function createJsonStringObjectFromUsInputField() {
     $("#us-update-btn").prop("disabled", false);
     return;
   } else if ($("#usMetricMultiSelect").val() == null) {
-	$("#us-update-btn").prop("disabled", false);
+    $("#us-update-btn").prop("disabled", false);
     alert("No test metric selected");
     return;
   }
@@ -162,22 +162,21 @@ function callAjaxToUpdateUsGadget(jsonString) {
         hideUsTable();
       },
       error: function(xhr, textStatus, error) {
-    	  debugError(xhr, textStatus, error);
+        debugError(xhr, textStatus, error);
         $("#us-update-btn").prop("disabled", false);
         showUsTable();
       },
       success: function(data) {
         if (debugAjaxResponse(data)) {
-        	$("#us-update-btn").prop("disabled", false);
-        	showUsTable();
+          $("#us-update-btn").prop("disabled", false);
+          showUsTable();
           return;
+        } else {
+          alert("Gadget updated succesfully");
+          TEST_US_ID = data["data"];
+          drawUsTable(TEST_US_ID, $("#usMetricMultiSelect").val());
         }
-        else{
-        	alert("Gadget updated succesfully");
-        	TEST_US_ID = data["data"];
-        	drawUsTable(TEST_US_ID, $("#usMetricMultiSelect").val());
-        }
-        
+
       }
     }).always(function(returnMessage) {
       console.log(jsonString);
@@ -198,34 +197,36 @@ function reloadUSList(selectList) {
   });
   var jsonString = JSON.stringify(values);
   $.ajax({
-    url: "/gadget/getStoryInEpic",
+    url: GET_STORY_URI,
     data: {
       epics: jsonString
     },
     error: function(xhr, textStatus, error) {
-    	debugError(xhr, textStatus, error);
+      debugError(xhr, textStatus, error);
     },
     beforeSend: function() {
       $("#usMultiSelect").fadeOut();
       $("#us-us-loader").fadeIn();
     },
     success: function(data) {
+      var tempList = [];
       if (debugAjaxResponse(data)) {
         return;
       }
-
       $('#usMultiSelect').find("option").remove().end();
       $.each(data, function(key, list) {
-        for (var i = 0; i < list.length; i++) {
-          $(
-            '<option value="' + list[i] + '">' + list[i] + '</option>').appendTo(
-            '#usMultiSelect');
-        }
+        tempList.push.apply(tempList, list);
       })
-      if(selectList != null){
-    	  $('#usMultiSelect').val(selectList);  
+      tempList.sort();
+      for (var i = 0; i < tempList.length; i++) {
+        $(
+          '<option value="' + tempList[i] + '">' + tempList[i] + '</option>').appendTo(
+          '#usMultiSelect');
       }
-      
+      if (selectList != null) {
+        $('#usMultiSelect').val(selectList);
+      }
+
     }
   }).always(
     function(data) {
@@ -235,7 +236,7 @@ function reloadUSList(selectList) {
 }
 
 function drawUsTable(gadgetId, metricArray) {
-	console.log("DRAW US TABLE: "+ gadgetId);
+  console.log("DRAW US TABLE: " + gadgetId);
   var columnList = getColumnArray(metricArray, false);
   var jsonObjectForUsTable;
   if (GLOBAL_US_TABLES_AJAX.loading == true && GLOBAL_US_TABLES_AJAX.ajax != null) {
@@ -253,17 +254,17 @@ function drawUsTable(gadgetId, metricArray) {
       hideUsTable();
     },
     error: function(xhr, textStatus, error) {
-    	debugError(xhr, textStatus, error);
+      debugError(xhr, textStatus, error);
     },
     success: function(responseData) {
-    	if (debugAjaxResponse(responseData)) {
-    		$("#us-update-btn").prop("disabled", false);
-        	showUsTable();
-            return;
-          }
+      if (debugAjaxResponse(responseData)) {
+        $("#us-update-btn").prop("disabled", false);
+        showUsTable();
+        return;
+      }
       $("#us-table-container").html("");
       var index = 0;
-      
+
       jsonObjectForUsTable = responseData;
       console.log(jsonObjectForUsTable["data"]);
 
@@ -299,7 +300,7 @@ function drawUsTable(gadgetId, metricArray) {
             columns: [{
               title: "User Story",
               "render": function(data, displayOrType, rowData, setting) {
-            	  return createIssueLinkForTitle(data);
+                return createIssueLinkForTitle(data);
               }
             }, {
               title: "SUMMARY"
@@ -359,10 +360,12 @@ function drawUsTable(gadgetId, metricArray) {
 function callAjaxOnUsProjectAndRelease(selectList, usSelectList) {
   if ($("#usProject").val() == null || $("#usRelease").val() == null || $("#usProduct").val() == null) {
     return;
+  } else if ($("#usProject").val() == "" || $("#usRelease").val() == "" || $("#usProduct").val() == "") {
+    return;
   }
 
   $.ajax({
-    url: "/getEpicLinks?",
+    url: GET_EPIC_URI,
     data: {
 
       project: $("#usProject").val(),
@@ -379,12 +382,12 @@ function callAjaxOnUsProjectAndRelease(selectList, usSelectList) {
 
     },
     error: function(xhr, textStatus, error) {
-    	debugError(xhr, textStatus, error);
-    	if (!$("#usCheckAllEpic").prop("checked")) {
-            showUsEpic();
-          } else if (!$("#usCheckAllStory").prop("checked")) {
-            showUsStory();
-          }
+      debugError(xhr, textStatus, error);
+      if (!$("#usCheckAllEpic").prop("checked")) {
+        showUsEpic();
+      } else if (!$("#usCheckAllStory").prop("checked")) {
+        showUsStory();
+      }
     },
     success: function(data) {
       if (debugAjaxResponse(data)) {
@@ -392,26 +395,31 @@ function callAjaxOnUsProjectAndRelease(selectList, usSelectList) {
       }
       data.sort();
       if (!$("#usCheckAllEpic").prop("checked")) {
-    	  if(selectList != null){
-    		  appendToSelect(true, data, "#usEpicAvailable");
-        	  $("#usEpicAvailable option").filter(function () {
-        	     return $.inArray(this.value, selectList) !== -1
-        	  }).remove();
-        	  
-    		  appendToSelect(true,selectList, "#usEpic");
-          }
-    	  else{
-    		  appendToSelect(true, data, "#usEpicAvailable");
-    	      $('#usEpic').find('option').remove().end();
-    	      
-    	  }
-    	  showUsEpic();
+        if (selectList != null) {
+          appendToSelect(true, data, "#usEpicAvailable");
+          $("#usEpicAvailable option").filter(function() {
+            return $.inArray(this.value, selectList) !== -1
+          }).remove();
+
+          appendToSelect(true, selectList, "#usEpic");
+        } else {
+          appendToSelect(true, data, "#usEpicAvailable");
+          $('#usEpic').find('option').remove().end();
+
+        }
+        showUsEpic();
       } else if ($("#usCheckAllEpic").prop("checked")) {
         $('#usEpicAvailable').find('option').remove().end();
         appendToSelect(true, data, "#usEpic");
       }
-      
+
       reloadUSList(usSelectList);
+    }
+  }).always(function() {
+    if (!$("#usCheckAllEpic").prop("checked")) {
+      showUsEpic();
+    } else if (!$("#usCheckAllStory").prop("checked")) {
+      showUsStory();
     }
   });
 }

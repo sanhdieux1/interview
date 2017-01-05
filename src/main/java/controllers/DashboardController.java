@@ -363,11 +363,12 @@ public class DashboardController {
 
 		
 		Map<String, String> gadgetType = new LinkedHashMap<>();
-		gadgetType.put("epic", Gadget.Type.EPIC_US_TEST_EXECUTION.toString());
-		gadgetType.put("story", Gadget.Type.STORY_TEST_EXECUTION.toString());
-		gadgetType.put("cycle", Gadget.Type.TEST_CYCLE_TEST_EXECUTION.toString());
-		gadgetType.put("cycle", Gadget.Type.ASSIGNEE_TEST_EXECUTION.toString());
-
+		gadgetType.put("epicType", Gadget.Type.EPIC_US_TEST_EXECUTION.toString());
+		gadgetType.put("storyType", Gadget.Type.STORY_TEST_EXECUTION.toString());
+		gadgetType.put("cycleType", Gadget.Type.TEST_CYCLE_TEST_EXECUTION.toString());
+		gadgetType.put("assigneeType", Gadget.Type.ASSIGNEE_TEST_EXECUTION.toString());
+		
+		logger.info("USER ROLE: " +role);
 		return Results.html().render("id", id).render("dashboard", dashboard).render("username", username)
 				.render("alias", alias).render("role", role).render("s_data", s_data2).render("s_datas", s_datas)
 				.render("r_datas", r_datas).render("s_ia", s_ia).render("metrics", metrics).render("releases", releases)

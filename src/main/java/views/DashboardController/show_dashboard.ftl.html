@@ -312,6 +312,12 @@
 </div>
 <div class="hidden" style="display: none">
 	<input id="dashboardId" value="${id}" />
+	<#if role??>
+		<input id="userRole" value="${role}" />
+	</#if>
+	<#list gadgetType?keys as k>
+		<input id="${k}" class="gadgetType" value="${gadgetType[k]}" />
+	</#list>
 </div>
 </#if> 
 </@layout.myLayout>

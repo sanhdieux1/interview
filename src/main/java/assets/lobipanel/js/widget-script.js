@@ -15,16 +15,15 @@ var GET_STORY_URI = "/gadget/getStoryInEpic";
 var GET_CYCLE_URI = "/listcycle";
 var GET_PRODUCT_URI = "/product/getall";
 var GET_ASSIGNEE_URI = "/getassignee";
-var EPIC_TYPE = "EPIC_US_TEST_EXECUTION";
-var US_TYPE = "STORY_TEST_EXECUTION";
-var ASSIGNEE_TYPE = "ASSIGNEE_TEST_EXECUTION";
-var CYCLE_TYPE = "TEST_CYCLE_TEST_EXECUTION";
 var GET_EXISTING_CYCLE_URI = "/cycleExisting";
+var EPIC_TYPE;
+var US_TYPE;
+var ASSIGNEE_TYPE;
+var CYCLE_TYPE;
 var TEST_EPIC_ID = null;
 var TEST_US_ID = null;
 var TEST_ASSIGNEE_ID = null;
 var TEST_CYCLE_ID = null;
-var PRODUCT_MANAGEMENT_URI = location.origin = location.protocol + "//" + location.host +"/product";
 
 $("#btn-add-gadget-epic").click(function(){
 	$("#epic-test-execution-div").show();
@@ -63,41 +62,30 @@ function fetchGadgetList() {
 			error : function(xhr, textStatus, error) {
 				debugError(xhr, textStatus, error);
 			},
+		}).always(function(){
+			console.log("Setting Products");
+			if(TEST_EPIC_ID == null){
+				$("#epicProduct").val("");
+			}
+			if(TEST_US_ID == null){
+				$("#epicProduct").val("");
+			}
+			if(TEST_ASSIGNEE_ID == null){
+				$("#assigneeProduct").val("");
+			}
+			if(TEST_CYCLE_ID == null){
+				$("#cycleProduct").val("");
+			}
 		});
 	}
 }
 
-function checkAddGadgetButton() {
-	if ($("#epic-test-execution-div").css("display") == "block") {
-		$("#btn-add-gadget-epic").prop("disabled", true);
-	}
-	else{
-		$("#btn-add-gadget-epic").prop("disabled", false);
-	}
-	if ($("#us-test-execution-div").css("display") == "block") {
-		$("#btn-add-gadget-us").prop("disabled", true);
-	}
-	else{
-		$("#btn-add-gadget-us").prop("disabled", false);
-	}
-	if ($("#assignee-test-execution-div").css("display") == "block") {
-		$("#btn-add-gadget-assignee").prop("disabled", true);
-	}
-	else{
-		$("#btn-add-gadget-assignee").prop("disabled", false);
-	}
-	if ($("#cycle-test-execution-div").css("display") == "block") {
-		$("#btn-add-gadget-cycle").prop("disabled", true);
-	}
-	else{
-		$("#btn-add-gadget-cycle").prop("disabled", false);
-	}
-}
 
 function drawGadgets(gadgetList) {
 	for (var i = 0; i < gadgetList.length; i++) {
 		if (EPIC_TYPE == gadgetList[i]["type"]) {
 			$("#epic-test-execution-div").show();
+			$("#btn-add-gadget-epic").prop("disabled", true);
 			hideEpicTable();
 			TEST_EPIC_ID = gadgetList[i]["id"];
 			if (gadgetList[i]["projectName"] != ""
@@ -107,6 +95,9 @@ function drawGadgets(gadgetList) {
 
 			if (gadgetList[i]["products"] != null) {
 				$("#epicProduct").val(gadgetList[i]["products"]);
+			}
+			else{
+				$("#epicProduct").val("");
 			}
 
 			if (gadgetList[i]["release"] != null) {
@@ -128,6 +119,7 @@ function drawGadgets(gadgetList) {
 			drawEpicTable(gadgetList[i]["id"], gadgetList[i]["metrics"]);
 		} else if (US_TYPE == gadgetList[i]["type"]) {
 			TEST_US_ID = gadgetList[i]["id"];
+			$("#btn-add-gadget-us").prop("disabled", true);
 			$("#us-test-execution-div").show();
 			if (gadgetList[i]["projectName"] != null) {
 				$("#usProject").val(gadgetList[i]["projectName"]);
@@ -171,6 +163,7 @@ function drawGadgets(gadgetList) {
 			console.log(gadgetList[i]["id"]);
 			drawUsTable(gadgetList[i]["id"], gadgetList[i]["metrics"]);
 		} else if (ASSIGNEE_TYPE == gadgetList[i]["type"]) {
+			$("#btn-add-gadget-assignee").prop("disabled", true);
 			TEST_ASSIGNEE_ID = gadgetList[i]["id"];
 			$("#assignee-test-execution-div").show();
 			if (gadgetList[i]["projectName"] != null) {
@@ -208,6 +201,7 @@ function drawGadgets(gadgetList) {
 			console.log("prepare to draw table");
 			drawAssigneeTable(gadgetList[i]["id"], gadgetList[i]["metrics"]);
 		} else if (CYCLE_TYPE == gadgetList[i]["type"]) {
+			$("#btn-add-gadget-cycle").prop("disabled", true);
 			TEST_CYCLE_ID = gadgetList[i]["id"];
 			$("#cycle-test-execution-div").show();
 			if (gadgetList[i]["projectName"] != ""
@@ -249,56 +243,14 @@ function drawGadgets(gadgetList) {
 
 // On document ready, append projects list to 4 widget project field
 $(document).ready(function() {
-	var productPage;
-	var connectErrorFlag = false;
 	if("dashboard" != window.location.href.split('/')[3] ){
 		return;
 	}
-	
-	if ($('#epicProject').length != 0) {
-		$.get("/listproject", function(data) {
-			if (debugAjaxResponse(data)) {
-				return;
-			}
-			data.sort();
-			appendToSelect(false, data, "#epicProject");
-			$("#epicProject").val("FNMS 557x");
-			appendToSelect(false, data, "#usProject");
-			$("#usProject").val("FNMS 557x");
-			appendToSelect(false, data, "#cycleProject");
-			$("#cycleProject").val("FNMS 557x");
-			appendToSelect(false, data, "#assigneeProject");
-			$("#assigneeProject").val("FNMS 557x");
-		});
+	else{
+		setUpMinorSetting();
+		setUpInitialAjax();
+		fetchGadgetList();		
 	}
-	
-	$.ajax({
-		url: GET_PRODUCT_URI,
-		error: function(xhr, textStatus, error){
-			debugError(xhr, textStatus, error);
-		},
-		success: function(data){
-			if(debugAjaxResponse(data)){
-				return;
-			}
-			else{
-				console.log(data);
-				appendToSelect(false, data["data"], "#epicProduct");
-				appendToSelect(false, data["data"], "#usProduct");
-				appendToSelect(false, data["data"], "#assigneeProduct");
-				appendToSelect(false, data["data"], "#cycleProduct");
-			}
-		}
-	});
-	getExistingCycleAssigneeWidget();
-	getExistingCycleList();
-	
-	productPage = location.protocol + "//" + location.host+ "/product";
-	console.log(productPage);
-	$(".btn-to-product").attr("href", productPage);
-	
-	fetchGadgetList();
-	checkAddGadgetButton();
 });
 
 // Create new table for each epic or cycle in Story table and Assignee table
@@ -401,6 +353,11 @@ function getColumnArray(metricArray, isCycleOrAssignee) {
   return columnList;
 }
 
+/*
+ * Show all hidden table column
+ * table: datatable object: designated table to show all table column
+ * isCycleOrAssignee: boolean: is this epic-us or cycle-assignee table?
+ */
 function resetTableColumns(table, isCycleOrAssignee){
 	var list;
 	if(table == null) {
@@ -419,12 +376,6 @@ function resetTableColumns(table, isCycleOrAssignee){
 			column.visible( ! column.visible() );
 		}
 	}
-}
-
-function sortSelection(selectId) {
-  $(selectId).html($(selectId + " option").sort(function(a, b) {
-    return a.text == b.text ? 0 : a.text < b.text ? -1 : 1
-  }))
 }
 
 function debugAjaxResponse(data) {
@@ -447,27 +398,32 @@ window.onerror = function(msg, url, linenumber) {
 
 function createIssueLinks(data, displayOrType, rowData, setting){
 	var issue="issue in(";
+	var htmlString = [];
 	if(data['total'] == 1){
-		return '<a href="'+GREENHOPPER_ISSUE_API_LINK +issue+ data["issues"][0]+')">' + data["total"] + '</a>';
+		htmlString.push('<a href="',GREENHOPPER_ISSUE_API_LINK, issue, data["issues"][0], ')">' ,data["total"],'</a>');
+		return htmlString.join("");
 	}
 	else if (data['total'] > 1){
-		var htmlString = '<a href="' + GREENHOPPER_ISSUE_API_LINK +issue;
+		htmlString.push('<a href="', GREENHOPPER_ISSUE_API_LINK, issue);
 		for(var i = 0; i < data["issues"].length; i++){
 			var isLastIndex;
 			
-			htmlString += data["issues"][i];
+			htmlString.push(data["issues"][i]);
 			isLastIndex = ((data["issues"].length - i) == 1)? true : false; 
 			if(!isLastIndex){
-				htmlString += ",";
+				htmlString.push(",");
 			}
 		}
-		return htmlString += ')">' + data["total"] + '</a>';
+		htmlString.push(')">',data["total"],'</a>')
+		return htmlString.join("");
 	}
 	return data["total"];
 }
 
 function createIssueLinkForTitle(data){
-	return '<a href="'+GREENHOPPER_BROWSE_ISSUE_LINK + data["key"] + '">'+data["key"]+'</a>';
+	var htmlString = [];
+	htmlString.push('<a href="', GREENHOPPER_BROWSE_ISSUE_LINK, data["key"],'">',data["key"],'</a>' );
+	return htmlString.join("");
 }
 
 function debugError(xhr, textStatus, error){
@@ -475,4 +431,69 @@ function debugError(xhr, textStatus, error){
 	console.log(xhr);
 	console.log(textStatus);
 	console.log(error);
+}
+
+function setUpInitialAjax(){
+	if ($('#epicProject').length != 0) {
+		$.get("/listproject", function(data) {
+			if (debugAjaxResponse(data)) {
+				return;
+			}
+			data.sort();
+			appendToSelect(false, data, "#epicProject");
+			$("#epicProject").val("FNMS 557x");
+			appendToSelect(false, data, "#usProject");
+			$("#usProject").val("FNMS 557x");
+			appendToSelect(false, data, "#cycleProject");
+			$("#cycleProject").val("FNMS 557x");
+			appendToSelect(false, data, "#assigneeProject");
+			$("#assigneeProject").val("FNMS 557x");
+		});
+	}
+	
+	$.ajax({
+		url: GET_PRODUCT_URI,
+		error: function(xhr, textStatus, error){
+			debugError(xhr, textStatus, error);
+		},
+		success: function(data){
+			if(debugAjaxResponse(data)){
+				return;
+			}
+			else{
+				console.log(data);
+				appendToSelect(false, data["data"], "#epicProduct");
+
+				appendToSelect(false, data["data"], "#usProduct");
+
+				appendToSelect(false, data["data"], "#assigneeProduct");
+
+				appendToSelect(false, data["data"], "#cycleProduct");
+
+			}
+		}
+	});
+	getExistingCycleAssigneeWidget();
+	getExistingCycleList();
+}
+
+function setUpMinorSetting(){
+	var productPage;
+	var gadgetType;
+	productPage = location.protocol + "//" + location.host+ "/product";
+	console.log(productPage);
+	
+	$(".btn-to-product").attr("href", productPage);
+	if($("#userRole").val() == undefined){
+		$(".btn-to-product").attr("href", "");
+	}
+	
+	$('[data-toggle="tooltip"]').tooltip(); 
+	gadgetType = $(".gadgetType");
+	if(gadgetType.length != 0){
+		EPIC_TYPE = gadgetType[0].value;
+		US_TYPE = gadgetType[1].value;
+		CYCLE_TYPE = gadgetType[2].value;
+		ASSIGNEE_TYPE = gadgetType[3].value;
+	}
 }

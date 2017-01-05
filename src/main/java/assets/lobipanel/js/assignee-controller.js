@@ -2,15 +2,15 @@
  * Set listerners for project, release, product field
  */
 $("#assigneeProject").change(function() {
-	
+
 });
 
 $("#assigneeRelease").change(function() {
-	
+
 });
 
 $("#assigneeProduct").change(function() {
-	
+
 });
 /*
  * Set listeners for add, remove, add all and remove all test cycle list
@@ -72,20 +72,20 @@ function createJsonStringFromAssigneeInput() {
     alert("No valid dashboard id provided.");
     $("#assignee-update-btn").prop("disabled", false);
     return;
-  } else if ($("#assigneeProject").val() == null) {
-	  alert("No project selected");
-	  $("#assignee-update-btn").prop("disabled", false);
+  } else if ($("#assigneeProject").val() == null || $("#assigneeProject").val() == "") {
+    alert("No project selected");
+    $("#assignee-update-btn").prop("disabled", false);
     return;
-  }else if ($("#assigneeRelease").val() == null) {
-	  alert("No release selected");
-	  $("#assignee-update-btn").prop("disabled", false);
-	  return;
-  } else if ($("#assigneeProduct").val() == null) {
+  } else if ($("#assigneeRelease").val() == null || $("#assigneeRelease").val() == "") {
+    alert("No release selected");
+    $("#assignee-update-btn").prop("disabled", false);
+    return;
+  } else if ($("#assigneeProduct").val() == null || $("#assigneeProduct").val() == "") {
     alert("No product selected");
     $("#assignee-update-btn").prop("disabled", false);
     return;
   } else if ($("#assigneeCycle option").length == 0 && !$("#assigneeCheckAllCycle").prop("checked")) {
-	  $("#assignee-update-btn").prop("disabled", false);
+    $("#assignee-update-btn").prop("disabled", false);
     alert("No cycle selected");
     return;
   } else if ($("#assigneeMultiSelect").val() == null && !$("#assigneeCheckAll").prop("checked")) {
@@ -130,29 +130,28 @@ function updateAssigneeGadget(jsonString) {
       url: SAVE_GADGET_URI,
       method: 'POST',
       data: {
-        type: 'ASSIGNEE_TEST_EXECUTION',
+        type: ASSIGNEE_TYPE,
         data: jsonString
       },
       beforeSend: function() {
         hideAssigneeTable();
       },
       error: function(xhr, textStatus, error) {
-    	  debugError(xhr, textStatus, error);
+        debugError(xhr, textStatus, error);
         $("#assignee-update-btn").prop("disabled", false);
         showAssigneeTable();
       },
       success: function(data) {
         if (debugAjaxResponse(data)) {
-        	$("#assignee-update-btn").prop("disabled", false);
-        	showAssigneeTable();
+          $("#assignee-update-btn").prop("disabled", false);
+          showAssigneeTable();
           return;
+        } else {
+          alert("Gadget updated succesfully")
+          TEST_ASSIGNEE_ID = data["data"];
+          drawAssigneeTable(data["data"], $("#assigneeMetricMultiSelect").val());
         }
-        else{
-        	alert("Gadget updated succesfully")
-        	TEST_ASSIGNEE_ID = data["data"];
-        	drawAssigneeTable(data["data"], $("#assigneeMetricMultiSelect").val());
-        }
-        
+
       }
     }).always(function(returnMessage) {
       console.log(jsonString);
@@ -167,7 +166,7 @@ $("#assigneeCheckAll").click(function() {
   if ($(this).prop("checked") == true) {
     $("#assignee-container").fadeOut();
   } else {
-    $("#assignee-container").fadeIn(); 
+    $("#assignee-container").fadeIn();
   }
 });
 
@@ -177,8 +176,8 @@ $("#assigneeCheckAllCycle").click(function() {
     addAllCycle();
   } else {
     $("#assignee-cycle-container").fadeIn();
-    if($("#assigneeCycle option").length == 0 && $("#assigneeCycleAvailable option").length == 0){
-    	getExistingCycleAssigneeWidget();
+    if ($("#assigneeCycle option").length == 0 && $("#assigneeCycleAvailable option").length == 0) {
+      getExistingCycleAssigneeWidget();
     }
   }
 });
@@ -193,7 +192,7 @@ function drawAssigneeTable(gadgetId, metricArray) {
 
   GLOBAL_ASSIGNEE_TABLES_AJAX.ajax = $
     .ajax({
-      url: "/gadget/getData?",
+      url: GET_DATA_URI,
       method: "GET",
       data: {
         id: gadgetId
@@ -203,16 +202,16 @@ function drawAssigneeTable(gadgetId, metricArray) {
         hideAssigneeTable();
       },
       error: function(xhr, textStatus, error) {
-    	  debugError(xhr, textStatus, error);
-    	  showAssigneeTable();
+        debugError(xhr, textStatus, error);
+        showAssigneeTable();
       },
       success: function(responseData) {
         GLOBAL_ASSIGNEE_TABLES_AJAX.loading = false;
         var index = 0;
         $("#assignee-table-container").html("");
         if (debugAjaxResponse(responseData)) {
-        	$("#assignee-update-btn").prop("disabled", false);
-        	showAssigneeTable();
+          $("#assignee-update-btn").prop("disabled", false);
+          showAssigneeTable();
           return;
         }
 
@@ -358,14 +357,14 @@ function callAjaxOnAssigneeTable() {
     },
     success: function(gadgetList) {
       if (debugAjaxResponse(gadgetList)) {
-    	  $("#assignee-update-btn").prop("disabled", false);
-    	  showAssigneeTable();
+        $("#assignee-update-btn").prop("disabled", false);
+        showAssigneeTable();
         return;
       }
       drawAssigneeGadget(gadgetList);
     },
     error: function(xhr, textStatus, error) {
-    	debugError(xhr, textStatus, error);
+      debugError(xhr, textStatus, error);
       $("#assignee-update-btn").prop("disabled", false);
     },
     beforeSend: function() {
@@ -377,17 +376,15 @@ function callAjaxOnAssigneeTable() {
 }
 
 function callAjaxOnAssigneeProjectAndRelease() {
-  if ($("#assigneeRelease").val() == null) {
+  if ($("#assigneeRelease").val() == null || $("#assigneeProject").val() == null || $("#assigneeProduct").val() == null) {
     return;
-  } else if ($("#assigneeProject").val() == null) {
-    return;
-  } else if ($("#assigneeProduct").val() == null) {
+  } else if ($("#assigneeRelease").val() == "" || $("#assigneeProject").val() == "" || $("#assigneeProduct").val() == "") {
     return;
   }
 
   if (!$("#assigneeCheckAllCycle").prop("checked")) {
     $.ajax({
-      url: "/listcycle?",
+      url: GET_CYCLE_URI,
       data: {
         project: $("#assigneeProject").val(),
         release: $("#assigneeRelease").val(),
@@ -406,9 +403,66 @@ function callAjaxOnAssigneeProjectAndRelease() {
         $("#assigneeCycle").find("option").remove().end();
       },
       error: function(xhr, textStatus, error) {
-    	  debugError(xhr, textStatus, error);
-    	  showAssigneeCycle();
-          console.log(data);
+        debugError(xhr, textStatus, error);
+        showAssigneeCycle();
+        console.log(data);
+      }
+    }).always(function() {
+      showAssigneeCycle();
+    });
+  }
+  if (!$("#assigneeCheckAll").prop("checked")) {
+
+    $.ajax({
+      url: GET_ASSIGNEE_URI,
+      data: {
+        project: $("#assigneeProject").val(),
+        release: $("#assigneeRelease").val()
+      },
+
+      beforeSend: function() {
+        hideAssignee();
+      },
+      success: function(data) {
+        if (debugAjaxResponse(data)) {
+          return;
+        }
+        var tempAssigneeList = [];
+        $.each(data, function(key, map) {
+          tempAssigneeList.push(map["assignee"]);
+        });
+        tempAssigneeList.sort();
+        appendToSelect(true, tempAssigneeList, "#assigneeMultiSelect");
+      },
+      error: function(xhr, textStatus, error) {
+        debugError(xhr, textStatus, error);
+        console.log(data);
+      }
+    }).always(function() {
+      showAssignee();
+    });
+  }
+}
+
+function getExistingCycleAssigneeWidget() {
+  if (!$("#assigneeCheckAllCycle").prop("checked")) {
+    $.ajax({
+      url: GET_EXISTING_CYCLE_URI,
+      beforeSend: function() {
+        hideAssigneeCycle();
+      },
+      success: function(data) {
+        if (debugAjaxResponse(data)) {
+          return;
+        }
+        data.sort();
+        appendToSelect(true, data, "#assigneeCycleAvailable");
+        $("#assigneeCycle").find("option").remove().end();
+      },
+      error: function(xhr, textStatus, error) {
+        debugError(xhr, textStatus, error);
+        showAssigneeCycle();
+        console.log(data);
       }
     }).always(function() {
       showAssigneeCycle();
@@ -438,70 +492,13 @@ function callAjaxOnAssigneeProjectAndRelease() {
         appendToSelect(true, tempAssigneeList, "#assigneeMultiSelect");
       },
       error: function(xhr, textStatus, error) {
-    	 debugError(xhr, textStatus, error);
+        debugError(xhr, textStatus, error);
         console.log(data);
       }
     }).always(function() {
       showAssignee();
     });
   }
-}
-
-function getExistingCycleAssigneeWidget(){
-	if (!$("#assigneeCheckAllCycle").prop("checked")) {
-	    $.ajax({
-	      url: GET_EXISTING_CYCLE_URI,
-	      beforeSend: function() {
-	        hideAssigneeCycle();
-	      },
-	      success: function(data) {
-	        if (debugAjaxResponse(data)) {
-	          return;
-	        }
-	        data.sort();
-	        appendToSelect(true, data, "#assigneeCycleAvailable");
-	        $("#assigneeCycle").find("option").remove().end();
-	      },
-	      error: function(xhr, textStatus, error) {
-	    	  debugError(xhr, textStatus, error);
-	    	  showAssigneeCycle();
-	          console.log(data);
-	      }
-	    }).always(function() {
-	      showAssigneeCycle();
-	    });
-	  }
-	  if (!$("#assigneeCheckAll").prop("checked")) {
-
-	    $.ajax({
-	      url: "/getassignee?",
-	      data: {
-	        project: $("#assigneeProject").val(),
-	        release: $("#assigneeRelease").val()
-	      },
-
-	      beforeSend: function() {
-	        hideAssignee();
-	      },
-	      success: function(data) {
-	        if (debugAjaxResponse(data)) {
-	          return;
-	        }
-	        var tempAssigneeList = [];
-	        $.each(data, function(key, map) {
-	          tempAssigneeList.push(map["assignee"]);
-	        });
-	        tempAssigneeList.sort();
-	        appendToSelect(true, tempAssigneeList, "#assigneeMultiSelect");
-	      },
-	      error: function(xhr, textStatus, error) {
-	    	 debugError(xhr, textStatus, error);
-	        console.log(data);
-	      }
-	    }).always(function() {
-	      showAssignee();
-	    });
-	  }
 }
 
 function addAllCycle() {
