@@ -1,3 +1,22 @@
+/*
+ * List of html id for cycle gadget
+ * #cycle-test-execution-div
+ * #cycleProject
+ * #cycleRelease
+ * #cycleProduct
+ * #cycle-container
+ * #cycleLoader
+ * #cycleMultiSelect
+ * #cycleCheckAll
+ * #cycleMetricMultiSelect
+ * #cycle-table-container
+ * #cycleTable
+ * #cycle-update-btn
+ * #cycle-table-loader
+ * 
+ */
+
+
 $("#cycleProject").change(function() {
 
 });

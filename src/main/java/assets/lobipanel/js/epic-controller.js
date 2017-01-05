@@ -1,7 +1,23 @@
 /*
- * Set listeners for project, release, product select option.
+ * List of html id for epic gadget
+ * #epic-test-execution-div
+ * #epicProject
+ * #epicRelease
+ * #epicProduct
+ * #epic-link-container
+ * #epic-link-loader
+ * #epicMultiSelect
+ * #epicCheckAll
+ * #epicMetricMultiSelect
+ * #epic-add-gadget
+ * #epic-table-container
+ * #epic-table
+ * #epic-table-loader
  */
 
+/*
+ * Set listeners for project, release, product select option.
+ */
 $("#epicProject").change(function() {
   callAjaxOnEpicProjectAndRelease(null);
 });

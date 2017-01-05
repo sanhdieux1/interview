@@ -1,4 +1,31 @@
 /*
+ * List of html id for user story widget
+ * #us-test-execution-div
+ * #usProject
+ * #usRelease
+ * #usProduct
+ * #us-epic-container
+ * #usEpicAvailableDiv
+ * #usEpicAvailable
+ * #usEpic
+ * #us-epic-loader
+ * #usCheckAllEpic
+ * #us-add-epic-btn
+ * #us-remove-epic-btn
+ * #us-add-all-epic-btn
+ * #us-remove-all-epic-btn
+ * #us-container
+ * #usMultiSelect
+ * #usCheckAllStory
+ * #us-us-loader
+ * #usMetricMultiSelect
+ * #us-table-container
+ * #us-table-loader
+ * 
+ */
+
+
+/*
  * Set listeners for project, release, product select option
  */
 
@@ -55,13 +82,6 @@ $("#us-update-btn").click(
     callAjaxToUpdateUsGadget(jsonString);
   });
 
-/*
- * Not used anymore, can be removed
- */
-$("#usEpicSelectAll").change(function() {
-  $("#us-epic-available-div").fadeOut();
-  $("#us-epic-available-div").fadeIn();
-});
 
 /*
  * Set listeners for input check option
