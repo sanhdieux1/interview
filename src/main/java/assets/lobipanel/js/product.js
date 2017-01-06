@@ -151,6 +151,7 @@ function createEvent() {
                     $("#searchComponent").removeAttr("disabled");
                 }else{
                     if(data.type == "error"){
+                    	$("#searchComponent").removeAttr("disabled");
                         alert(data.data);
                     }
                 }
